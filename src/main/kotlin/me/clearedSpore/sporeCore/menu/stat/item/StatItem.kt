@@ -1,0 +1,37 @@
+package me.clearedSpore.sporeCore.menu.stat.item
+
+import me.clearedSpore.sporeAPI.menu.Item
+import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
+import me.clearedSpore.sporeAPI.util.CC.white
+import me.clearedSpore.sporeAPI.util.StringUtil.capitalizeFirstLetter
+import org.bukkit.Material
+import org.bukkit.OfflinePlayer
+import org.bukkit.Statistic
+import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
+import org.bukkit.inventory.ItemStack
+
+class StatItem(
+    val player: OfflinePlayer,
+    val stat: Statistic,
+    val name: String,
+    val material: Material
+) : Item() {
+
+    override fun createItem(): ItemStack {
+        val item = ItemStack(material)
+        val meta = item.itemMeta
+
+        meta.setDisplayName(name.blue())
+        meta.lore = listOf<String>(
+            stat.name.capitalizeFirstLetter().toString().gray() + player.getStatistic(stat).toString().white(),
+        )
+
+        item.itemMeta = meta
+
+        return item
+    }
+
+    override fun onClickEvent(clicker: Player, clickType: ClickType) {}
+}
