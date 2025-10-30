@@ -2,16 +2,20 @@ package me.clearedSpore.sporeCore.database
 
 import me.clearedSpore.sporeCore.database.util.DocReader
 import me.clearedSpore.sporeCore.database.util.DocWriter
+import me.clearedSpore.sporeCore.features.kit.`object`.Kit
 import me.clearedSpore.sporeCore.features.warp.`object`.Warp
+import me.clearedSpore.sporeCore.util.InventoryUtil
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.NitriteCollection
 
 data class Database(
     val id: String = "server",
     var spawn: Location? = null,
-    var warps: MutableList<Warp> = mutableListOf()
+    var warps: MutableList<Warp> = mutableListOf(),
+    var kits: MutableList<Kit> = mutableListOf()
 ) {
 
     private fun locationToString(loc: Location?): String? =
@@ -36,10 +40,22 @@ data class Database(
         .put("location", locationToString(warp.location))
         .build()
 
+    private fun kitToDocument(kit: Kit): Document = DocWriter()
+        .put("name", kit.name)
+        .put("id", kit.id)
+        .put("inventory", InventoryUtil.itemStackListToBase64(kit.inventory))
+        .put("armor", InventoryUtil.itemStackListToBase64(kit.armor))
+        .put("offhand", InventoryUtil.itemStackToBase64(kit.offHand))
+        .put("permission", kit.permission)
+        .put("cooldown", kit.cooldown)
+        .put("displayItem", kit.displayItem)
+        .build()
+
     fun toDocument(): Document = DocWriter()
         .put("id", id)
         .put("spawn", locationToString(spawn))
         .putList("warps", warps.map { warpToDocument(it) })
+        .putList("kits", kits.map { kitToDocument(it) })
         .build()
 
     fun save(collection: NitriteCollection) {
@@ -62,6 +78,7 @@ data class Database(
 
             val doc = DocReader(docRaw)
             val warpDocs = doc.documents("warps")
+            val kitDocs = doc.documents("kits")
             return Database(
                 id = doc.string("id") ?: "server",
                 spawn = doc.string("spawn")?.let { stringToLocation(it) },
@@ -70,6 +87,17 @@ data class Database(
                     val location = stringToLocation(d.get("location") as? String) ?: return@mapNotNull null
                     val permission = d.get("permission") as? String
                     Warp(name, location, permission)
+                }.toMutableList(),
+                kits = kitDocs.mapNotNull { d ->
+                    val name = d.get("name") as? String ?: return@mapNotNull null
+                    val id = d.get("id") as? String ?: return@mapNotNull null
+                    val inventory = InventoryUtil.itemStackListFromBase64(d.get("inventory") as? String)
+                    val armor = InventoryUtil.itemStackListFromBase64(d.get("armor") as? String)
+                    val offhand = InventoryUtil.itemStackFromBase64(d.get("offhand") as? String)
+                    val permission = d.get("permission") as? String
+                    val cooldown = d.get("cooldown") as? Long
+                    val displayItem = d.get("displayItem") as? Material
+                    Kit(name, id, inventory, armor, offhand, permission, cooldown, displayItem)
                 }.toMutableList()
             )
         }

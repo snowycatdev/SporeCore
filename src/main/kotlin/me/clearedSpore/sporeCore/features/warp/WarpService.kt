@@ -23,10 +23,9 @@ class WarpService {
         return warps.values.toList()
     }
 
-
     fun reloadWarps() {
         warps.clear()
-        Logger.info("Reloading warps from database...")
+        Logger.info("Loading warps from database...")
 
         val allWarps = db.warps
         if (allWarps.isEmpty()) {
