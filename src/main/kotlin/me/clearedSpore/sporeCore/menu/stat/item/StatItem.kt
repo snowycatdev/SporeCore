@@ -25,7 +25,7 @@ class StatItem(
 
         meta.setDisplayName(name.blue())
         meta.lore = listOf<String>(
-            stat.name.capitalizeFirstLetter().toString().gray() + player.getStatistic(stat).toString().white(),
+            name.gray() + " ${player.getStatistic(stat).toString().blue()}",
         )
 
         item.itemMeta = meta

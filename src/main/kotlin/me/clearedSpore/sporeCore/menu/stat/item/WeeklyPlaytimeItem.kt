@@ -27,7 +27,7 @@ class WeeklyPlaytimeItem(
 
         meta.setDisplayName("Weekly Playtime".blue())
         meta.lore = listOf<String>(
-            "Weekly Playtime: ".gray() + TimeUtil.formatDuration(StatService.getWeeklyPlaytime(user)).white()
+            "Weekly Playtime: ".gray() + TimeUtil.formatDuration(StatService.getWeeklyPlaytime(user)).blue()
         )
 
         item.itemMeta = meta

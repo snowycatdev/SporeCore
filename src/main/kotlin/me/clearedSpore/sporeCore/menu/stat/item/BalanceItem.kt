@@ -29,7 +29,7 @@ class BalanceItem(
 
         meta.setDisplayName("Balance".blue())
         meta.lore = listOf<String>(
-            "Balance: ".gray() + EconomyService.format(user.balance).white()
+            "Balance: ".gray() + EconomyService.format(user.balance).blue()
         )
 
         item.itemMeta = meta

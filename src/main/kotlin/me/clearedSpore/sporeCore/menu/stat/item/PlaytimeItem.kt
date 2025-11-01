@@ -28,7 +28,7 @@ class PlaytimeItem(
 
         meta.setDisplayName("Playtime".blue())
         meta.lore = listOf<String>(
-            "Playtime: ".gray() + TimeUtil.formatDuration(StatService.getTotalPlaytime(user)).white()
+            "Playtime: ".gray() + TimeUtil.formatDuration(StatService.getTotalPlaytime(user)).blue()
         )
 
         item.itemMeta = meta
