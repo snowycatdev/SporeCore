@@ -12,6 +12,7 @@ import me.clearedSpore.sporeCore.features.kit.`object`.Kit
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import java.util.UUID
 
 class KitService {
 
@@ -72,12 +73,18 @@ class KitService {
         val armor = player.inventory.armorContents.toList()
         val offHand = player.inventory.itemInOffHand
 
-        val kit = Kit(name, inventory = inventory, armor = armor, offHand = offHand, permission = permission)
+        val kit = Kit(
+            name = name,
+            id = UUID.randomUUID().toString(),
+            inventory = inventory,
+            armor = armor,
+            offHand = offHand,
+            permission = permission
+        )
         kits[key] = kit
         db.kits.add(kit)
 
         DatabaseManager.saveServerData()
-        player.sendMessage("Created a new kit ${name.white()} with ${inventory.filterNotNull().size} items.".blue())
     }
 
     fun setDisplayItem(kitName: String, material: Material) {
@@ -152,6 +159,7 @@ class KitService {
             player.sendErrorMessage("You must wait $formatted before using this kit again.")
             return
         }
+
 
         val inv = player.inventory
         var addedCount = 0

@@ -2,13 +2,18 @@ package me.clearedSpore.sporeCore.user
 
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.green
+import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.StringUtil.firstPart
 import me.clearedSpore.sporeAPI.util.StringUtil.hasFlag
+import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.database.DatabaseManager
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.util.Tasks
+import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -16,6 +21,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class UserListener : Listener {
@@ -26,45 +32,13 @@ class UserListener : Listener {
         val user = UserManager.get(player) ?: return
 
 
-        if (!user.hasJoinedBefore) {
-            user.hasJoinedBefore = true
-            user.firstJoin = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
-            val starter = SporeCore.instance.coreConfig.economy.starterBalance
-            EconomyService.add(user, starter, "Starter balance")
-
-            val config = SporeCore.instance.coreConfig
-            val kitService = SporeCore.instance.kitService
-
-            if (config.kits.firstJoinKit.isNotEmpty()) {
-                val kitName = config.kits.firstJoinKit.firstPart()
-                val shouldClear = config.kits.firstJoinKit.hasFlag("clear")
-                val kits = kitService.getAllKits()
-
-                val kit = kits.find { it.name.equals(kitName, ignoreCase = true) }
-
-                if(kit == null){
-                    Logger.error("Failed to give death kit to ${player.name}")
-                    return
-                }
-
-
-                if (shouldClear) {
-                    player.inventory.clear()
-                }
-
-                kitService.giveKit(player, kitName)
-            }
-        }
-
-
         if (user.playerName != player.name) {
             user.playerName = player.name
         }
 
 
-        user.lastJoin = System.currentTimeMillis()
+        user.lastJoin = LocalDateTime.now()
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         UserManager.startAutoSave(user)
 
         Logger.infoDB("Loaded user data for ${player.name} (${player.uniqueId})")
@@ -74,13 +48,15 @@ class UserListener : Listener {
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
         val user = UserManager.getIfLoaded(player.uniqueId) ?: return
+        val joinConfig = SporeCore.instance.coreConfig.join
+        val db = DatabaseManager.getServerData()
 
         if (user.pendingPayments.isNotEmpty()) {
             Tasks.runLater(Runnable {
                 player.sendMessage("")
                 user.pendingPayments.forEach { (senderName, total) ->
                     val formattedAmount = EconomyService.format(total)
-                    player.sendMessage("You received ${formattedAmount.green()} from ${senderName.white()}".blue())
+                    player.sendMessage("While you were away you received ${formattedAmount.green()}".blue() + " from ${senderName.white()}".blue())
                 }
                 player.sendMessage("")
                 player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f)
@@ -89,7 +65,80 @@ class UserListener : Listener {
             }, 1)
         }
 
-        user.lastJoin = System.currentTimeMillis()
+        if (!user.hasJoinedBefore) {
+            user.hasJoinedBefore = true
+            user.firstJoin = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+
+            db.totalJoins = db.totalJoins + 1
+
+            val starter = SporeCore.instance.coreConfig.economy.starterBalance
+            EconomyService.add(user, starter, "Starter balance")
+
+            joinConfig.firstJoinMessage.forEach { msg ->
+                val formatted = msg.replace("%player%", player.name)
+                    .replace("%join_count%", db.totalJoins.toString())
+                    .translate()
+                Bukkit.broadcastMessage(formatted)
+            }
+
+
+
+            val kitConfig = SporeCore.instance.coreConfig.kits.firstJoinKit
+            if (kitConfig.isNotEmpty()) {
+                val kitName = kitConfig.firstPart()
+                val shouldClear = kitConfig.hasFlag("clear")
+                val kit = SporeCore.instance.kitService.getAllKits()
+                    .find { it.name.equals(kitName, ignoreCase = true) }
+
+                if (kit == null) {
+                    Logger.error("Failed to give first join kit to ${player.name}")
+                } else {
+                    if (shouldClear) player.inventory.clear()
+                    SporeCore.instance.kitService.giveKit(player, kitName)
+                }
+            }
+        }
+
+        if(joinConfig.spawnOnJoin && db.spawn != null){
+            player.teleport(db.spawn!!)
+        }
+
+        if (joinConfig.title.isNotBlank()) {
+            var title = joinConfig.title
+            title = title.replace("%player%", player.name)
+            player.sendTitle(title.translate(), "")
+        }
+
+
+        if (joinConfig.joinSound.isNotBlank()) {
+            runCatching {
+                val sound = Sound.valueOf(joinConfig.joinSound)
+                player.playSound(player, sound, 1.0f, 1.0f)
+            }.onFailure {
+                Logger.error("Failed to play join sound: ${joinConfig.joinSound}")
+            }
+        }
+
+
+        Tasks.runLater(Runnable{
+        if(joinConfig.message.isNotEmpty()){
+            joinConfig.message.forEach { message ->
+                val msg = message.replace("%player%", player.name).translate()
+                player.sendMessage(msg)
+            }
+        }
+        }, 2)
+
+        if(joinConfig.gamemode.isNotBlank()) {
+            runCatching {
+                val gamemode = GameMode.valueOf(joinConfig.gamemode.uppercase())
+                player.gameMode = gamemode
+            }.onFailure {
+                Logger.error("Failed to apply join gamemode: ${joinConfig.gamemode}")
+            }
+        }
+
         UserManager.save(user)
     }
 
@@ -98,21 +147,23 @@ class UserListener : Listener {
         val player = event.player
         val user = UserManager.getIfLoaded(player.uniqueId) ?: return
 
-        val joinTime = user.lastJoin ?: System.currentTimeMillis()
-        val quitTime = System.currentTimeMillis()
-        val sessionDuration = quitTime - joinTime
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val joinTime = user.lastJoin?.let {
+            runCatching { LocalDateTime.parse(it, formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() }
+                .getOrNull()
+        } ?: System.currentTimeMillis()
 
-        user.totalPlaytime += sessionDuration
+        val quitTime = System.currentTimeMillis()
+        user.totalPlaytime += quitTime - joinTime
         user.playtimeHistory.add(joinTime to quitTime)
 
-
-        val twoWeeksAgo = System.currentTimeMillis() - (14 * 24 * 60 * 60 * 1000)
+        val twoWeeksAgo = System.currentTimeMillis() - (14L * 24 * 60 * 60 * 1000)
         user.playtimeHistory.removeIf { it.first < twoWeeksAgo }
 
         UserManager.save(user)
+
         UserManager.stopAutoSave(player.uniqueId)
         UserManager.remove(player.uniqueId)
-
-        Logger.infoDB("Saved and removed user ${player.name} (${player.uniqueId}) (session: ${sessionDuration / 1000}s)")
     }
+
 }

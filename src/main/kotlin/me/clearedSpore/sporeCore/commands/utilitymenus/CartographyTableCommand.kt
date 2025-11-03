@@ -18,7 +18,7 @@ class CartographyTableCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onCarography(player: Player, @Optional targetName: String){
+    fun onCarography(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openCartographyTable(player.location, true)
             return

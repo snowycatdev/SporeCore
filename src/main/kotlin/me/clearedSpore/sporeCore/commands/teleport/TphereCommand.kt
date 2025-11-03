@@ -9,6 +9,7 @@ import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.util.Perm
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 @CommandAlias("tphere|teleporthere|bring")
@@ -17,7 +18,9 @@ class TphereCommand : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onTphere(sender: Player, target: Player?) {
+    fun onTphere(sender: Player, targetName: String) {
+        val target = Bukkit.getPlayer(targetName)
+
         if (target == null || !target.isOnline) {
             sender.sendErrorMessage("That player is not online.")
             return

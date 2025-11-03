@@ -18,7 +18,7 @@ class StoneCutterCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onStoneCutter(player: Player, @Optional targetName: String){
+    fun onStoneCutter(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openStonecutter(player.location, true)
             return

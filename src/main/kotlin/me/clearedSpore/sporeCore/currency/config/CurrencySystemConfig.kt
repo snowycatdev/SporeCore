@@ -20,7 +20,7 @@ data class CurrencySystemConfig(
         "%singular_currency% -> Returns with the singular currency name",
         "%symbol% -> Returns with the currency symbol",
         "%package_name% -> Returns with the package someone bought.",
-         "   Only works for the bought broadcast",
+        "   Only works for the bought broadcast",
         "%costs% -> Returns with how much a package costs.",
         "    Only works for the bought broadcast",
         "And all PlaceholderAPI placeholders",
@@ -35,7 +35,9 @@ data class CurrencySystemConfig(
     var shop: CurrencyShopConfig = CurrencyShopConfig(
         menuSettings = MenuSettingsConfig(
             main = MenuRowConfig(rows = 4, fillItems = true),
-            category = MenuRowConfig(rows = 5, fillItems = true)
+            categories = mutableMapOf(
+                "ranks" to MenuRowConfig(rows = 5, fillItems = true)
+            )
         ),
         categories = mutableMapOf(
             "ranks" to ShopCategoryConfig(
@@ -93,10 +95,9 @@ data class CurrencySystemConfig(
 
 @Configuration
 data class CurrencySettingConfig(
-
     @Comment("Display names for your currency.")
-    var singularName: String = "Gem",
-    var pluralName: String = "Gems",
+    var singularName: String = "Credit",
+    var pluralName: String = "Credits",
 
     @Comment(
         "Color code for the currency symbol/name (e.g. §5 for dark purple)",
@@ -108,7 +109,7 @@ data class CurrencySettingConfig(
     var currencyColor: String = "&#9C68D9&l",
 
     @Comment("Command alias for the shop command.")
-    var shopCommand: List<String> = listOf("gemshop"),
+    var shopCommand: List<String> = listOf("creditshop"),
 
     @Comment("Currency symbol configuration (e.g. ✦100 vs 100✦).")
     var symbol: String = "✦",
@@ -131,7 +132,7 @@ data class CurrencySettingConfig(
     var startingBalance: Double = 0.0,
 
     @Comment("Name of the in-game shop menu.")
-    var shopName: String = "Gem Shop",
+    var shopName: String = "Credit Shop",
 
     @Comment("Enable or disable the in-game shop feature.")
     var shopEnabled: Boolean = true,
@@ -144,14 +145,13 @@ data class CurrencySettingConfig(
 
     @Comment("Messages that will be sent when someone buys a package")
     var broadcastMessages: List<String> = listOf(
-        "&c[GemShop Alert!] &f%player% has bought the "
+        "&c[CreditShop Alert!] &f%player% has bought the %package_name% &ffor &a%costs%"
     )
 )
 
 @Configuration
 data class CurrencyShopConfig(
-
-    @Comment("Menu row settings for main menu and category menu.")
+    @Comment("Menu row settings for main menu and categories.")
     var menuSettings: MenuSettingsConfig = MenuSettingsConfig(),
 
     @Comment(
@@ -166,11 +166,10 @@ data class CurrencyShopConfig(
     var infoItems: MutableMap<Int, GlobalInfoItemConfig> = mutableMapOf()
 )
 
-
 @Configuration
 data class MenuSettingsConfig(
     var main: MenuRowConfig = MenuRowConfig(),
-    var category: MenuRowConfig = MenuRowConfig()
+    var categories: MutableMap<String, MenuRowConfig> = mutableMapOf()
 )
 
 @Configuration
@@ -178,7 +177,6 @@ data class MenuRowConfig(
     var rows: Int = 4,
     var fillItems: Boolean = true
 )
-
 
 @Configuration
 data class ShopCategoryConfig(

@@ -29,16 +29,17 @@ class KitItem(
         val user = UserManager.get(player)!!
 
 
-        val canClaim = user.hasKitCooldown(kit.id)
+        val canClaim = !user.hasKitCooldown(kit.id)
 
         val lore = mutableListOf<String>()
-        if(!canClaim){
-        lore.add("Left click to claim".blue())
+        if(canClaim){
+            lore.add("Left click to claim".blue())
         } else {
             val timeleft = TimeUtil.formatDuration(user.getKitCooldownRemaining(kit.id))
             lore.add("You are currently on cooldown!".red())
             lore.add("Time left: $timeleft".red())
         }
+
 
         lore.add("Right click to preview this kit!".blue())
 

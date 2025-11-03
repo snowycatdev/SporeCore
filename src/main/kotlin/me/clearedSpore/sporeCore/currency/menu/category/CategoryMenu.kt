@@ -13,7 +13,6 @@ import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.menu.util.NoUserItem
 import me.clearedSpore.sporeCore.menu.util.confirm.ConfirmMenu
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.util.InventoryUtil
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
@@ -27,16 +26,15 @@ class CategoryMenu(
     private val service = CurrencySystemService
     val currencyName = service.currencyName
 
+    private val menuSettings by lazy { service.getMenuSettingsFor(category.name) }
+
     override fun getMenuName(): String = category.name
-    override fun getRows(): Int = service.config.shop.menuSettings.category.rows
-    override fun fillEmptySlots(): Boolean = service.config.shop.menuSettings.category.fillItems
+    override fun getRows(): Int = menuSettings.rows
+    override fun fillEmptySlots(): Boolean = menuSettings.fillItems
 
     override fun setMenuItems() {
-        val rows = getRows()
-
         category.items.values.forEach { itemConfig ->
             val (row, column) = CurrencySystemService.parseSlot(itemConfig.slot)
-
             if (row > getRows()) {
                 Logger.warn("[$currencyName] Item '${itemConfig.name}' is in the bottom row. Skipping.")
                 return@forEach
@@ -44,29 +42,19 @@ class CategoryMenu(
 
             setMenuItem(column, row, object : Item() {
                 override fun createItem(): ItemStack {
-                    val mat = try {
-                        Material.valueOf(itemConfig.material.uppercase())
-                    } catch (ex: IllegalArgumentException) {
-                        Logger.warn("[$currencyName] Invalid material '${itemConfig.material}' for item '${itemConfig.name}' in category '${category.name}'. Skipping.")
+                    val mat = Material.matchMaterial(itemConfig.material.uppercase()) ?: run {
+                        Logger.warn("[$currencyName] Invalid material '${itemConfig.material}' for item '${itemConfig.name}'. Skipping.")
                         return ItemStack(Material.AIR)
                     }
 
                     val stack = ItemStack(mat)
                     val meta = stack.itemMeta ?: return stack
-
-                    meta.setDisplayName(
-                        CurrencySystemService.parsePlaceholders(itemConfig.name.translate(), player)
-                    )
-
+                    meta.setDisplayName(CurrencySystemService.parsePlaceholders(itemConfig.name.translate(), player))
                     val lore = itemConfig.description.map {
                         CurrencySystemService.parsePlaceholders(it, player).translate()
                     }.toMutableList()
 
-                    val user = UserManager.get(player)
-                    if(user == null){
-                        return NoUserItem.toItemStack()
-                    }
-
+                    val user = UserManager.get(player) ?: return stack
                     val balance = CurrencySystemService.getBalance(user)
                     val ownsItem = CurrencySystemService.hasPermissionOrRank(player, itemConfig)
 
@@ -82,12 +70,12 @@ class CategoryMenu(
                 }
 
                 override fun onClickEvent(clicker: Player, clickType: ClickType) {
-                    val user = UserManager.get(clicker)
-                    if(user == null){
+                    val user = UserManager.get(clicker) ?: run {
                         clicker.closeInventory()
                         clicker.userFail()
                         return
                     }
+
                     val balance = CurrencySystemService.getBalance(user)
                     val ownsItem = CurrencySystemService.hasPermissionOrRank(clicker, itemConfig)
 
@@ -103,40 +91,40 @@ class CategoryMenu(
 
                     ConfirmMenu(clicker) {
                         CurrencySystemService.handlePurchase(clicker, itemConfig)
-                    }.open(player)
+                    }.open(clicker)
                 }
             })
         }
 
-        service.config.shop.infoItems.values.forEach { info ->
-            if (info.menu.lowercase() != "category") return@forEach
 
-            val (row, column) = CurrencySystemService.parseSlot(info.slot)
-            if (row > getRows()) {
-                Logger.warn("[$currencyName] Info item '${info.name}' cannot be in bottom row. Skipping.")
-                return@forEach
-            }
-
-            val mat = Material.matchMaterial(info.material.uppercase()) ?: Material.BOOK
-            val stack = ItemStack(mat).apply {
-                val meta = itemMeta ?: return@apply
-                meta.setDisplayName(
-                    CurrencySystemService.parsePlaceholders(info.name, player).translate()
-                )
-                meta.lore = info.description.map {
-                    CurrencySystemService.parsePlaceholders(it, player).translate()
+        service.config.shop.infoItems.values
+            .filter { it.menu.isBlank() || it.menu.equals(category.name, ignoreCase = true) }
+            .forEach { info ->
+                val (row, column) = CurrencySystemService.parseSlot(info.slot)
+                if (row > getRows()) {
+                    Logger.warn("[$currencyName] Info item '${info.name}' cannot be in bottom row. Skipping.")
+                    return@forEach
                 }
-                itemMeta = meta
+
+                val mat = Material.matchMaterial(info.material.uppercase()) ?: Material.BOOK
+                val stack = ItemStack(mat).apply {
+                    val meta = itemMeta ?: return@apply
+                    meta.setDisplayName(CurrencySystemService.parsePlaceholders(info.name, player).translate())
+                    meta.lore = info.description.map {
+                        CurrencySystemService.parsePlaceholders(it, player).translate()
+                    }
+                    itemMeta = meta
+                }
+
+                setMenuItem(column, row, object : Item() {
+                    override fun createItem(): ItemStack = stack
+                    override fun onClickEvent(clicker: Player, clickType: ClickType) {}
+                })
             }
 
-            setMenuItem(column, row, object : Item() {
-                override fun createItem(): ItemStack = stack
-                override fun onClickEvent(clicker: Player, clickType: ClickType) {}
-            })
-        }
 
         val backSlot = 5
-        setMenuItem(backSlot, rows, object : Item() {
+        setMenuItem(backSlot, getRows(), object : Item() {
             override fun createItem(): ItemStack {
                 val item = ItemStack(Material.BARRIER)
                 val meta = item.itemMeta ?: return item

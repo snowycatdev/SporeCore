@@ -18,7 +18,7 @@ class EnchantmentTableCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onEnchantment(player: Player, @Optional targetName: String){
+    fun onEnchantment(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openEnchanting(player.location, true)
             return

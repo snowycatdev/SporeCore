@@ -106,10 +106,6 @@ class HomeCommand() : BaseCommand() {
     @Syntax("<player> <home>")
     fun adminDelete(sender: Player, targetName: String, homeName: String) {
         val offlinePlayer = Bukkit.getOfflinePlayer(targetName)
-        if (offlinePlayer == null) {
-            sender.sendErrorMessage("Player '$targetName' does not exist.")
-            return
-        }
 
         val user = UserManager.get(offlinePlayer.uniqueId)
 

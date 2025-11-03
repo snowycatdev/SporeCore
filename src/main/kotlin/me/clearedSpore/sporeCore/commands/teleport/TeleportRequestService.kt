@@ -1,6 +1,7 @@
 package me.clearedSpore.sporeCore.commands.teleport
 
 import me.clearedSpore.sporeAPI.util.CC.red
+import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
@@ -38,6 +39,13 @@ object TeleportRequestService {
             return
         }
 
+        val existingRequest = pendingRequests[target]
+        if (existingRequest != null && existingRequest.requester == requester) {
+            requester.sendErrorMessage("You have already sent a request to ${target.name}!")
+            return
+        }
+
+
         val executeRequest = {
             pendingRequests[target] = Request(requester, target, type)
             requester.sendSuccessMessage("Teleport request sent to ${target.name}.")
@@ -49,8 +57,13 @@ object TeleportRequestService {
             )
         }
 
-        if (targetUser.isSettingEnabled(Setting.CONFIRM_TPA)) {
-            TPAConfirmMenu(target, requester, executeRequest).open(target)
+        val requesterUser = UserManager.get(requester)
+        if(requesterUser == null){
+            Logger.error("Failed to load user for ${requester.name}")
+            return
+        }
+        if (requesterUser.isSettingEnabled(Setting.CONFIRM_TPA)) {
+            TPAConfirmMenu(requester, target, executeRequest).open(requester)
         } else {
             executeRequest()
         }
@@ -87,6 +100,8 @@ object TeleportRequestService {
                 }
             }
         }
+
+
 
         if (targetUser.isSettingEnabled(Setting.CONFIRM_TPA)) {
             TPAConfirmMenu(target, request.requester, executeTeleport).open(target)

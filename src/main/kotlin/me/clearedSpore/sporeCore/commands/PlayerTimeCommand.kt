@@ -31,7 +31,7 @@ class PlayerTimeCommand : BaseCommand() {
             return
         }
 
-        if (sender != target && !sender.hasPermission(Perm.PWEATHER_OTHERS)) {
+        if (sender != target && !sender.hasPermission(Perm.PTIME_OTHERS)) {
             sender.sendMessage("You don't have permission to repair other players' items.".red())
             return
         }

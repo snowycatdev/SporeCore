@@ -6,6 +6,7 @@ import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeCore.SporeCore
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
@@ -31,6 +32,7 @@ class ConfirmMenu(
 
             override fun onClickEvent(clicker: Player, clickType: ClickType) {
                 onConfirm()
+                player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f)
                 player.closeInventory()
             }
         })

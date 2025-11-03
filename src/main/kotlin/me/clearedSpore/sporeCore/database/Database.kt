@@ -14,11 +14,14 @@ import org.dizitart.no2.collection.NitriteCollection
 
 data class Database(
     val id: String = "server",
-    var spawn: Location? = null,
+    var totalJoins: Int = 0,
+    var spawnString: String? = null,
     var warps: MutableList<Warp> = mutableListOf(),
     var kits: MutableList<Kit> = mutableListOf(),
     var packagePurchases: MutableList<PackagePurchase> = mutableListOf()
 ) {
+    val spawn: Location?
+        get() = stringToLocation(spawnString)
 
     private fun locationToString(loc: Location?): String? =
         loc?.let { "${it.world?.name},${it.x},${it.y},${it.z},${it.yaw},${it.pitch}" }
@@ -61,10 +64,11 @@ data class Database(
 
     fun toDocument(): Document = DocWriter()
         .put("id", id)
-        .put("spawn", locationToString(spawn))
+        .put("spawn", spawnString)
         .putList("warps", warps.map { warpToDocument(it) })
         .putList("kits", kits.map { kitToDocument(it) })
         .putList("packagePurchases", packagePurchases.map { packagePurchaseToDocument(it) })
+        .putInt("totalJoins", totalJoins)
         .build()
 
     fun save(collection: NitriteCollection) {
@@ -91,7 +95,7 @@ data class Database(
             val packageDocs = doc.documents("packagePurchases")
             return Database(
                 id = doc.string("id") ?: "server",
-                spawn = doc.string("spawn")?.let { stringToLocation(it) },
+                spawnString = doc.string("spawn"),
                 warps = warpDocs.mapNotNull { d ->
                     val name = d.get("name") as? String ?: return@mapNotNull null
                     val location = stringToLocation(d.get("location") as? String) ?: return@mapNotNull null
@@ -105,7 +109,12 @@ data class Database(
                     val armor = InventoryUtil.itemStackListFromBase64(d.get("armor") as? String)
                     val offhand = InventoryUtil.itemStackFromBase64(d.get("offhand") as? String)
                     val permission = d.get("permission") as? String
-                    val cooldown = d.get("cooldown") as? Long
+                    val cooldown = when (val raw = d.get("cooldown")) {
+                        is Long -> raw
+                        is Int -> raw.toLong()
+                        is Double -> raw.toLong()
+                        else -> null
+                    }
                     val displayItem = d.get("displayItem") as? Material
                     Kit(name, id, inventory, armor, offhand, permission, cooldown, displayItem)
                 }.toMutableList(),
@@ -114,7 +123,8 @@ data class Database(
                     val amount = d.get("amount") as? Int ?: return@mapNotNull null
                     val timestamp = d.get("timestamp") as? Long ?: return@mapNotNull null
                     PackagePurchase(packageName, amount, timestamp)
-                }.toMutableList()
+                }.toMutableList(),
+                totalJoins = doc.int("totalJoins")
             )
         }
 

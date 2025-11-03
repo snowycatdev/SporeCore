@@ -12,7 +12,7 @@ object DatabaseManager {
     private lateinit var db: Nitrite
     private lateinit var userCollection: NitriteCollection
     private lateinit var serverCollection: NitriteCollection
-    private var serverData: Database? = null
+    private lateinit var serverData: Database
 
     fun init(pluginFolder: File) {
         if (!pluginFolder.exists()) pluginFolder.mkdirs()
@@ -32,13 +32,11 @@ object DatabaseManager {
     fun getUserCollection(): NitriteCollection = userCollection
     fun getServerCollection(): NitriteCollection = serverCollection
 
-    fun getServerData(): Database = serverData ?: Database()
+    fun getServerData(): Database = serverData
 
     fun saveServerData() {
-        serverData?.let { db ->
-            db.save(serverCollection)
-            Logger.infoDB("Saved global server data")
-        }
+        serverData.save(serverCollection)
+        Logger.infoDB("Saved global server data")
     }
 
     fun close() {

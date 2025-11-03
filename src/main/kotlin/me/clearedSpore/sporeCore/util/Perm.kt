@@ -69,6 +69,10 @@ object Perm {
     const val PWEATHER_OTHERS = "pweather.others"
     const val PTIME = "ptime"
     const val PTIME_OTHERS = "ptime.others"
+    const val BACK = MAIN + "back"
+    const val SPEED = MAIN + "speed"
+    const val SPEED_OTHERS = MAIN + "speed.others"
+    const val REBOOT = MAIN + "reboot"
 
     //warps
     const val WARP = MAIN + "warp."
@@ -93,6 +97,8 @@ object Perm {
     const val CURRENCY_GET_OTHERS = CURRENCY + "get.others"
     const val CURRENCY_ADMIN = CURRENCY + "admin"
     const val CURRENCY_TOP = CURRENCY + "top"
+    const val CURRENCY_SPENT = CURRENCY + "topspent"
+    const val CURRENCY_BOUGHT = CURRENCY + "topbought"
     const val CURRENCY_NOTIFY = CURRENCY + "notify"
 
 

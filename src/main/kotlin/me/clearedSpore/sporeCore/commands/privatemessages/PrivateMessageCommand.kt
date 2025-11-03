@@ -20,7 +20,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 
-@CommandAlias("whisper|pm|msg")
+@CommandAlias("whisper|pm|msg|tell")
 class PrivateMessageCommand : BaseCommand() {
 
     @Default

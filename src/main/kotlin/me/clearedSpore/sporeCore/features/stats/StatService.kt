@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 
 
 object StatService {
+
     fun getTotalPlaytime(user: User): Long {
         return user.totalPlaytime
     }
@@ -19,19 +20,10 @@ object StatService {
     }
 
     fun getFirstJoin(user: User): String {
-        val firstJoin = user.firstJoin?.toLongOrNull() ?: return "Never"
-        return formatTime(firstJoin)
+        return user.firstJoin ?: "Never"
     }
 
     fun getLastJoin(user: User): String {
-        val lastJoin = user.lastJoin ?: return "Never"
-        return formatTime(lastJoin)
-    }
-
-    private fun formatTime(millis: Long): String {
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        return Instant.ofEpochMilli(millis)
-            .atZone(ZoneId.systemDefault())
-            .format(formatter)
+        return user.lastJoin ?: "Never"
     }
 }

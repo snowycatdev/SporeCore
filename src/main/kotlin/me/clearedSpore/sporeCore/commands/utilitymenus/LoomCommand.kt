@@ -18,7 +18,7 @@ class LoomCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onLoom(player: Player, @Optional targetName: String){
+    fun onLoom(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openLoom(player.location, true)
             return

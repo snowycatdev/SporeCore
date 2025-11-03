@@ -17,6 +17,7 @@ class KitsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.instanc
     override fun getRows(): Int = 6
 
     override fun createItems() {
+        startAutoRefresh()
         val kits = kitService.getAllKits()
 
         val accessibleKits = kits.filter { it.permission == null || player.hasPermission(it.permission) }

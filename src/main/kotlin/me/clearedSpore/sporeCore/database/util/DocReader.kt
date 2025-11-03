@@ -53,12 +53,16 @@ class DocReader(val doc: Document) {
     inline fun <reified T> map(key: String): Map<String, T> =
         (doc.get(key) as? Map<*, *>)?.mapNotNull {
             val k = it.key?.toString() ?: return@mapNotNull null
-            val v = when (T::class) {
-                Boolean::class -> (it.value as? Boolean ?: it.value.toString().toBoolean()) as T
-                Double::class -> (it.value as? Number)?.toDouble() as? T ?: it.value.toString().toDouble() as T
-                else -> return@mapNotNull null
+            val v: Any? = when (T::class) {
+                Boolean::class -> (it.value as? Boolean ?: it.value.toString().toBooleanStrictOrNull())
+                Double::class -> (it.value as? Number)?.toDouble() ?: it.value.toString().toDoubleOrNull()
+                Number::class -> (it.value as? Number)
+                    ?: it.value.toString().toDoubleOrNull()
+                String::class -> it.value?.toString()
+                else -> null
             }
-            k to v
+            if (v == null) return@mapNotNull null
+            k to (v as T)
         }?.toMap() ?: emptyMap()
 
 

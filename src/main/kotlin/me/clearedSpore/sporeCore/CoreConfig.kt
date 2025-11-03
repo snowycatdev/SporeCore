@@ -3,9 +3,6 @@ package me.clearedSpore.sporeCore
 import de.exlll.configlib.Comment
 import de.exlll.configlib.Configuration
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
-import org.checkerframework.checker.builder.qual.CalledMethods
-import org.intellij.lang.annotations.JdkConstants
-import javax.swing.text.StyledEditorKit
 
 
 @Configuration
@@ -23,7 +20,62 @@ data class CoreConfig(
 
     var economy: EconomyConfig = EconomyConfig(),
 
-    var kits: KitsConfig = KitsConfig()
+    var kits: KitsConfig = KitsConfig(),
+
+    var join: JoinConfig = JoinConfig()
+)
+
+@Configuration
+data class JoinConfig(
+
+    @Comment(
+        "Should players be teleported to spawn when they join?"
+    )
+    var spawnOnJoin: Boolean = true,
+
+    @Comment(
+        "What title should the players see when they join?",
+        "You can use %player% to return the players name",
+        "Leave it empty if you don't want a title"
+    )
+    var title: String = "&c&lWelcome %player%!",
+
+    @Comment(
+        "What message should the players receive when they join?",
+        "You can use %player% to return the players name",
+        "Leave it empty if you don't want to send messages"
+    )
+    var message: List<String> = listOf(
+        "&cWelcome &b%player%",
+        "&fRun &c/help &f to view the help menu!"
+    ),
+
+    @Comment(
+        "The sound that should play (e.g., ENTITY_PLAYER_LEVELUP)",
+        "when a player joins!"
+    )
+    var joinSound: String = "ENTITY_PLAYER_LEVELUP",
+
+    @Comment(
+        "What message should it broadcast when a player",
+        "joins for the first time?",
+        "You can use %player% to return the players name",
+        "You can use %join_count% to see how many players",
+        "have joined in total! This will add 1 to it since there",
+        "is a new player that joined",
+        "Leave it empty if you don't want it to broadcast it"
+    )
+    var firstJoinMessage: List<String> = listOf(
+        "&b%player% &fhas joined for the first time!! &7%join_count%",
+        "&cGive them a warm welcome!"
+    ),
+
+    @Comment(
+        "What gamemode should the player be put in when they join?",
+        "Leave it empty if you don't want it to set a gamemode"
+    )
+    var gamemode: String = "SURVIVAL"
+
 
 )
 
@@ -50,10 +102,10 @@ data class GeneralConfig(
     var prefix: String = "SporeCore",
 
     @Comment(
-    "When a player wants to teleport for example to spawn and",
-    "they don't have the bypass permission (sporecore.bypass.teleport) they will",
-    "need to wait a few seconds before being teleported. With this value you can set",
-    "how long a player has to wait before being teleported."
+        "When a player wants to teleport for example to spawn and",
+        "they don't have the bypass permission (sporecore.bypass.teleport) they will",
+        "need to wait a few seconds before being teleported. With this value you can set",
+        "how long a player has to wait before being teleported."
     )
     var teleportTime: Int = 5
 )
@@ -144,7 +196,7 @@ data class EconomyConfig(
         "DECIMAL → 5000.00",
         "COMPACT → 5k, 5m, etc."
     )
-    var balanceFormat: BalanceFormat = BalanceFormat.COMPACT
+    var balanceFormat: BalanceFormat = BalanceFormat.COMPACT,
 )
 
 @Configuration

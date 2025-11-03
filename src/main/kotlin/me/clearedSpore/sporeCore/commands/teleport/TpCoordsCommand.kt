@@ -16,25 +16,39 @@ class TpCoordsCommand : BaseCommand() {
 
     @Default
     @CommandCompletion("@players|~ ~ ~ ~")
-    fun onTpCoords(player: Player, arg1: String, arg2: String, arg3: String, @Optional targetName: String?) {
-        val target = if (targetName != null) Bukkit.getPlayer(targetName) else player
+    fun onTpCoords(
+        executor: Player,
+        arg1: String,
+        arg2: String,
+        arg3: String,
+        @Optional targetName: String?
+    ) {
+        val target: Player? = if (targetName != null) {
+            Bukkit.getPlayer(targetName)
+        } else {
+            executor
+        }
+
         if (target == null) {
-            player.sendErrorMessage("That player is not online!")
+            executor.sendErrorMessage("That player is not online!")
             return
         }
 
-        val base = target.location
+
+        val base = executor.location
+
         val x = parseCoordinate(base.x, arg1)?.let { String.format("%.1f", it).toDouble() }
         val y = parseCoordinate(base.y, arg2)?.let { String.format("%.1f", it).toDouble() }
         val z = parseCoordinate(base.z, arg3)?.let { String.format("%.1f", it).toDouble() }
 
         if (x == null || y == null || z == null) {
-            player.sendErrorMessage("Invalid coordinates.")
+            executor.sendErrorMessage("Invalid coordinates.")
             return
         }
 
-        target.teleport(Location(base.world, x, y, z))
-        player.sendSuccessMessage("Teleported ${target.name} to &f$x $y $z".blue())
+
+        target.teleport(Location(target.world, x, y, z))
+        executor.sendSuccessMessage("Teleported ${target.name} to &f$x $y $z".blue())
     }
 
     private fun parseCoordinate(base: Double, input: String): Double? {

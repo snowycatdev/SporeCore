@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.features.stats
 
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.user.UserManager
+import me.clearedSpore.sporeCore.util.Util
 import org.bukkit.Bukkit
 
 object PlaytimeTracker {
@@ -20,7 +21,7 @@ object PlaytimeTracker {
 
                 user.totalPlaytime += 60_000
 
-                if (user.lastJoin == null) user.lastJoin = now
+                if (user.lastJoin == null) user.lastJoin = Util.formatNow()
 
                 user.playtimeHistory.add(now - 60_000 to now)
 

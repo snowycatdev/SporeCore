@@ -8,8 +8,10 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
+import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeAPI.util.Message
 import me.clearedSpore.sporeCore.CoreConfig
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.currency.CurrencySystemService
@@ -20,17 +22,22 @@ import me.clearedSpore.sporeCore.database.Database
 import me.clearedSpore.sporeCore.database.DatabaseManager
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.features.eco.EconomyService
+import me.clearedSpore.sporeCore.features.stats.StatService
 import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.dizitart.no2.collection.Document
+import java.awt.Color.red
+import java.awt.Color.yellow
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import kotlin.random.Random
 
-@CommandAlias("sporecore|sc")
+@CommandAlias("sporecore|core")
 class CoreCommand : BaseCommand() {
 
     private val startTime = System.currentTimeMillis()
@@ -42,7 +49,8 @@ class CoreCommand : BaseCommand() {
         sender.sendMessage("Reloading SporeCore asynchronously...".blue())
 
         val startTime = System.currentTimeMillis()
-
+        Logger.initialize(plugin.coreConfig.general.prefix)
+        Message.init(true)
         reloadConfig(plugin, sender)
             .thenCompose { reloadEconomy() }
             .thenCompose { reloadWarps(plugin) }
@@ -186,8 +194,60 @@ class CoreCommand : BaseCommand() {
         sender.sendMessage("Value of '$fieldName' for ${target.name}: ".blue() + value.toString().green())
     }
 
+
+    @Subcommand("dumpdb")
+    @CommandPermission(Perm.ADMIN)
+    fun onDumpDB(sender: CommandSender) {
+        sender.sendMessage("Dumping database to JSON...".blue())
+
+        CompletableFuture.runAsync {
+            try {
+                val plugin = SporeCore.instance
+                val file = File(plugin.dataFolder, "database_dump.json")
+
+                val userCollection = DatabaseManager.getUserCollection()
+                val serverCollection = DatabaseManager.getServerCollection()
+
+                val dump: MutableMap<String, List<Map<String, Any>>> = mutableMapOf()
+
+                dump["users"] = userCollection.find().map { doc ->
+                    @Suppress("UNCHECKED_CAST")
+                    (doc as Map<String, Any>).mapValues { it.value!! }
+                }.toList()
+
+                dump["serverData"] = serverCollection.find().map { doc ->
+                    @Suppress("UNCHECKED_CAST")
+                    (doc as Map<String, Any>).mapValues { it.value!! }
+                }.toList()
+
+                val json = com.google.gson.GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+                    .toJson(dump)
+
+                file.writeText(json)
+
+                sender.sendMessage("Database successfully dumped to ${file.name}".green())
+                Logger.infoDB("Database dump saved to ${file.absolutePath}")
+            } catch (ex: Exception) {
+                sender.sendMessage("Failed to dump database: ${ex.message}".red())
+                Logger.error("Database dump failed: ${ex.message}")
+                ex.printStackTrace()
+            }
+        }
+    }
+
+
     @Subcommand("generateusers")
+    @CommandPermission("*")
+    @Private
     fun onGenerate(sender: CommandSender, amountArg: Int?) {
+
+        if(sender is Player){
+            sender.sendMessage("You can only run this command trough console!".red())
+            return
+        }
+
         val amount = (amountArg ?: 500).coerceIn(1, 5000)
         sender.sendMessage("Starting generation of $amount fake users...".blue())
 
@@ -325,15 +385,26 @@ class CoreCommand : BaseCommand() {
         }
 
         sender.sendMessage("=== User Info for ${target.name} ===".blue())
-        sender.sendMessage("UUID: ".white() + target.uniqueId.toString().green() + "(uuidStr)".gray())
-        sender.sendMessage("First Join: ".white() + (user.firstJoin ?: "Unknown").green() + "(firstJoin)".gray())
-        sender.sendMessage("Homes: ".white() + user.homes.size.toString().green() + "(homes)".gray())
-        sender.sendMessage("Pending Messages: ".white() + user.pendingMessages.size.toString().green() + "(pendingMessages)".gray())
-        sender.sendMessage("Balance: ".white() + EconomyService.format(user.balance).green() + "(balance)".gray())
-        sender.sendMessage("Pending Payments: ".white() + "(pendingPayments)".gray())
-        user.pendingPayments.forEach { (senderName, total) ->
-            val formattedAmount = EconomyService.format(total)
-            sender.sendMessage("   ${formattedAmount.green()} from ${senderName.white()}".blue())
+        sender.sendMessage("UUID: ".white() + target.uniqueId.toString().green() + " (uuidStr)".gray())
+        sender.sendMessage("First Join: ".white() + (user.firstJoin ?: "Unknown").green() + " (firstJoin)".gray())
+        sender.sendMessage("Homes: ".white() + user.homes.size.toString().green() + " (homes)".gray())
+        sender.sendMessage("Pending Messages: ".white() + user.pendingMessages.size.toString().green() + " (pendingMessages)".gray())
+        sender.sendMessage("Balance: ".white() + EconomyService.format(user.balance).green() + " (balance)".gray())
+        sender.sendMessage("Last join: ".white() + user.lastJoin?.green() + " (lastJoin)".gray())
+        sender.sendMessage("Playtime: ".white() + StatService.getTotalPlaytime(user).toString().green() + " (totalPlaytime)".gray())
+        sender.sendMessage("Credits: ".white() + user.credits.toString().gray() + " (credits)".gray())
+        sender.sendMessage("Credits Spent: ".white() + user.creditsSpent.toString().gray() + " (creditsSpent)".gray())
+        sender.sendMessage("Last Location: ".white() + (user.lastLocation?.let { loc ->
+            "X: ${"%.1f".format(loc.x)}, Y: ${"%.1f".format(loc.y)}, Z: ${"%.1f".format(loc.z)}, World: ${loc.world?.name}"
+        } ?: "None").green() + " (lastLocation)".gray())
+        sender.sendMessage("Pending Payments: ".white() + " (pendingPayments)".gray())
+        if(user.pendingPayments.isNotEmpty()) {
+            user.pendingPayments.forEach { (senderName, total) ->
+                val formattedAmount = EconomyService.format(total)
+                sender.sendMessage("   ${formattedAmount.green()} from ${senderName.white()}".blue())
+            }
+        } else {
+            sender.sendMessage("   User has no pending payments".red())
         }
 
     }

@@ -3,18 +3,16 @@ package me.clearedSpore.sporeCore.listener
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.StringUtil.firstPart
 import me.clearedSpore.sporeAPI.util.StringUtil.hasFlag
-import me.clearedSpore.sporeCore.KitsConfig
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.util.InventoryUtil
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 
 
 class DeathListener : Listener {
 
     @EventHandler
-    fun onDeath(event: PlayerDeathEvent) {
+    fun onDeath(event: PlayerRespawnEvent) {
         val player = event.player
         val config = SporeCore.instance.coreConfig
         val kitService = SporeCore.instance.kitService

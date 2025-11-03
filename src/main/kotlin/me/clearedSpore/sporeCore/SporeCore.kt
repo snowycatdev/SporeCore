@@ -48,6 +48,7 @@ import me.clearedSpore.sporeCore.features.warp.WarpService
 import me.clearedSpore.sporeCore.hook.PlaceholderAPIHook
 import me.clearedSpore.sporeCore.listener.ChatEvent
 import me.clearedSpore.sporeCore.listener.DeathListener
+import me.clearedSpore.sporeCore.listener.LocationListener
 import me.clearedSpore.sporeCore.listener.LoggerEvent
 import me.clearedSpore.sporeCore.user.UserListener
 import me.clearedSpore.sporeCore.user.UserManager
@@ -169,6 +170,7 @@ class SporeCore : JavaPlugin() {
         server.pluginManager.registerEvents(LoggerEvent(), this)
         server.pluginManager.registerEvents(ChatEvent(), this)
         server.pluginManager.registerEvents(DeathListener(), this)
+        server.pluginManager.registerEvents(LocationListener(), this)
     }
 
     fun loadConfig(): CoreConfig {
@@ -219,26 +221,6 @@ class SporeCore : JavaPlugin() {
         }
     }
 
-
-    fun setupACF() {
-        val prefix = "⚙ ".blue() + "SporeCore » ".white()
-
-        val locales = commandManager.locales
-
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_HEADER, "$prefix &fAvailable Commands:")
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_FORMAT, "&e/{command} &7{parameters} &f- {description}")
-
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_HEADER, "$prefix &fCommand Help for &e/{command}")
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_COMMAND_FORMAT, "Usage: &f/{command} {parameters}".blue())
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_PARAMETER_FORMAT, "&7- &f{parameter} &7({description})")
-
-        locales.addMessage(Locales.ENGLISH, MessageKeys.INVALID_SYNTAX, "$prefix" + "Use &e{command} &f{syntax}".blue())
-        locales.addMessage(Locales.ENGLISH, MessageKeys.PERMISSION_DENIED, "$prefix" + "You don't have permission to use this command!".red())
-        locales.addMessage(Locales.ENGLISH, MessageKeys.UNKNOWN_COMMAND, "$prefix" + "That command does not exist!".red())
-
-        ConfirmCondition.register(commandManager)
-        CooldownCondition.register(commandManager)
-    }
 
     fun registerCommands(){
 
@@ -329,6 +311,9 @@ class SporeCore : JavaPlugin() {
             commandManager.registerCommand(StatsCommand())
         }
 
+        commandManager.registerCommand(BackCommand())
+        commandManager.registerCommand(SpeedCommand())
+        commandManager.registerCommand(RebootCommand())
 
         if (features.currency.enabled) {
             val singular = CurrencySystemService.config.currencySettings.singularName.lowercase()
@@ -352,6 +337,26 @@ class SporeCore : JavaPlugin() {
             Logger.info("Registered currency aliases: ${aliases.joinToString(", ")}")
         }
 
+    }
+
+    fun setupACF() {
+        val prefix = "⚙ ".blue() + "SporeCore » ".white()
+
+        val locales = commandManager.locales
+
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_HEADER, "$prefix &fAvailable Commands:")
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_FORMAT, "&e/{command} &7{parameters} &f- {description}")
+
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_HEADER, "$prefix &fCommand Help for &e/{command}")
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_COMMAND_FORMAT, "Usage: &f/{command} {parameters}".blue())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_PARAMETER_FORMAT, "&7- &f{parameter} &7({description})")
+
+        locales.addMessage(Locales.ENGLISH, MessageKeys.INVALID_SYNTAX, "$prefix" + "Use &e{command} &f{syntax}".blue())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.PERMISSION_DENIED, "$prefix" + "You don't have permission to use this command!".red())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.UNKNOWN_COMMAND, "$prefix" + "That command does not exist!".red())
+
+        ConfirmCondition.register(commandManager)
+        CooldownCondition.register(commandManager)
     }
 
 
@@ -432,7 +437,9 @@ class SporeCore : JavaPlugin() {
 
         commandManager.commandCompletions.registerCompletion("playerhomes") { context ->
             val targetName = context.input
-            val target = Bukkit.getOfflinePlayer(targetName) ?: return@registerCompletion emptyList()
+            if (targetName.isBlank()) return@registerCompletion emptyList()
+
+            val target = Bukkit.getOfflinePlayerIfCached(targetName) ?: return@registerCompletion emptyList()
             val user = UserManager.getIfLoaded(target.uniqueId) ?: return@registerCompletion emptyList()
             user.homes.map { it.name }
         }
@@ -443,7 +450,7 @@ class SporeCore : JavaPlugin() {
             Material.entries
                 .asSequence()
                 .filter { !it.isLegacy }
-                .map { it.name.lowercase().capitalizeFirstLetter() }
+                .map { it.name }
                 .filter { it!!.startsWith(input.lowercase()) }
                 .take(50)
                 .toList()

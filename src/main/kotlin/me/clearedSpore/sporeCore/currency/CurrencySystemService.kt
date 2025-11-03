@@ -86,11 +86,17 @@ object CurrencySystemService {
         }
 
         shopConfig.categories.forEach { (key, category) ->
-            categories[key.lowercase()] = category
+            val lowerKey = key.lowercase()
+            categories[lowerKey] = category
+
+            if (!shopConfig.menuSettings.categories.containsKey(lowerKey)) {
+                Logger.info("[$currencyName] No menu settings found for category '${category.name}', adding default settings.")
+                shopConfig.menuSettings.categories[lowerKey] = MenuRowConfig(rows = 5, fillItems = true)
+            }
+
             Logger.info("[$currencyName] Loaded category '${category.name}' with ${category.items.size} items.")
         }
     }
-
 
     fun reload() {
         initialize()
@@ -120,6 +126,18 @@ object CurrencySystemService {
 
         Logger.info("[$plural] Currency system reloaded. Registered aliases: ${aliases.joinToString(", ")}")
     }
+
+    fun getMenuSettingsFor(menuName: String): MenuRowConfig {
+        val settings = config.shop.menuSettings
+        return if (menuName.equals("main", ignoreCase = true)) {
+            settings.main
+        } else {
+            settings.categories[menuName.lowercase()] ?: MenuRowConfig()
+        }
+    }
+
+
+
 
     fun addBalance(sender: CommandSender, user: User, amount: Double, reason: String) {
         user.credits = user.credits + amount
@@ -166,7 +184,7 @@ object CurrencySystemService {
 
         val currencyColor = settings.currencyColor
         val currencyName = settings.pluralName
-        val formattedAmount = CurrencySystemService.format(amount)
+        val formattedAmount = format(amount)
         val senderName = if (sender is Player) sender.name else "Console"
         val targetName = targetUser.playerName.ifEmpty { "Unknown" }
 
@@ -180,7 +198,6 @@ object CurrencySystemService {
                             "$targetName ".white() +
                             "received ".blue() +
                             "$currencyColor$formattedAmount ".translate() +
-                            "$currencyName ".white() +
                             "from ".blue() +
                             senderName.white() +
                             (if (!reason.isNullOrBlank()) " for ".blue() + "&e$reason".translate() else "")
@@ -190,7 +207,6 @@ object CurrencySystemService {
                             "$senderName ".white() +
                             "removed ".blue() +
                             "$currencyColor$formattedAmount ".translate() +
-                            "$currencyName ".white() +
                             "from ".blue() +
                             targetName.white() +
                             (if (!reason.isNullOrBlank()) " for ".blue() + "&e$reason".translate() else "")
@@ -202,15 +218,13 @@ object CurrencySystemService {
                             targetName.white() +
                             "'s balance to ".blue() +
                             "$currencyColor$formattedAmount ".translate() +
-                            currencyName.white() +
                             (if (!reason.isNullOrBlank()) " for ".blue() + "&e$reason".translate() else "")
 
                 CreditAction.SPENT ->
                     "&c[$currencyName]&r ".blue() +
                             "$targetName ".white() +
                             "has spent ".blue() +
-                            "$currencyColor$formattedAmount ".translate() +
-                            currencyName.white()
+                            "$currencyColor$formattedAmount ".translate()
             }
 
             player.sendMessage(message)

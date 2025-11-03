@@ -37,6 +37,7 @@ class BalTopCommand: BaseCommand() {
         val pageSize = 10
         val startIndex = (requestedPage - 1) * pageSize
 
+        sender.sendMessage("Loading balances......".blue())
         EconomyService.top().thenAccept { topList ->
             if (topList.isEmpty() || startIndex >= topList.size) {
                 sender.sendMessage("No more results.".red())

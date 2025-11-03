@@ -12,6 +12,7 @@ import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.database.util.DocReader
 import me.clearedSpore.sporeCore.database.util.DocWriter
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.dizitart.no2.collection.NitriteCollection
 import org.dizitart.no2.filters.FluentFilter
@@ -33,12 +34,13 @@ data class User(
     var homes: MutableList<Home> = mutableListOf(),
     var economyLogs: MutableList<EconomyLog> = mutableListOf(),
     var kitCooldowns: MutableMap<String, Long> = mutableMapOf(),
-    var lastJoin: Long? = null,
+    var lastJoin: String? = null,
     var totalPlaytime: Long = 0L,
     var playtimeHistory: MutableList<Pair<Long, Long>> = mutableListOf(),
     var credits: Double = 0.0,
     var creditLogs: MutableList<CreditLog> = mutableListOf(),
-    var creditsSpent: MutableList<CreditLog> = mutableListOf()
+    var creditsSpent: MutableList<CreditLog> = mutableListOf(),
+    var lastLocation: Location? = null
 ) {
     val uuid: UUID get() = UUID.fromString(uuidStr)
     val player: Player? get() = Bukkit.getPlayer(uuid)
@@ -54,13 +56,14 @@ data class User(
         .putDocuments("homes", homes.map { it.toDocument() })
         .putDocuments("economyLogs", economyLogs.map { it.toDocument() })
         .putDouble("balance", balance)
-        .putMap("kitCooldowns", kitCooldowns)
-        .putLong("lastJoin", lastJoin ?: 0L)
+        .putMap("kitCooldowns", kitCooldowns.mapValues { it.value as Long })
+        .putString("lastJoin", lastJoin ?: "Never")
         .putLong("totalPlaytime", totalPlaytime)
         .putList("playtimeHistory", playtimeHistory.map { "${it.first}:${it.second}" })
         .putDouble("credits", credits)
         .putDocuments("creditLogs", creditLogs.map { it.toDocument() })
         .putDocuments("creditsSpent", creditsSpent.map { it.toDocument() })
+        .putLocation("lastLocation", lastLocation)
         .build()
 
     companion object {
@@ -81,8 +84,16 @@ data class User(
                 homes = doc.documents("homes").mapNotNull { Home.fromDocument(it) }.toMutableList(),
                 economyLogs = doc.documents("economyLogs").mapNotNull { EconomyLog.fromDocument(it) }.toMutableList(),
                 balance = doc.double("balance"),
-                kitCooldowns = doc.map<Long>("kitCooldowns").toMutableMap(),
-                lastJoin = doc.long("lastJoin").takeIf { it != 0L },
+                kitCooldowns = (doc.doc.get("kitCooldowns") as? Map<*, *>)?.mapNotNull { (k, v) ->
+                    val key = k?.toString() ?: return@mapNotNull null
+                    val value = when (v) {
+                        is Number -> v.toLong()
+                        is String -> v.toLongOrNull()
+                        else -> null
+                    } ?: return@mapNotNull null
+                    key to value
+                }?.toMap()?.toMutableMap() ?: mutableMapOf(),
+                lastJoin = doc.string("lastJoin"),
                 totalPlaytime = doc.long("totalPlaytime"),
                 playtimeHistory = doc.list("playtimeHistory").mapNotNull {
                     val parts = it.toString().split(":")
@@ -90,7 +101,8 @@ data class User(
                 }.toMutableList(),
                 credits = doc.double("credits"),
                 creditLogs = doc.documents("creditLogs").mapNotNull { CreditLog.fromDocument(it) }.toMutableList(),
-                creditsSpent = doc.documents("creditsSpent").mapNotNull { CreditLog.fromDocument(it) }.toMutableList()
+                creditsSpent = doc.documents("creditsSpent").mapNotNull { CreditLog.fromDocument(it) }.toMutableList(),
+                lastLocation = doc.location("lastLocation")
             )
         }
 
@@ -112,7 +124,8 @@ data class User(
                 playtimeHistory = mutableListOf(),
                 credits = 0.0,
                 creditLogs = mutableListOf(),
-                creditsSpent = mutableListOf()
+                creditsSpent = mutableListOf(),
+                lastLocation = null
             )
 
             collection.insert(user.toDocument())
@@ -171,18 +184,29 @@ data class User(
             }
         }
 
-    fun save(collection: NitriteCollection) {
+    fun save(collection: NitriteCollection, silent: Boolean = false) {
         val filter = FluentFilter.where("uuidStr").eq(uuidStr)
         val result = collection.update(filter, toDocument())
         if (result.affectedCount == 0) {
             collection.insert(toDocument())
         }
-        Logger.infoDB("Saved user $playerName ($uuidStr)")
+        if(!silent) {
+            Logger.infoDB("Saved user $playerName ($uuidStr)")
+        }
     }
 
-    fun isSettingEnabled(setting: Setting) = playerSettings.getOrDefault(setting.key, setting.defaultValue)
     fun setSetting(setting: Setting, value: Boolean) { playerSettings[setting.key] = value }
-    fun toggleSetting(setting: Setting): Boolean = !isSettingEnabled(setting).also { setSetting(setting, it) }
+
+    fun isSettingEnabled(setting: Setting): Boolean {
+        return playerSettings[setting.key] ?: setting.defaultValue
+    }
+
+    fun toggleSetting(setting: Setting): Boolean {
+        val newValue = !isSettingEnabled(setting)
+        setSetting(setting, newValue)
+        return newValue
+    }
+
     fun getAllSettings(): Map<Setting, Boolean> = Setting.values().associateWith { isSettingEnabled(it) }
 
     fun logEconomy(action: EcoAction, amount: Double, reason: String = "") {
@@ -195,7 +219,6 @@ data class User(
         if (creditLogs.size > 100) creditLogs.removeLast()
     }
 
-    fun getFormattedFirstJoin() = firstJoin ?: "Never"
 
     fun queueMessage(msg: String){
         pendingMessages.add(msg)
@@ -203,21 +226,20 @@ data class User(
     }
 
 
-    fun hasKitCooldown(kitId: String): Boolean {
-        val expiry = kitCooldowns[kitId.lowercase()] ?: return false
+    fun hasKitCooldown(kitID: String): Boolean {
+        val expiry = kitCooldowns[kitID] ?: return false
         return System.currentTimeMillis() < expiry
     }
 
-    fun getKitCooldownRemaining(kitId: String): Long {
-        val expiry = kitCooldowns[kitId.lowercase()] ?: return 0
-        return (expiry - System.currentTimeMillis()).coerceAtLeast(0)
+    fun getKitCooldownRemaining(kitID: String): Long {
+        val expiry = kitCooldowns[kitID] ?: return 0L
+        return maxOf(expiry - System.currentTimeMillis(), 0L)
     }
 
-    fun setKitCooldown(kitId: String, durationMillis: Long) {
-        kitCooldowns[kitId.lowercase()] = System.currentTimeMillis() + durationMillis
+    fun setKitCooldown(kitID: String, durationMillis: Long) {
+        kitCooldowns[kitID] = System.currentTimeMillis() + durationMillis
         UserManager.save(this)
     }
-
 
     fun queuePayment(senderName: String, amount: Double) {
         pendingPayments[senderName] = pendingPayments.getOrDefault(senderName, 0.0) + amount

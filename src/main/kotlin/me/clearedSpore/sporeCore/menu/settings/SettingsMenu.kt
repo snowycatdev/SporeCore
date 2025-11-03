@@ -23,7 +23,8 @@ class SettingsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.ins
             return
         }
 
-        val features = SporeCore.instance.coreConfig.features
+        val config = SporeCore.instance.coreConfig
+        val features = config.features
 
         Setting.entries.forEach { setting ->
             if (setting.permission != null && !player.hasPermission(setting.permission)) return@forEach
@@ -33,6 +34,7 @@ class SettingsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.ins
                 val enabled = when (key) {
                     "teleportRequest" -> features.teleportRequest
                     "privateMessages" -> features.privateMessages
+                    "currency" -> features.currency.enabled
                     else -> true
                 }
                 if (!enabled) return@forEach

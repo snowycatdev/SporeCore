@@ -1,8 +1,6 @@
 package me.clearedSpore.sporeCore.currency.menu.main.item
 
 import me.clearedSpore.sporeAPI.menu.Item
-import me.clearedSpore.sporeAPI.util.CC.gray
-import me.clearedSpore.sporeAPI.util.CC.gold
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeCore.currency.CurrencySystemService
@@ -23,9 +21,11 @@ class CategoryItem(
         val item = ItemStack(material)
         val meta = item.itemMeta ?: return item
 
+        val displayName = category.displayItem.name ?: category.name
         meta.setDisplayName(
-            CurrencySystemService.parsePlaceholders(category.displayItem.name.toString(), player).translate()
+            CurrencySystemService.parsePlaceholders(displayName, player).translate()
         )
+
         meta.lore = category.displayItem.description.map {
             CurrencySystemService.parsePlaceholders(it, player).translate()
         }
@@ -36,15 +36,13 @@ class CategoryItem(
 
     override fun onClickEvent(clicker: Player, clickType: ClickType) {
         val (row, _) = CurrencySystemService.parseSlot(category.slot)
-        val maxRows = CurrencySystemService.config.shop.menuSettings.category.rows
+        val maxRows = CurrencySystemService.getMenuSettingsFor(category.name).rows
 
         if (row > maxRows) {
             clicker.sendMessage("This category cannot be opened because it is in the bottom row!".red())
             return
         }
 
-        if (clickType.isLeftClick || clickType.isRightClick) {
-            CategoryMenu(category, player).open(clicker)
-        }
+        CategoryMenu(category, clicker).open(clicker)
     }
 }

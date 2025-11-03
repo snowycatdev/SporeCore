@@ -18,7 +18,7 @@ class GrindstoneCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onGrindstone(player: Player, @Optional targetName: String){
+    fun onGrindstone(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openGrindstone(player.location, true)
             return

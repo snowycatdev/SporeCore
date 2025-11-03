@@ -53,7 +53,13 @@ class EconomyCommand : BaseCommand() {
             return
         }
 
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
         EconomyService.add(user, amount, "Added by ${sender.name}")
+
 
         sender.sendMessage("Added ".blue() + EconomyService.format(amount).green() + " to ${user.playerName}.".blue())
     }
@@ -67,12 +73,22 @@ class EconomyCommand : BaseCommand() {
             ?: return sender.sendMessage("Invalid amount!".red())
 
 
-
         val target = Bukkit.getOfflinePlayer(targetName)
         val user = UserManager.get(target.uniqueId)
 
         if(user == null){
             sender.userJoinFail()
+            return
+        }
+
+
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
+        if(user.balance < amount){
+            sender.sendMessage("That player does not have enough money!".red())
             return
         }
 
@@ -97,7 +113,13 @@ class EconomyCommand : BaseCommand() {
             return
         }
 
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
         EconomyService.set(user, amount, "Set by ${sender.name}")
+
 
         sender.sendMessage("Set ${user.playerName}'s balance to ".blue() + EconomyService.format(amount).green())
     }

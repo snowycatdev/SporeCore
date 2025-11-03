@@ -72,7 +72,7 @@ object EconomyService {
         val amountStr = action.format(amount)
         val reasonText = if (reason.isNotBlank()) " | ${reason}" else ""
 
-        val message = "§7[§6Economy§7] §f($userName) §7| $amountStr$reasonText".white() + " [${timestamp}]".gray()
+        val message = "§7[§6Economy§7] §f$userName §7| $amountStr$reasonText".white() + " [${timestamp}]".gray()
 
         Bukkit.getConsoleSender().sendMessage(message)
     }

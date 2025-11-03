@@ -22,6 +22,7 @@ class TpaCommand : BaseCommand() {
             return
         }
 
+
         TeleportRequestService.sendRequest(sender, target, TeleportRequestService.RequestType.TPA)
     }
 }

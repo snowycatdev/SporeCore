@@ -9,12 +9,13 @@ import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 object UserManager {
     private val users = mutableMapOf<UUID, User>()
     private val scheduler = Executors.newScheduledThreadPool(1)
-    private val autoSaveTasks = mutableMapOf<UUID, Runnable>()
+    private val autoSaveTasks = mutableMapOf<UUID, ScheduledFuture<*>>()
 
     private val userCollection get() = DatabaseManager.getUserCollection()
 
@@ -35,13 +36,23 @@ object UserManager {
             }
 
             if (existingByName != null) {
-                val existingUuid = UUID.fromString(existingByName.get("uuidStr", String::class.java))
-                val existingUser = User.load(existingUuid, userCollection)
-                if (existingUser != null) {
-                    users[existingUuid] = existingUser
-                    return existingUser
+                val existingUuidStr = existingByName.get("uuidStr", String::class.java)
+                if (!existingUuidStr.isNullOrBlank()) {
+                    val existingUuid = UUID.fromString(existingUuidStr)
+                    val existingUser = User.load(existingUuid, userCollection)
+                    if (existingUser != null) {
+                        existingUser.playerName = finalName
+                        users[existingUuid] = existingUser
+                        return existingUser
+                    }
                 }
             }
+        }
+
+        val alreadyExists = userCollection.find().any { it.get("uuidStr", String::class.java) == uuid.toString() }
+        if (alreadyExists) {
+            Logger.warn("UserManager: Tried to create new user for $uuid, but record already exists in DB. Skipping.")
+            return User.load(uuid, userCollection)
         }
 
         val offlinePlayer = Bukkit.getOfflinePlayer(uuid)
@@ -51,6 +62,7 @@ object UserManager {
         users[uuid] = newUser
         return newUser
     }
+
 
     fun getAllStoredUUIDsFromDB(): List<UUID> {
         return userCollection.find().mapNotNull {
@@ -67,11 +79,11 @@ object UserManager {
 
     fun saveAllUsers(): CompletableFuture<Void> =
         CompletableFuture.runAsync {
-            users.values.forEach { save(it) }
+            users.values.forEach { save(it, true) }
         }
 
-    fun save(user: User) {
-        user.save(userCollection)
+    fun save(user: User, silent: Boolean = false) {
+        user.save(userCollection, silent)
     }
 
     fun remove(uuid: UUID) {
@@ -80,16 +92,16 @@ object UserManager {
 
     fun startAutoSave(user: User) {
         if (autoSaveTasks.containsKey(user.uuid)) return
-        val task = Runnable {
-            if (users.containsKey(user.uuid)) save(user)
-        }
-        scheduler.scheduleAtFixedRate(task, 10, 10, TimeUnit.MINUTES)
+        val task = scheduler.scheduleAtFixedRate({
+            users[user.uuid]?.let { save(it) }
+        }, 10, 10, TimeUnit.MINUTES)
         autoSaveTasks[user.uuid] = task
     }
 
     fun stopAutoSave(uuid: UUID) {
-        autoSaveTasks.remove(uuid)
+        autoSaveTasks.remove(uuid)?.cancel(false)
     }
+
 
 
     fun getBalance(uuid: UUID): CompletableFuture<Double?> =

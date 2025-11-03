@@ -30,6 +30,7 @@ class CurrencyCommand : BaseCommand() {
 
     @Default
     @CommandPermission(Perm.CURRENCY_GET)
+    @Syntax("<player>")
     fun onDefault(sender: CommandSender, @Optional target: OfflinePlayer?) {
         if (target == null && sender !is Player) {
             sender.sendMessage("You must specify a player.".red())
@@ -75,7 +76,7 @@ class CurrencyCommand : BaseCommand() {
 
     @Subcommand("set")
     @CommandCompletion("@players")
-    @Syntax("<player> <amount>")
+    @Syntax("<player> <amount> <reason>")
     @CommandPermission(Perm.CURRENCY_ADMIN)
     fun onSet(sender: CommandSender, target: OfflinePlayer, amount: Double, reason: String) {
         if (!target.hasPlayedBefore()) {
@@ -89,6 +90,11 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
         val formatted = CurrencySystemService.format(amount)
         service.setBalance(sender, user, amount, reason)
         sender.sendMessage("Set ${target.name}'s balance to $formatted.".blue())
@@ -97,7 +103,7 @@ class CurrencyCommand : BaseCommand() {
     @Subcommand("get")
     @CommandCompletion("@players")
     @Syntax("<player>")
-    @CommandPermission(Perm.CURRENCY_ADMIN)
+    @CommandPermission(Perm.CURRENCY_GET_OTHERS)
     fun onGet(sender: CommandSender, target: OfflinePlayer) {
         if (!target.hasPlayedBefore()) {
             sender.userJoinFail()
@@ -118,7 +124,7 @@ class CurrencyCommand : BaseCommand() {
 
     @Subcommand("add")
     @CommandCompletion("@players")
-    @Syntax("<player> <amount>")
+    @Syntax("<player> <amount> <reason>")
     @CommandPermission(Perm.CURRENCY_ADMIN)
     fun onAdd(sender: CommandSender, target: OfflinePlayer, amount: Double, reason: String) {
         if (!target.hasPlayedBefore()) {
@@ -132,6 +138,11 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
         val formatted = CurrencySystemService.format(amount)
 
         service.addBalance(sender, user, amount, reason)
@@ -139,10 +150,10 @@ class CurrencyCommand : BaseCommand() {
     }
 
     @Subcommand("topbought")
-    @CommandCompletion("true")
-    @CommandPermission(Perm.CURRENCY_TOP)
-    fun onTopBought(sender: CommandSender, @Optional lastMonth: Boolean?) {
-        val lastMonthOnly = lastMonth ?: false
+    @CommandCompletion("monthly")
+    @CommandPermission(Perm.CURRENCY_BOUGHT)
+    fun onTopBought(sender: CommandSender, @Optional period: String?) {
+        val lastMonthOnly = period?.equals("monthly", ignoreCase = true) == true
         val topLimit = 10
 
         val topList = CurrencySystemService.topBoughtPackages(lastMonthOnly, topLimit)
@@ -161,10 +172,10 @@ class CurrencyCommand : BaseCommand() {
     }
 
     @Subcommand("topspent")
-    @CommandCompletion("true")
-    @CommandPermission(Perm.CURRENCY_TOP)
-    fun onTopSpent(sender: CommandSender, @Optional lastMonth: Boolean?) {
-        val lastMonthOnly = lastMonth ?: false
+    @CommandCompletion("monthly")
+    @CommandPermission(Perm.CURRENCY_SPENT)
+    fun onTopSpent(sender: CommandSender, @Optional period: String?) {
+        val lastMonthOnly = period?.equals("monthly", ignoreCase = true) == true
         val topLimit = 10
 
         CurrencySystemService.topSpenders(lastMonthOnly, topLimit).thenAccept { topList ->
@@ -183,6 +194,7 @@ class CurrencyCommand : BaseCommand() {
             }
         }
     }
+
 
 
     @Subcommand("logs|transactions")
@@ -238,7 +250,7 @@ class CurrencyCommand : BaseCommand() {
 
     @Subcommand("remove")
     @CommandCompletion("@players")
-    @Syntax("<player> <amount>")
+    @Syntax("<player> <amount> <reason>")
     @CommandPermission(Perm.CURRENCY_ADMIN)
     fun onRemove(sender: CommandSender, target: OfflinePlayer, amount: Double, reason: String) {
         if (!target.hasPlayedBefore()) {
@@ -252,7 +264,17 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
+        if(amount < 0){
+            sender.sendMessage("Amount must be above 0!".red())
+            return
+        }
+
         val formatted = CurrencySystemService.format(amount)
+
+        if(user.credits < amount){
+            sender.sendMessage("That user does not have $formatted".red())
+            return
+        }
 
         service.removeBalance(sender, user, amount, reason)
         sender.sendMessage("Removed $formatted".blue() + " from ${target.name}.".blue())

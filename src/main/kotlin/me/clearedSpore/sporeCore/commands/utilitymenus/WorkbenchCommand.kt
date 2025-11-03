@@ -18,7 +18,7 @@ class WorkbenchCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onWorkbench(player: Player, @Optional targetName: String){
+    fun onWorkbench(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openWorkbench(player.location, true)
             return

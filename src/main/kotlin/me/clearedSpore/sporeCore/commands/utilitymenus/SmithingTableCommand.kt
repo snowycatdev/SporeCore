@@ -18,7 +18,7 @@ class SmithingTableCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onSmithing(player: Player, @Optional targetName: String){
+    fun onSmithing(player: Player, @Optional targetName: String?){
         if (targetName == null) {
             player.openSmithingTable(player.location, true)
             return

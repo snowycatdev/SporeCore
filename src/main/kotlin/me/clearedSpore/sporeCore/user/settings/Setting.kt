@@ -80,13 +80,13 @@ enum class Setting(
         key = "currency-logs",
         defaultValue = true,
         displayName = "Currency Logs",
-        item = Material.HOPPER,
+        item = Material.GOLD_INGOT,
         lore = listOf(
             "If you can see the custom currency logs."
         ),
         permission = Perm.CURRENCY_NOTIFY,
         configKey = "currency.enabled"
-    )
+    ),
 
     ;
 }
