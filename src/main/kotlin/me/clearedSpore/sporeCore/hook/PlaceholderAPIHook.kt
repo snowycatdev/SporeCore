@@ -15,7 +15,7 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
 
     override fun getIdentifier(): String = "sporecore"
     override fun getAuthor(): String = "ClearedSpore"
-    override fun getVersion(): String = "1.0"
+    override fun getVersion(): String = "2.0"
     override fun persist() = true
 
     override fun onPlaceholderRequest(player: Player, params: String): String? {
