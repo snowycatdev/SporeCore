@@ -2,7 +2,9 @@ package me.clearedSpore.sporeCore
 
 import de.exlll.configlib.Comment
 import de.exlll.configlib.Configuration
+import it.unimi.dsi.fastutil.booleans.BooleanList
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
+import java.awt.Color
 
 
 @Configuration
@@ -18,11 +20,15 @@ data class CoreConfig(
     )
     var features: FeaturesConfig = FeaturesConfig(),
 
+    var broadcastConfig: BroadcastConfig = BroadcastConfig(),
+
     var economy: EconomyConfig = EconomyConfig(),
 
     var kits: KitsConfig = KitsConfig(),
 
-    var join: JoinConfig = JoinConfig()
+    var join: JoinConfig = JoinConfig(),
+
+    var chat: ChatConfig = ChatConfig()
 )
 
 @Configuration
@@ -76,7 +82,118 @@ data class JoinConfig(
     )
     var gamemode: String = "SURVIVAL"
 
+)
 
+@Configuration
+data class ChatConfig(
+
+    var chatColor: ChatColorConfig = ChatColorConfig(),
+
+    @Comment(
+        "You can enable or disable custom chat formatting using the 'enabled' flag.",
+        "The 'format' string supports placeholders for player info and prefixes/suffixes.",
+        "Supported placeholders:",
+        "  %rankprefix% → Vault rank prefix of the player",
+        "  %ranksuffix% → Vault rank suffix of the player",
+        "  %player_name% → Name of the player sending the message",
+        "  %message% → The actual chat message the player typed",
+        "",
+        "If PlaceholderAPI is installed, you can also use any PAPI placeholders here,",
+        "for example: %player_health%, %server_online%, etc.",
+        "",
+        "Example format:",
+        "  '%rankprefix% %player_name%: %message%'",
+        "  → Outputs: [Admin] Steve: Hello everyone!"
+    )
+    var formatting: ChatFormatterConfig = ChatFormatterConfig()
+)
+
+@Configuration
+data class ChatFormatterConfig(
+
+    var enabled: Boolean = true,
+
+    var format: String = "%rankprefix% %player_name% %ranksuffix%: %message%"
+)
+
+@Configuration
+data class ChatColorConfig(
+
+    var enabled: Boolean = true,
+
+    @Comment(
+        "Add new color codes players can equip in chat.",
+        "Each color code has its own permission.",
+        "For example, for 'red' it would be 'sporecore.chatcolor.red'.",
+        "",
+        "You can now also specify a MATERIAL for GUI menus,",
+        "so players can visually select their color.",
+        "Example material names: RED_WOOL, GREEN_CONCRETE, PINK_TERRACOTTA, etc.",
+        "",
+        "⚠️ Don't use special characters (-, spaces, etc.) in the color key — it breaks permissions!"
+    )
+    var colors: MutableMap<String, ColorConfig> = mutableMapOf(
+        "red" to ColorConfig("Red", "&c", "RED_WOOL"),
+        "green" to ColorConfig("Green", "&a", "LIME_WOOL"),
+        "blue" to ColorConfig("Blue", "&9", "BLUE_WOOL"),
+        "yellow" to ColorConfig("Yellow", "&e", "YELLOW_WOOL"),
+        "aqua" to ColorConfig("Aqua", "&b", "LIGHT_BLUE_WOOL"),
+        "purple" to ColorConfig("Purple", "&5", "PURPLE_WOOL"),
+        "gold" to ColorConfig("Gold", "&6", "ORANGE_WOOL"),
+        "pink" to ColorConfig("Pink", "&d", "PINK_WOOL"),
+        "gray" to ColorConfig("Gray", "&7", "LIGHT_GRAY_WOOL"),
+        "customblue" to ColorConfig("Custom Blue", "&#1D91FF", "CYAN_WOOL")
+    ),
+
+    @Comment(
+        "Default color code from one of the codes above."
+    )
+    var defaultColor: String = "gray"
+)
+
+@Configuration
+data class ColorConfig(
+    var name: String = "Default",
+    var color: String = "&7",
+    var material: String = "LIGHT_GRAY_WOOL"
+)
+
+@Configuration
+data class BroadcastConfig(
+    @Comment(
+        "Prefix for the /broadcast command messages.",
+        "You can use colors in the prefix with:",
+        "  MiniMessage tags: <red>, <blue>, <bold>, etc.",
+        "  Legacy codes: &c, &e, &l, etc.",
+        "  Hex/RGB colors: &#RRGGBB (example: &#9C68D9)",
+        "Example: '&7[&cBroadcast&7] &f'"
+    )
+    var broadcastPrefix: String = "&7[&cBroadcast&7] &f",
+
+    @Comment(
+        "Predefined broadcasts are messages that can be sent quickly.",
+        "Each message can have placeholders {0}, {1}, etc., which are replaced",
+        "by the arguments you provide in the command. Use quotes to provide arguments.",
+        "",
+        "Usage Examples:",
+        "  /broadcast event \"CrystalPVP\" \"5 minutes\"",
+        "    -> Broadcasts: {prefix} Event CrystalPVP is starting in 5 minutes!",
+        "",
+        "  /broadcast restart \"10\"",
+        "    -> Broadcasts: {prefix}  Server restarting in 10 minutes!",
+        "",
+        "You can also send custom messages without using a predefined key:",
+        "  /broadcast Hello everyone!",
+        "",
+        "Tips:",
+        "  - Always enclose multi-word arguments in double quotes (\")",
+        "  - Placeholders in the message template are zero-indexed: {0}, {1}, {2}, etc.",
+        "  - Add as many placeholders as needed, but make sure to provide the same number of arguments."
+    )
+    var predefinedBroadcasts: MutableMap<String, String> = mutableMapOf(
+        "event" to "&aEvent {0} is starting in {1}!",
+        "restart" to "&cServer restarting in {0} minutes!"
+    )
 )
 
 @Configuration
@@ -107,7 +224,7 @@ data class GeneralConfig(
         "need to wait a few seconds before being teleported. With this value you can set",
         "how long a player has to wait before being teleported."
     )
-    var teleportTime: Int = 5
+    var teleportTime: Int = 5,
 )
 
 @Configuration
@@ -227,6 +344,8 @@ data class FeaturesConfig(
     var kits: Boolean = true,
 
     var stats: Boolean = true,
+
+    var chatColor: Boolean = true,
 
     @Comment(
         "The currency feature is a separate currency that you",
