@@ -77,12 +77,17 @@ object Perm {
     const val BROADCAST = MAIN + "broadcast"
     const val TRASH = MAIN + "trash"
     const val TRASH_OTHERS = MAIN + "trash.others"
+    const val ITEM_EDITOR = MAIN + "itemeditor"
+    const val GIVE = MAIN + "give"
+    const val UPDATECHEKER = MAIN + "updatechecker"
+    const val SUDO = MAIN + "sudo"
 
     //warps
     const val WARP = MAIN + "warp."
     const val WARP_CREATE = WARP + "create"
     const val WARP_DELETE = WARP + "delete"
     const val WARP_PERMISSION = WARP + "permission"
+
 
     //home
     const val HOME = MAIN + "home"

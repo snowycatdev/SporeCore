@@ -1,6 +1,7 @@
 package me.clearedSpore.sporeCore
 
 import co.aikar.commands.BaseCommand
+import co.aikar.commands.InvalidCommandArgument
 import co.aikar.commands.Locales
 import co.aikar.commands.MessageKeys
 import co.aikar.commands.PaperCommandManager
@@ -16,6 +17,7 @@ import me.clearedSpore.sporeAPI.util.Message
 import me.clearedSpore.sporeAPI.util.Task
 import me.clearedSpore.sporeCore.acf.ConfirmCondition
 import me.clearedSpore.sporeCore.acf.CooldownCondition
+import me.clearedSpore.sporeCore.acf.ItemCompletions.registerItemCompletions
 import me.clearedSpore.sporeCore.commands.*
 import me.clearedSpore.sporeCore.commands.currency.CurrencyCommand
 import me.clearedSpore.sporeCore.commands.currency.CurrencyShopCommand
@@ -50,14 +52,16 @@ import me.clearedSpore.sporeCore.listener.LoggerEvent
 import me.clearedSpore.sporeCore.user.UserListener
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
+import me.clearedSpore.sporeCore.util.UpdateChecker
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.attribute.Attribute
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.plugin.RegisteredServiceProvider
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -78,6 +82,7 @@ class SporeCore : JavaPlugin() {
     lateinit var warpService: WarpService
     lateinit var homeService: HomeService
     lateinit var kitService: KitService
+    lateinit var updateChecker: UpdateChecker
 
     var chat: Chat? = null
     var perms: Permission? = null
@@ -103,6 +108,8 @@ class SporeCore : JavaPlugin() {
         Perm.registerAll()
         chatInput = ChatInput(this)
 
+
+        updateChecker = UpdateChecker()
 
         if(coreConfig.features.currency.enabled){
             CurrencySystemService.initialize()
@@ -330,6 +337,9 @@ class SporeCore : JavaPlugin() {
         registerCommand(RebootCommand())
         registerCommand(BroadcastCommand())
         registerCommand(TrashCommand())
+        registerCommand(EditItemCommand())
+        registerCommand(ItemCommand())
+        registerCommand(SudoCommand())
 
         if(coreConfig.chat.chatColor.enabled){
             registerCommand(ChatColorCommand())
@@ -344,7 +354,6 @@ class SporeCore : JavaPlugin() {
                 commandManager.commandReplacements.addReplacement("currencyalias", alias)
                 registerCommand(CurrencyCommand())
             }
-
             val shopAliases = CurrencySystemService.config.currencySettings.shopCommand
 
             if (shopAliases.isNotEmpty()) {
@@ -384,6 +393,29 @@ class SporeCore : JavaPlugin() {
 
         ConfirmCondition.register(commandManager)
         CooldownCondition.register(commandManager)
+
+        commandManager.commandContexts.registerContext(Enchantment::class.java) { c ->
+            val input = c.popFirstArg().lowercase()
+            val enchant = Enchantment.values().firstOrNull {
+                it.key.key.equals(input, true) || it.name.equals(input, true)
+            }
+
+            if (enchant == null) {
+                throw InvalidCommandArgument("Invalid enchantment: $input")
+            }
+
+            enchant
+        }
+
+        commandManager.commandContexts.registerContext(Attribute::class.java) { context ->
+            val arg = context.popFirstArg()
+            try {
+                Attribute.valueOf(arg.uppercase())
+            } catch (ex: IllegalArgumentException) {
+                throw IllegalArgumentException("Attribute '$arg' does not exist!")
+            }
+        }
+
     }
 
 
@@ -472,14 +504,9 @@ class SporeCore : JavaPlugin() {
         }
 
         commandManager.commandCompletions.registerCompletion("materials") { context ->
-            val input = context.input?.trim()?.uppercase() ?: ""
-
             Material.entries
-                .asSequence()
                 .filter { !it.isLegacy }
                 .map { it.name }
-                .filter { it!!.startsWith(input.lowercase()) }
-                .take(50)
                 .toList()
         }
 
@@ -491,5 +518,28 @@ class SporeCore : JavaPlugin() {
             coreConfig.chat.chatColor.colors.keys.toList()
         }
 
+        commandManager.commandCompletions.registerCompletion("enchantsWithLevels") { ctx ->
+            val input = ctx.input
+            val available = Enchantment.values().map { it.key.key.lowercase() }
+
+
+            if (input.contains("|")) {
+                val parts = input.split("|")
+                val enchName = parts[0].lowercase()
+                val ench = Enchantment.getByName(enchName.uppercase())
+                if (ench != null) {
+                    val max = ench.maxLevel.coerceAtLeast(1)
+                    return@registerCompletion (1..max).map { "$enchName|$it" }
+                }
+                return@registerCompletion emptyList<String>()
+            }
+
+
+            available.filter { it.startsWith(input.lowercase()) }
+        }
+
+
+
+        commandManager.registerItemCompletions()
     }
 }
