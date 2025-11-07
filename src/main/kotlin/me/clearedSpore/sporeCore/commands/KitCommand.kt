@@ -54,6 +54,7 @@ class KitCommand : BaseCommand() {
     @Subcommand("givekit")
     @CommandCompletion("@kits @players|*")
     @Syntax("<kit> [player|*]")
+    @CommandPermission(Perm.KIT_ADMIN)
     fun onGiveKit(player: Player, kitName: String, @Optional targetName: String?) {
         val kits = kitService.getAllKits()
         val kit = kits.find { it.name.equals(kitName, ignoreCase = true) }
