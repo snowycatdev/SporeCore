@@ -144,6 +144,24 @@ class CoreCommand : BaseCommand() {
         }
     }
 
+    @Subcommand("checkupdate")
+    @CommandPermission(Perm.UPDATECHEKER)
+    fun onCheck(sender: CommandSender){
+        val plugin = SporeCore.instance
+        val checker = plugin.updateChecker
+        checker.checkForUpdates()
+
+
+        if(checker.updateAvailable){
+            sender.sendMessage("[SporeCore] &fA new update is available!".blue())
+            sender.sendMessage("[SporeCore] &fCurrent version: &e${plugin.description.version}".blue())
+            sender.sendMessage("[SporeCore] &fLatest version: &e${checker.latestVersion}".blue())
+            sender.sendMessage("[SporeCore] &fDownload at: &ehttps://www.spigotmc.org/resources/sporecore.121185/".blue())
+        } else {
+            sender.sendMessage("[SporeCore] Plugin is up to date!".blue())
+        }
+    }
+
     @Subcommand("version")
     fun onVersion(sender: CommandSender) {
         val desc = SporeCore.instance.description
