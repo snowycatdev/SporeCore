@@ -11,8 +11,8 @@ import co.aikar.commands.annotation.Syntax
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeCore.currency.CurrencySystemService
-import me.clearedSpore.sporeCore.currency.menu.main.CurrencyMainMenu
+import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
+import me.clearedSpore.sporeCore.features.currency.menu.main.CurrencyMainMenu
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.user.UserManager
