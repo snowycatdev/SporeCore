@@ -2,16 +2,9 @@ package me.clearedSpore.sporeCore.menu.chatcolor.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeCore.currency.CurrencySystemService
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.features.chat.ChatColorService
-import me.clearedSpore.sporeCore.features.chat.ChatService
-import me.clearedSpore.sporeCore.features.chat.`object`.ChatColor
 import me.clearedSpore.sporeCore.features.chat.`object`.ChatFormat
-import me.clearedSpore.sporeCore.menu.util.NoUserItem
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.Sound

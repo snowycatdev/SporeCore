@@ -1,6 +1,6 @@
 package me.clearedSpore.sporeCore.database
 
-import me.clearedSpore.sporeCore.currency.`object`.PackagePurchase
+import me.clearedSpore.sporeCore.features.currency.`object`.PackagePurchase
 import me.clearedSpore.sporeCore.database.util.DocReader
 import me.clearedSpore.sporeCore.database.util.DocWriter
 import me.clearedSpore.sporeCore.features.kit.`object`.Kit
