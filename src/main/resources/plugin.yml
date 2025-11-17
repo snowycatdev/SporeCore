@@ -1,9 +1,9 @@
 name: SporeCore
-version: '2.2'
+version: '2.3'
 main: me.clearedSpore.sporeCore.SporeCore
 api-version: '1.17'
 authors: [ ClearedSpore ]
-load: STARTUP
+# load: STARTUP
 softdepend:
   - Vault
   - PlaceholderAPI

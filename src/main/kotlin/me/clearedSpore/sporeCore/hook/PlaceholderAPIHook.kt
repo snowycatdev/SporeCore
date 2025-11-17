@@ -2,12 +2,11 @@ package me.clearedSpore.sporeCore.hook
 
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.currency.CurrencySystemService
+import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
-import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 
 
