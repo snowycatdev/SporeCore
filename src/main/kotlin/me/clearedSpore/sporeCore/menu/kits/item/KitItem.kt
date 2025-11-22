@@ -55,7 +55,7 @@ class KitItem(
                 kitService.giveKit(player, kit.name)
             }
             clickType.isRightClick -> {
-                KitPreviewMenu(kit).open(player)
+                KitPreviewMenu(kit, player).open(player)
             }
         }
     }

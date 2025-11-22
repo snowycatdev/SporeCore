@@ -5,13 +5,16 @@ import me.clearedSpore.sporeAPI.menu.Menu
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.kit.`object`.Kit
+import me.clearedSpore.sporeCore.menu.kits.KitsMenu
+import me.clearedSpore.sporeCore.menu.util.BackItem
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 
 class KitPreviewMenu(
-    private val kit: Kit
+    private val kit: Kit,
+    private val player: Player
 ) : Menu(SporeCore.instance) {
 
     override fun fillEmptySlots() = true
@@ -39,6 +42,10 @@ class KitPreviewMenu(
 
         val offhandItem = kit.offHand ?: ItemStack(Material.AIR)
         setMenuItem(6, 5, SimpleItem(offhandItem))
+
+        setMenuItem(5, 6, BackItem({ unit ->
+            KitsMenu(player).open(player)
+        }))
     }
 
     private class SimpleItem(private val stack: ItemStack) : Item() {
