@@ -5,9 +5,9 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeCore.features.chat.ChatColorService
+import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.ChatService
-import me.clearedSpore.sporeCore.features.chat.`object`.ChatColor
+import me.clearedSpore.sporeCore.features.chat.color.`object`.ChatColor
 import me.clearedSpore.sporeCore.menu.util.NoUserItem
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material

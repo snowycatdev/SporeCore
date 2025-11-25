@@ -22,8 +22,6 @@ object RebootService {
             return
         }
 
-        cancelReboot()
-
         rebootEndTime = System.currentTimeMillis() + durationMs
         cancelled = false
 

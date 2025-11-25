@@ -2,7 +2,7 @@ package me.clearedSpore.sporeCore.menu.chatcolor
 
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.features.chat.`object`.ChatColor
+import me.clearedSpore.sporeCore.features.chat.color.`object`.ChatColor
 import me.clearedSpore.sporeCore.menu.chatcolor.item.ColorItem
 import me.clearedSpore.sporeCore.menu.chatcolor.item.ResetItem
 import me.clearedSpore.sporeCore.menu.chatcolor.item.SpecialColorItem

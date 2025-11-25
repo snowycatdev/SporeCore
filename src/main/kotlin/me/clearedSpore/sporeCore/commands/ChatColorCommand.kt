@@ -10,7 +10,7 @@ import co.aikar.commands.annotation.Syntax
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
-import me.clearedSpore.sporeCore.features.chat.ChatColorService
+import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.menu.chatcolor.ChatColorMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm

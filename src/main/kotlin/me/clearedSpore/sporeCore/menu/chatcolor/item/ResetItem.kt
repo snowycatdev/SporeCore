@@ -3,7 +3,7 @@ package me.clearedSpore.sporeCore.menu.chatcolor.item
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
-import me.clearedSpore.sporeCore.features.chat.ChatColorService
+import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.`object`.ChatFormat
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material

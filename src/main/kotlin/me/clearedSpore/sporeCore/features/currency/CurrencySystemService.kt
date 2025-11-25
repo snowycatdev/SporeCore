@@ -304,7 +304,7 @@ object CurrencySystemService {
 
     private fun formatCompact(amount: Double, settings: CurrencySettingConfig): String {
         val absAmount = abs(amount)
-        val suffixes = listOf("", "k", "m", "b", "t", "q")
+        val suffixes = listOf("", "k", "m", "b", "t", "q", "b")
         val suffixIndex = if (absAmount == 0.0) 0 else floor(log10(absAmount) / 3)
             .toInt()
             .coerceAtMost(suffixes.lastIndex)

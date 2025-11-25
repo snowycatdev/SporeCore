@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.features.chat.`object`
 import me.clearedSpore.sporeCore.database.util.DocReader
 import org.dizitart.no2.collection.Document
 
-
 data class ChatFormat(
     var bold: Boolean = false,
     var italic: Boolean = false,
