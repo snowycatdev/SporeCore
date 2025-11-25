@@ -1,4 +1,4 @@
-package me.clearedSpore.sporeCore.features.chat.`object`
+package me.clearedSpore.sporeCore.features.chat.color.`object`
 
 import me.clearedSpore.sporeCore.database.util.DocReader
 import org.dizitart.no2.collection.Document
