@@ -30,24 +30,18 @@ class UnMuteCommand : BaseCommand() {
     @Syntax("<player> <reason>")
     fun onUnmute(sender: CommandSender, targetName: String, reason: String) {
         val target = Bukkit.getOfflinePlayer(targetName)
-        val targetUser = UserManager.get(target)
-
-        if (targetUser == null) {
+        val targetUser = UserManager.get(target) ?: run {
             sender.userJoinFail()
             return
         }
 
-        val senderUser: User? = when (sender) {
-            is Player -> UserManager.get(sender)?.also {
-                if (it == null) sender.userFail()
-            }
+        val senderUser: User = when (sender) {
+            is Player -> UserManager.get(sender) ?: run { sender.userFail(); return }
             is ConsoleCommandSender -> UserManager.getConsoleUser()
-            else -> null
-        }
-
-        if (senderUser == null) {
-            sender.sendMessage("Unable to resolve sender user.".red())
-            return
+            else -> run {
+                sender.sendMessage("Unable to resolve sender user.".red())
+                return
+            }
         }
 
         val activePunishment = targetUser.getActivePunishment(PunishmentType.MUTE)
@@ -58,11 +52,17 @@ class UnMuteCommand : BaseCommand() {
             return
         }
 
-        val updatedPunishment = targetUser.unmute(senderUser, reason)
+        val success = targetUser.unmute(senderUser, activePunishment.id, reason)
 
-        if (updatedPunishment != null) {
+        if (success) {
             val msg = PunishmentService.config.logs.unMute
-            val formatted = PunishmentService.buildRemovalMessage(msg, updatedPunishment, targetUser, senderUser)
+            val formatted = PunishmentService.buildRemovalMessage(
+                msg,
+                activePunishment,
+                targetUser,
+                senderUser,
+                reason
+            )
             Message.broadcastMessageWithPermission(formatted, Perm.PUNISH_LOG)
             sender.sendMessage("Successfully unmuted ${target.name}.".blue())
         } else {

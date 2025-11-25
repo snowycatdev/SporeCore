@@ -21,41 +21,45 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
         val user = UserManager.get(player) ?: return null
 
         val args = params.lowercase().split("_")
+        val config = SporeCore.instance.coreConfig
+        val features = config.features
 
         return when {
-            // %sporecore_balance_raw%
-            params.equals("balance_raw", ignoreCase = true) -> user.balance.toString()
+            params.equals("balance_raw", ignoreCase = true) -> {
+                if (!config.economy.enabled) return null
+                user.balance.toString()
+            }
 
-            // %sporecore_balance_formatted%
-            params.equals("balance_formatted", ignoreCase = true) ->
+            params.equals("balance_formatted", ignoreCase = true) -> {
+                if (!config.economy.enabled) return null
                 EconomyService.format(user.balance, BalanceFormat.COMPACT).toString()
+            }
 
-            // %sporecore_balance_decimal%
-            params.equals("balance_decimal", ignoreCase = true) ->
+            params.equals("balance_decimal", ignoreCase = true) -> {
+                if (!config.economy.enabled) return null
                 EconomyService.format(user.balance, BalanceFormat.DECIMAL).toString()
+            }
 
-            // %sporecore_homes%
-            params.equals("homes", ignoreCase = true) ->
+            params.equals("homes", ignoreCase = true) -> {
+                if (!features.homes) return null
                 SporeCore.instance.homeService.getAllHomes(user).size.toString()
+            }
 
-            // %sporecore_kit_timeleft_<kitName>%
             args.size >= 3 && args[0] == "kit" && args[1] == "timeleft" -> {
+                if (!features.kits) return null
                 val kitName = args.drop(2).joinToString("_")
                 val remaining = user.getKitCooldownRemaining(kitName)
                 if (remaining <= 0) "Ready" else TimeUtil.formatDuration(remaining)
             }
 
-            //%sporecore_<currencyName>_balance_<format>%
             args.size >= 2 && args[1].equals("balance", ignoreCase = true) -> {
+                if (!features.currency.enabled) return null
                 val currencyToken = args[0].lowercase()
-
                 val settings = CurrencySystemService.config.currencySettings
                 val matchesCurrency = currencyToken == settings.pluralName.lowercase()
                         || currencyToken == settings.singularName.lowercase()
-
-                if (!matchesCurrency) {
-                    null
-                } else {
+                if (!matchesCurrency) null
+                else {
                     val formatToken = args.getOrNull(2)?.lowercase()
                     val formatType = when (formatToken) {
                         "plain" -> BalanceFormat.PLAIN
@@ -66,7 +70,6 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
                         else -> runCatching { BalanceFormat.valueOf(settings.balanceFormat.uppercase()) }
                             .getOrDefault(BalanceFormat.PLAIN)
                     }
-
                     val balance = CurrencySystemService.getBalance(user)
                     CurrencySystemService.format(balance, formatType)
                 }
