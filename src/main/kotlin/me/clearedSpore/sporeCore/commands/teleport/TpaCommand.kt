@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.Default
+import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import org.bukkit.Bukkit
@@ -14,15 +15,7 @@ class TpaCommand : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onTpa(sender: Player, targetName: String) {
-        val target = Bukkit.getPlayer(targetName)
-
-        if (target == null) {
-            sender.sendErrorMessage("That player is not online!")
-            return
-        }
-
-
-        TeleportRequestService.sendRequest(sender, target, TeleportRequestService.RequestType.TPA)
+    fun onTpa(sender: Player, target: OnlinePlayer) {
+        TeleportRequestService.sendRequest(sender, target.player, TeleportRequestService.RequestType.TPA)
     }
 }

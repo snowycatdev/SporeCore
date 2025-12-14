@@ -8,7 +8,7 @@ import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.menu.util.confirm.TPAConfirmMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.user.settings.Setting
-import me.clearedSpore.sporeCore.util.PlayerUtil.actionBar
+import me.clearedSpore.sporeCore.util.ActionBar.actionBar
 import me.clearedSpore.sporeCore.util.TeleportService.awaitTeleport
 import org.bukkit.entity.Player
 
@@ -56,12 +56,12 @@ object TeleportRequestService {
         pendingRequests[target] = request
 
         val executeRequest = {
-            requester.actionBar("Teleport request sent to ${target.name}.")
+            requester.actionBar("tpa", "Teleport request sent to ${target.name}.")
             when (type) {
                 RequestType.TPA -> {
                     if (targetUser.isSettingEnabled(Setting.AUTO_TELEPORT)) {
                         accept(target)
-                        target.actionBar("Accepted ${requester.name}'s request (Auto-TP)")
+                        target.actionBar("tpa", "Accepted ${requester.name}'s request (Auto-TP)")
                         pendingRequests.remove(target)
                     } else {
                         target.sendSuccessMessage("${requester.name} wants to teleport to you. Use /tpaaccept or /tpadeny.")
@@ -101,14 +101,14 @@ object TeleportRequestService {
             when (request.type) {
                 RequestType.TPA -> {
                     request.requester.awaitTeleport(target.location)
-                    request.requester.actionBar("${target.name} accepted your teleport request.")
-                    target.actionBar("Accepted ${request.requester.name}'s teleport request.")
+                    request.requester.actionBar("tpa", "${target.name} accepted your teleport request.")
+                    target.actionBar("tpa", "Accepted ${request.requester.name}'s teleport request.")
                 }
 
                 RequestType.TPAHERE -> {
                     target.awaitTeleport(request.requester.location)
-                    target.actionBar("Accepted ${request.requester.name}'s teleport request.")
-                    request.requester.actionBar("${target.name} accepted your teleport request.")
+                    target.actionBar("tpa", "Accepted ${request.requester.name}'s teleport request.")
+                    request.requester.actionBar("tpa", "${target.name} accepted your teleport request.")
                 }
             }
         }

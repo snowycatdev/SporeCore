@@ -4,8 +4,11 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
+import okhttp3.Call
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
+import org.eclipse.sisu.inject.Sources
 import kotlin.math.roundToLong
 
 
@@ -51,7 +54,7 @@ object RebootService {
             if (remaining <= countdownSeconds.max()!! * 1000) {
                 val secondsLeft = (remaining / 1000.0).roundToLong().toInt()
                 if (secondsLeft in countdownSeconds) {
-                    sendRebootMessage(remaining)
+                    sendRebootMessage(remaining, true)
                 }
             }
 
@@ -72,13 +75,18 @@ object RebootService {
         Bukkit.broadcastMessage("")
     }
 
-    private fun sendRebootMessage(timeLeft: Long) {
+    private fun sendRebootMessage(timeLeft: Long, isCountdown: Boolean = false) {
         val formatted = TimeUtil.formatDuration(timeLeft)
         val title = "§lReboot!!".red()
         val subtitle = "Rebooting in §f$formatted".blue()
 
         Bukkit.getOnlinePlayers().forEach {
-            it.sendTitle(title, subtitle, 10, 20, 10)
+            if(isCountdown) {
+                it.sendTitle(title, subtitle, 0, 40, 0)
+            } else {
+                it.sendTitle(title, subtitle, 10, 20, 10)
+            }
+            it.playSound(it, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f)
         }
 
         Bukkit.broadcastMessage("")
