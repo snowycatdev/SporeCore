@@ -1,5 +1,6 @@
 package me.clearedSpore.sporeCore.listener
 
+import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message
@@ -9,8 +10,10 @@ import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.`object`.ChatFormat
+import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
+import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.util.Perm
@@ -106,6 +109,15 @@ class ChatListener : Listener {
             }
         }
 
+        if(ModeService.isInMode(player)){
+            val mode = ModeService.getPlayerMode(player)!!
+            if(!mode.chat){
+                event.isCancelled = true
+                player.sendMessage("You can't talk while in ${mode.name} mode!".red())
+                return
+            }
+        }
+
 
         val toRemove = event.recipients.filter { recipient ->
             val recipientUser = UserManager.get(recipient)
@@ -146,9 +158,14 @@ class ChatListener : Listener {
         message = "$appliedColor$chatFormat$message".translate()
 
         val prefix = chatService?.getPlayerPrefix(player)?.translate() ?: ""
-        val suffix = chatService?.getPlayerSuffix(player)?.translate() ?: ""
+        var suffix = chatService?.getPlayerSuffix(player)?.translate() ?: ""
 
         val chatFormatConfig = config.chat.formatting
+
+        if (VanishService.isVanished(senderUser.uuid) && chatFormatConfig.hideVanishSuffix) {
+            suffix = ""
+        }
+
         val formattedMessage = if (chatFormatConfig.enabled) {
             var format = chatFormatConfig.format
                 .replace("%rankprefix%", prefix)

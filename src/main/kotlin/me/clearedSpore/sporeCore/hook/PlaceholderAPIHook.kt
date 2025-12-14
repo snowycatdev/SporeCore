@@ -1,10 +1,12 @@
 package me.clearedSpore.sporeCore.hook
 
+import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
+import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
@@ -73,6 +75,21 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
                     val balance = CurrencySystemService.getBalance(user)
                     CurrencySystemService.format(balance, formatType)
                 }
+            }
+
+            params.equals("vanish_tag", ignoreCase = true) -> {
+                if (!features.vanish) return null
+                if (VanishService.isVanished(user.uuid)){
+                    val text = config.general.vanishTag
+                    return text.translate()
+                } else {
+                    return ""
+                }
+            }
+
+            params.equals("is_vanished", ignoreCase = true) -> {
+                if (!features.vanish) return null
+                return VanishService.isVanished(user.uuid).toString()
             }
 
             else -> null

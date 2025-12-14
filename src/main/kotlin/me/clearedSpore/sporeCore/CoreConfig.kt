@@ -2,15 +2,33 @@ package me.clearedSpore.sporeCore
 
 import de.exlll.configlib.Comment
 import de.exlll.configlib.Configuration
-import it.unimi.dsi.fastutil.booleans.BooleanList
-import me.clearedSpore.sporeCore.features.chat.channel.`object`.Channel
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
-import java.awt.Color
 
 
 @Configuration
 data class CoreConfig(
 
+    @Comment(
+        "==========================================",
+        "  ____                        ____         ",
+        " / ___| _ __   ___  _ __ ___ / ___|___  _ __ ___ ",
+        " \\___ \\| '_ \\ / _ \\| '__/ _ \\ |   / _ \\| '__/ _ \\",
+        "  ___) | |_) | (_) | | |  __/ |__| (_) | | |  __/",
+        " |____/| .__/ \\___/|_|  \\___|\\____\\___/|_|  \\___|",
+        "       |_|                                      ",
+        "==========================================",
+        "SporeCore - Made by ClearedSpore",
+        "",
+        "SporeCore is a plugin that adds a lot of commands and features.",
+        "Most of the big features and commands can be disabled.",
+        "That is what makes SporeCore so great.",
+        "If you have any questions you can join my discord.",
+        "https://discord.gg/V2ZTgEr3M8",
+        "or you can look at the wiki",
+        "https://spore-plugins.gitbook.io/sporecore",
+        "You can run /sporecore wiki <page> ingame to find",
+        "other wiki pages!"
+    )
     var general: GeneralConfig = GeneralConfig(),
 
     @Comment(
@@ -21,6 +39,10 @@ data class CoreConfig(
     )
     var features: FeaturesConfig = FeaturesConfig(),
 
+    var discord: DiscordConfig = DiscordConfig(),
+
+    var inventories: InventoryConfig = InventoryConfig(),
+
     var broadcastConfig: BroadcastConfig = BroadcastConfig(),
 
     var economy: EconomyConfig = EconomyConfig(),
@@ -30,6 +52,85 @@ data class CoreConfig(
     var join: JoinConfig = JoinConfig(),
 
     var chat: ChatConfig = ChatConfig()
+)
+
+@Configuration
+data class DiscordConfig(
+
+    @Comment(
+        "If you want to enable the discord features",
+        "What does this do?",
+        "- Add account linking",
+        "- Channel message from and to discord",
+        "- Discord punishments",
+        "And much more!",
+        "Not all features require the bot. For example the staff rollback",
+        "ping only requires a webhook URL."
+    )
+    var enabled: Boolean = false,
+
+    @Comment(
+        "The token from your discord application",
+        "You MUST provide this otherwise the bot features",
+        "wont work."
+    )
+    var botToken: String = "",
+
+    @Comment(
+        "Rollback webhook URL",
+        "For the ping you can set it to nothing or a role ID within <&>.",
+        "Example: <@&1361382396603138098>",
+        "In my private server that would be @Everyone"
+    )
+    var staffRollback: String = "",
+    var staffRollbackPing: String = "@everyone",
+
+
+    @Comment(
+        "Punishment webhook URL",
+        "These are webhook messages that will be sent",
+        "when a staff member punishes someone.",
+        "You can enable the staff ping. This would",
+        "ping the punisher.",
+        "THIS REQUIRES THE BOT FEATURE TO BE ENABLED!!"
+    )
+    var punishment: String = "",
+    var pingStaff: Boolean = true,
+
+    @Comment(
+        "When a staff member rolls back someones inv",
+        "it will send a message to the webhook.",
+        "If you don't want a discord log for this",
+        "then keep the webhook clear,"
+    )
+    var rollback: String = "",
+    var rollbackPing: String = ""
+)
+
+@Configuration
+data class InventoryConfig(
+
+    @Comment(
+        "How long will an inventory be stored?"
+    )
+    var deletion: String = "7d",
+
+    @Comment(
+        "Should it delete the inventory data",
+        "When a staff member restores someone",
+        "their inventory?"
+    )
+    var deleteAfterRestore: Boolean = true,
+
+    var storeReasons: StoreReasonsConfig = StoreReasonsConfig()
+
+)
+
+@Configuration
+data class StoreReasonsConfig(
+    var death: Boolean = true,
+    var join: Boolean = true,
+    var leave: Boolean = true
 )
 
 @Configuration
@@ -116,7 +217,15 @@ data class ChatFormatterConfig(
 
     var enabled: Boolean = true,
 
-    var format: String = "%rankprefix% %player_name% %ranksuffix%: %message%"
+    var format: String = "%rankprefix% %player_name% %ranksuffix%: %message%",
+
+    @Comment(
+        "When a player is in vanish and you use Luckperms",
+        "for the vanish tag then it would display the tag",
+        "in chat. (only if you have the ranksuffix in your formatter)",
+        "This boolean makes it so that does not happen."
+    )
+    var hideVanishSuffix: Boolean = true
 )
 
 @Configuration
@@ -259,6 +368,24 @@ data class GeneralConfig(
         "how long a player has to wait before being teleported."
     )
     var teleportTime: Int = 5,
+
+    @Comment(
+        "Text for the vanish placeholder",
+        "%sporecore_vanish_tag%",
+        "This will return with an empty line if the",
+        "player is not vanished!"
+    )
+    var vanishTag: String = " &7[&bV&7]",
+
+    @Comment(
+        "Commands that can be run when a player",
+        "is frozen. This can be bypassed",
+        "with sporecore.bypass.freeze"
+    )
+    var freezeCommands: List<String> = listOf(
+        "/msg",
+        "/whisper"
+    )
 )
 
 @Configuration
@@ -382,6 +509,12 @@ data class FeaturesConfig(
     var punishments: Boolean = true,
 
     var channels: Boolean = true,
+
+    var vanish: Boolean = true,
+
+    var modes: Boolean = true,
+
+    var invRollback: Boolean = true,
 
     @Comment(
         "The currency feature is a separate currency that you",

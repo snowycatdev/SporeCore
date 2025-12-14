@@ -14,6 +14,8 @@ import me.clearedSpore.sporeCore.commands.*
 import me.clearedSpore.sporeCore.commands.channel.ChannelCommand
 import me.clearedSpore.sporeCore.commands.currency.CurrencyCommand
 import me.clearedSpore.sporeCore.commands.currency.CurrencyShopCommand
+import me.clearedSpore.sporeCore.commands.discord.LinkCommand
+import me.clearedSpore.sporeCore.commands.discord.UnLinkCommand
 import me.clearedSpore.sporeCore.commands.economy.BalTopCommand
 import me.clearedSpore.sporeCore.commands.economy.EcoLogsCommand
 import me.clearedSpore.sporeCore.commands.economy.EconomyCommand
@@ -22,33 +24,54 @@ import me.clearedSpore.sporeCore.commands.gamemode.*
 import me.clearedSpore.sporeCore.commands.home.CreateHomeCommand
 import me.clearedSpore.sporeCore.commands.home.DelHomeCommand
 import me.clearedSpore.sporeCore.commands.home.HomeCommand
+import me.clearedSpore.sporeCore.commands.inventory.InvRollbackCommand
+import me.clearedSpore.sporeCore.commands.inventory.InventoryManagerCommand
 import me.clearedSpore.sporeCore.commands.moderation.*
+import me.clearedSpore.sporeCore.commands.moderation.mode.CustomModeCommand
+import me.clearedSpore.sporeCore.commands.moderation.mode.ModeCommand
 import me.clearedSpore.sporeCore.commands.privatemessages.PrivateMessageCommand
 import me.clearedSpore.sporeCore.commands.privatemessages.ReplyCommand
 import me.clearedSpore.sporeCore.commands.spawn.SetSpawnCommand
 import me.clearedSpore.sporeCore.commands.spawn.SpawnCommand
 import me.clearedSpore.sporeCore.commands.teleport.*
+import me.clearedSpore.sporeCore.commands.util.UtilCommand
+import me.clearedSpore.sporeCore.commands.util.UtilInventoryCommand
+import me.clearedSpore.sporeCore.commands.util.UtilItemCommand
+import me.clearedSpore.sporeCore.commands.util.UtilPlayerCommand
+import me.clearedSpore.sporeCore.commands.util.UtilServerCommand
+import me.clearedSpore.sporeCore.commands.util.UtilWorldCommand
 import me.clearedSpore.sporeCore.commands.utilitymenus.*
 import me.clearedSpore.sporeCore.database.Database
 import me.clearedSpore.sporeCore.database.DatabaseManager
 import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
+import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.features.eco.VaultEco
 import me.clearedSpore.sporeCore.features.homes.HomeService
 import me.clearedSpore.sporeCore.features.kit.KitService
+import me.clearedSpore.sporeCore.features.mode.ModeService
+import me.clearedSpore.sporeCore.features.mode.listener.ModeListener
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 import me.clearedSpore.sporeCore.features.stats.PlaytimeTracker
+import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.features.warp.WarpService
 import me.clearedSpore.sporeCore.hook.PlaceholderAPIHook
+import me.clearedSpore.sporeCore.inventory.InventoryManager
 import me.clearedSpore.sporeCore.listener.ChatListener
 import me.clearedSpore.sporeCore.listener.DeathListener
+import me.clearedSpore.sporeCore.listener.FreezeListener
+import me.clearedSpore.sporeCore.listener.InventoryListener
 import me.clearedSpore.sporeCore.listener.LocationListener
 import me.clearedSpore.sporeCore.listener.LoggerEvent
+import me.clearedSpore.sporeCore.task.ActionBarTicker
+import me.clearedSpore.sporeCore.task.TpsTask
+import me.clearedSpore.sporeCore.task.VanishTask
 import me.clearedSpore.sporeCore.user.UserListener
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
+import me.clearedSpore.sporeCore.util.Tasks
 import me.clearedSpore.sporeCore.util.UpdateChecker
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
@@ -59,6 +82,7 @@ import org.bukkit.Material
 import org.bukkit.attribute.Attribute
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
@@ -80,11 +104,13 @@ class SporeCore : JavaPlugin() {
     lateinit var homeService: HomeService
     lateinit var kitService: KitService
     lateinit var updateChecker: UpdateChecker
+
     var chat: Chat? = null
     var perms: Permission? = null
     var eco: Economy? = null
 
     var totalCommands: Int = 0
+    var discordEnabled: Boolean = false
 
     override fun onEnable() {
         totalCommands = 0
@@ -117,22 +143,50 @@ class SporeCore : JavaPlugin() {
         database = DatabaseManager.getServerData()
         server.pluginManager.registerEvents(UserListener(), this)
 
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            PlaceholderAPIHook().register()
-            Logger.info("Successfully integrated with PlaceholderAPI")
+        InventoryManager.startCleanupTask()
+
+        Tasks.run {
+            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                PlaceholderAPIHook().register()
+                Logger.info("Successfully integrated with PlaceholderAPI")
+            }
         }
 
-        if (coreConfig.features.warps) {
+        ActionBarTicker.start()
+
+        val features = coreConfig.features
+
+        if(features.modes){
+            ModeService.initialize()
+
+            server.pluginManager.registerEvents(
+                ModeListener { player -> ModeService.getPlayerMode(player) },
+                this
+            )
+        }
+
+        if (features.warps) {
             warpService = WarpService()
         }
 
-        if (coreConfig.features.homes) {
+        if (features.homes) {
             homeService = HomeService()
         }
 
-        if (coreConfig.features.kits) {
+        if (features.kits) {
             kitService = KitService()
         }
+
+        if(coreConfig.discord.enabled){
+            loadDiscord()
+        }
+
+        if(features.vanish){
+            VanishTask.start()
+        }
+
+        TpsTask.start()
+
 
         setupPunishments()
 
@@ -147,6 +201,27 @@ class SporeCore : JavaPlugin() {
     }
 
     override fun onDisable() {
+        val features = coreConfig.features
+
+        if(features.modes){
+            ModeService.disableAll()
+        }
+
+        if(features.vanish) {
+            Logger.info("Unvanishing everyone....")
+            val vanished = VanishService.vanishedPlayers.size
+            VanishService.vanishedPlayers.forEach { uuid -> VanishService.unVanish(uuid) }
+            Logger.info("Unvanished $vanished players")
+
+            VanishTask.stop()
+        }
+
+        TpsTask.stop()
+
+
+        ActionBarTicker.stop()
+
+        InventoryManager.stopCleanupTask()
 
         PlaytimeTracker.stop()
         Logger.infoDB("Saving all user data before shutdown...")
@@ -176,6 +251,19 @@ class SporeCore : JavaPlugin() {
                 Logger.info("Registered Vault economy: ${coreConfig.economy.name}")
             }
         }
+    }
+
+    fun loadDiscord(){
+        try {
+            DiscordService.start()
+        } catch (e: Exception) {
+            Logger.error("Failed to startup discord bot!")
+            e.printStackTrace()
+        }
+
+        registerCommand(LinkCommand())
+        registerCommand(UnLinkCommand())
+        discordEnabled = true
     }
 
     fun setupChat() {
@@ -214,6 +302,11 @@ class SporeCore : JavaPlugin() {
         server.pluginManager.registerEvents(ChatListener(), this)
         server.pluginManager.registerEvents(DeathListener(), this)
         server.pluginManager.registerEvents(LocationListener(), this)
+        server.pluginManager.registerEvents(FreezeListener(), this)
+        server.pluginManager.registerEvents(TpsTask, this)
+        if(coreConfig.features.invRollback) {
+            server.pluginManager.registerEvents(InventoryListener(), this)
+        }
     }
 
     fun loadConfig(): CoreConfig {
@@ -240,8 +333,9 @@ class SporeCore : JavaPlugin() {
         if (::warpService.isInitialized) features.add("§aWarps")
         if (::homeService.isInitialized) features.add("§bHomes")
         if (coreConfig.economy.enabled) features.add("§eEconomy")
-        if (::kitService.isInitialized) features.add("§9Kits")
+        if (::kitService.isInitialized) features.add("§6Kits")
         if (PunishmentService.loaded) features.add("§cPunishments")
+        if (DiscordService.initialized) features.add("§9Discord")
         val featureLine = if (features.isNotEmpty()) features.joinToString(" §7| ") else "§7No features enabled"
 
         val banner = listOf(
@@ -371,10 +465,41 @@ class SporeCore : JavaPlugin() {
         registerCommand(PingCommand())
         registerCommand(WhoisCommand())
 
+        //util commands
+        commandManager.registerCommand(UtilCommand())
+        commandManager.registerCommand(UtilItemCommand())
+        commandManager.registerCommand(UtilPlayerCommand())
+        commandManager.registerCommand(UtilWorldCommand())
+        commandManager.registerCommand(UtilServerCommand())
+        commandManager.registerCommand(UtilInventoryCommand())
+
         if (coreConfig.chat.chatColor.enabled) {
             registerCommand(ChatColorCommand())
         }
 
+        if(features.vanish){
+            registerCommand(VanishCommand())
+        }
+
+        if(features.modes){
+            registerCommand(ModeCommand())
+            for (mode in ModeService.getModes()) {
+                val cmd = CustomModeCommand(mode)
+
+                val combinedAlias = mode.commands.joinToString("|")
+                commandManager.commandReplacements.addReplacement("modealias", combinedAlias)
+
+                registerCommand(cmd)
+            }
+        }
+
+        if(features.invRollback) {
+            registerCommand(InvRollbackCommand())
+        }
+
+        registerCommand(InventoryManagerCommand())
+        registerCommand(FreezeCommand())
+        registerCommand(TPSBarCommand())
 
         if (features.channels) {
             for (channel in ChatChannelService.getChannels()) {
@@ -386,7 +511,6 @@ class SporeCore : JavaPlugin() {
 
                 registerCommand(cmd)
                 Logger.info("Registered ${channel.id} channel")
-                totalCommands++
             }
         }
 
@@ -427,6 +551,10 @@ class SporeCore : JavaPlugin() {
 
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_HEADER, "$prefix &fAvailable Commands:")
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_FORMAT, "/{command} &7{parameters} &f- {description}".blue())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_PAGE_INFORMATION, "Page {page} out of {totalpages} pages".blue())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_NO_RESULTS, "No results were found!".red())
+        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_SEARCH_HEADER, "Results for &f{search}".blue())
+
 
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_DETAILED_HEADER, "$prefix &fCommand Help for &e/{command}")
         locales.addMessage(
@@ -434,6 +562,7 @@ class SporeCore : JavaPlugin() {
             MessageKeys.HELP_DETAILED_COMMAND_FORMAT,
             "Usage: &f/{command} {parameters}".blue()
         )
+
         locales.addMessage(
             Locales.ENGLISH,
             MessageKeys.HELP_DETAILED_PARAMETER_FORMAT,
@@ -467,6 +596,7 @@ class SporeCore : JavaPlugin() {
 
             enchant
         }
+
 
         commandManager.commandContexts.registerContext(Attribute::class.java) { context ->
             val arg = context.popFirstArg()
@@ -543,6 +673,10 @@ class SporeCore : JavaPlugin() {
                 "${formatted}b",
                 "${formatted}t"
             )
+        }
+
+        commandManager.commandCompletions.registerCompletion("worlds") { context ->
+            Bukkit.getWorlds().map { it.name }
         }
 
 
