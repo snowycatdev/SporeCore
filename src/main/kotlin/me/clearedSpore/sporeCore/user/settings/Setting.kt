@@ -103,7 +103,7 @@ enum class Setting(
         key = "punishment-logs",
         defaultValue = true,
         displayName = "Punishment logs",
-        item = Material.RED_WOOL,
+        item = Material.DISPENSER,
         lore = listOf(
             "If you can see punishment logs."
         ),
@@ -115,7 +115,7 @@ enum class Setting(
         key = "try-logs",
         defaultValue = true,
         displayName = "Try logs",
-        item = Material.BLUE_WOOL,
+        item = Material.BELL,
         lore = listOf(
             "If you want to receive a message when someone",
             "tries to join while being banned."
@@ -136,6 +136,19 @@ enum class Setting(
         permission = Perm.CHANNEL_ALLOW,
         configKey = "channels"
     ),
+
+    STAFFMODE_ON_JOIN(
+        key = "staffmode-on-join",
+        defaultValue = true,
+        displayName = "Staff mode on join",
+        item = Material.COMPASS,
+        lore = listOf(
+            "If you want to be put in staffmode",
+            "when you join the server"
+        ),
+        permission = Perm.MODE_ALLOW,
+        configKey = "modes"
+    )
 
     ;
 }

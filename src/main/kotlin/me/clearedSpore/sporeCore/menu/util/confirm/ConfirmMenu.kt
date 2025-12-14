@@ -23,7 +23,7 @@ class ConfirmMenu(
     override fun setMenuItems() {
         setMenuItem(7, 2, object : Item() {
             override fun createItem(): ItemStack {
-                val item = ItemStack(Material.GREEN_WOOL)
+                val item = ItemStack(Material.LIME_WOOL)
                 val meta = item.itemMeta
                 meta?.setDisplayName("Confirm".green())
                 item.itemMeta = meta

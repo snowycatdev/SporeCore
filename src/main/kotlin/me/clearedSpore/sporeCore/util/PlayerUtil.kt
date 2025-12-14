@@ -38,14 +38,4 @@ object PlayerUtil {
         val offline = Bukkit.getOfflinePlayer(playerName)
         return getPlayerHead(offline, displayName)
     }
-
-    fun Player.actionBar(message: String){
-        this.sendActionBar(message.blue())
-        this.playSound(this, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f)
-    }
-
-    fun Player.actionBarRed(message: String){
-        this.sendActionBar(message.red())
-        this.playSound(this, Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f)
-    }
 }

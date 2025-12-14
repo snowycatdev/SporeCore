@@ -10,10 +10,10 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class SettingsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.instance, true) {
+class SettingsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.instance, false) {
 
     override fun getMenuName(): String = "Player Settings"
-    override fun getRows(): Int = 6
+    override fun getRows(): Int = 4
 
     override fun createItems() {
         val user = UserManager.get(player)

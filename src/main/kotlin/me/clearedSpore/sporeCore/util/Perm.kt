@@ -16,6 +16,7 @@ object Perm {
     const val PM_BYPASS = BYPASS + "privatemessage"
     const val CHAT_BYPASS = BYPASS + "chat"
     const val CLEAR_CHAT_BYPASS = BYPASS + "clearchat"
+    const val FREEZE_BYPASS = BYPASS + "freeze"
 
     //chat
     const val CHAT = MAIN + "chat."
@@ -85,6 +86,7 @@ object Perm {
     const val PING = MAIN + "ping"
     const val PING_OTHERS = MAIN + "ping.others"
     const val WHOIS = MAIN + "whois"
+    const val TPSBAR = MAIN + "tpsbar"
 
     const val CHANNEL_ALLOW = "sporecore.channel.allow"
 
@@ -107,6 +109,7 @@ object Perm {
     const val HISTORY_OTHERS = "$PUNISHMENTS.history.others"
     const val ALTS = "$PUNISHMENTS.alts"
     const val ALTS_DEEP = "$PUNISHMENTS.alts.deep"
+    const val FREEZE = MAIN + "freeze"
 
     const val STAFF = "staff"
 
@@ -118,6 +121,33 @@ object Perm {
     const val WARP_DELETE = WARP + "delete"
     const val WARP_PERMISSION = WARP + "permission"
 
+    //discord
+    const val DISCORD = MAIN + "discord."
+    const val LINK = DISCORD + "link"
+
+    //Vanish & modes
+    const val VANISH = MAIN + "vanish"
+    const val VANISH_SEE = "$VANISH.see"
+    const val VANISH_OTHERS = "$VANISH.others"
+    const val MODE = MAIN + "mode."
+    const val MODE_ALLOW = MODE + "allow"
+    const val MODE_OTHERS = MODE + "others"
+
+    //Inventory
+    const val INVENTORY = MAIN + "inventory."
+    const val INV_ROLLBACK = INVENTORY + "rollback"
+    const val INV_DELETE = INVENTORY + "rollback.delete"
+    const val INV_TELEPORT = INVENTORY + "rollback.teleport"
+    const val INV_ADMIN = INVENTORY + "admin"
+
+    //util command
+    const val UTIL = MAIN + "util."
+    const val UTIL_COMMAND = MAIN + "util"
+    const val UTIL_ITEM = UTIL + "item"
+    const val UTIL_PLAYER = UTIL + "player"
+    const val UTIL_WORLD = UTIL + "world"
+    const val UTIL_SERVER = UTIL + "server"
+    const val UTIL_INVENTORY = UTIL + "inventory"
 
     //home
     const val HOME = MAIN + "home"

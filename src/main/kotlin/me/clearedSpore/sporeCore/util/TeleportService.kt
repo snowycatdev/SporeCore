@@ -4,24 +4,42 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Task
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.util.ActionBar.actionBar
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import java.util.Collections
+import java.util.WeakHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 object TeleportService {
 
     val teleportTime = SporeCore.instance.coreConfig.general.teleportTime ?: 5
+    private val teleportingPlayers = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
+
+    fun isTeleporting(player: Player): Boolean {
+        return teleportingPlayers.contains(player)
+    }
+
 
     fun Player.awaitTeleport(location: Location, seconds: Int = teleportTime) {
         val player = this
+
+        if(isTeleporting(player)){
+            player.sendMessage("You are already teleporting!".red())
+            player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f)
+            return
+        }
+
+        teleportingPlayers.add(player)
         if (!player.isOnline) return
 
         if (player.hasPermission(Perm.TELEPORT_BYPASS)) {
+            teleportingPlayers.remove(player)
             player.teleport(location)
             player.playSound(player.location, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f)
-            player.sendActionBar("Teleported successfully!".blue())
+            player.actionBar("tp", "Teleported successfully!".blue())
             return
         }
 
@@ -41,7 +59,8 @@ object TeleportService {
             if (moved) {
                 Task.cancel(key)
                 Task.runTask {
-                    player.sendActionBar("Teleportation canceled!".red())
+                    teleportingPlayers.remove(player)
+                    player.actionBar("tp", "Teleportation canceled!".red())
                     player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f)
                 }
                 return@Runnable
@@ -50,15 +69,16 @@ object TeleportService {
             if (timeLeft <= 0) {
                 Task.runTask {
                     player.teleport(location)
+                    teleportingPlayers.remove(player)
                     player.playSound(player.location, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f)
-                    player.sendActionBar("Teleported successfully!".blue())
+                    player.actionBar("tp",  "Teleported successfully!".blue())
                 }
                 Task.cancel(key)
                 return@Runnable
             }
 
             Task.runTask {
-                player.sendActionBar("Teleporting in ${timeLeft}s...".blue())
+                player.actionBar("tp",  "Teleporting in ${timeLeft}s...".blue())
                 player.playSound(player.location, Sound.UI_BUTTON_CLICK, 1f, 1f)
             }
 
