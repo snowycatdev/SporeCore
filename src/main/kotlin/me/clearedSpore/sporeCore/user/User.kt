@@ -3,6 +3,7 @@ package me.clearedSpore.sporeCore.user
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.database.util.DocReader
 import me.clearedSpore.sporeCore.database.util.DocWriter
 import me.clearedSpore.sporeCore.features.chat.color.`object`.ChatColor
@@ -16,8 +17,7 @@ import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
-import me.clearedSpore.sporeCore.inventory.`object`.InventoryData
-import me.clearedSpore.sporeCore.user.settings.Setting
+import me.clearedSpore.sporeCore.features.setting.model.AbstractSetting
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -39,7 +39,7 @@ data class User(
     var balance: Double = 0.0,
     var pendingMessages: MutableList<String> = mutableListOf(),
     var pendingPayments: MutableMap<String, Double> = mutableMapOf(),
-    var playerSettings: MutableMap<String, Boolean> = mutableMapOf(),
+    var playerSettings: MutableMap<String, Any> = mutableMapOf(),
     var homes: MutableList<Home> = mutableListOf(),
     var economyLogs: MutableList<EconomyLog> = mutableListOf(),
     var kitCooldowns: MutableMap<String, Long> = mutableMapOf(),
@@ -133,7 +133,16 @@ data class User(
                 firstServerIP = doc.string("firstServerIP"),
                 pendingMessages = doc.list("pendingMessages").filterIsInstance<String>().toMutableList(),
                 pendingPayments = doc.map<Double>("pendingPayments").toMutableMap(),
-                playerSettings = doc.map<Boolean>("playerSettings").toMutableMap(),
+                playerSettings = run {
+                    val loadedSettings = mutableMapOf<String, Any>()
+                    (doc.doc["playerSettings"] as? Map<*, *>)?.forEach { (k, v) ->
+                        val key = k?.toString() ?: return@forEach
+                        if (v != null) {
+                            loadedSettings[key] = v
+                        }
+                    }
+                    loadedSettings
+                },
                 homes = doc.documents("homes").mapNotNull { Home.fromDocument(it) }.toMutableList(),
                 economyLogs = doc.documents("economyLogs").mapNotNull { EconomyLog.fromDocument(it) }.toMutableList(),
                 balance = doc.double("balance"),
@@ -165,7 +174,8 @@ data class User(
                 lastIp = doc.string("lastIp"),
                 ipHistory = doc.list("ipHistory").filterIsInstance<String>().toMutableList(),
                 channel = doc.string("channel"),
-                staffStats = doc.documents("staffStats").mapNotNull { StaffPunishmentStats.fromDocument(it) }.toMutableList(),
+                staffStats = doc.documents("staffStats").mapNotNull { StaffPunishmentStats.fromDocument(it) }
+                    .toMutableList(),
                 lastServerIP = doc.string("lastServerIP"),
                 discordID = doc.string("discordID"),
                 pendingInventories = doc.list("pendingInventories")
@@ -176,35 +186,7 @@ data class User(
         }
 
         fun create(uuid: UUID, name: String, collection: NitriteCollection): User {
-            val user = User(
-                uuidStr = uuid.toString(),
-                playerName = name,
-                hasJoinedBefore = false,
-                firstJoin = null,
-                pendingMessages = mutableListOf(),
-                pendingPayments = mutableMapOf(),
-                playerSettings = mutableMapOf(),
-                homes = mutableListOf(),
-                economyLogs = mutableListOf(),
-                balance = 0.0,
-                kitCooldowns = mutableMapOf(),
-                lastJoin = null,
-                totalPlaytime = 0L,
-                playtimeHistory = mutableListOf(),
-                credits = 0.0,
-                creditLogs = mutableListOf(),
-                creditsSpent = mutableListOf(),
-                lastLocation = null,
-                chatColor = null,
-                chatFormat = null,
-                punishments = mutableListOf(),
-                channel = null,
-                staffStats = mutableListOf(),
-                discordID = null,
-                tpsBar = false,
-                pendingInventories = mutableSetOf()
-            )
-
+            val user = User()
             collection.insert(user.toDocument())
             Logger.infoDB("Created new user $name ($uuid)")
             return user
@@ -292,22 +274,28 @@ data class User(
         }
     }
 
-    fun setSetting(setting: Setting, value: Boolean) {
-        playerSettings[setting.key] = value
+    fun <T> getSetting(setting: AbstractSetting<T>): T {
+        val features = SporeCore.instance.coreConfig.features
+        if (!features.settings) return setting.defaultValue()
+        return setting.get(playerSettings[setting.key])
     }
 
-    fun isSettingEnabled(setting: Setting): Boolean {
-        return playerSettings[setting.key] ?: setting.defaultValue
+    fun <T> setSetting(setting: AbstractSetting<T>, value: T) {
+        val features = SporeCore.instance.coreConfig.features
+        if (!features.settings) return
+        playerSettings[setting.key] = setting.serialize(value)
     }
 
-    fun toggleSetting(setting: Setting): Boolean {
-        val newValue = !isSettingEnabled(setting)
-        setSetting(setting, newValue)
-        UserManager.save(this)
-        return newValue
+    fun <T> getSettingOrDefault(setting: AbstractSetting<T>): T {
+        val features = SporeCore.instance.coreConfig.features
+        if (!features.settings) return setting.defaultValue()
+        return try {
+            setting.get(playerSettings[setting.key])
+        } catch (e: Exception) {
+            setting.defaultValue()
+        }
     }
 
-    fun getAllSettings(): Map<Setting, Boolean> = Setting.values().associateWith { isSettingEnabled(it) }
 
     fun logEconomy(action: EcoAction, amount: Double, reason: String = "") {
         economyLogs.add(0, EconomyLog(action, amount, reason, System.currentTimeMillis()))
@@ -383,9 +371,6 @@ data class User(
 
         return punishments.filter { it.type in relatedTypes }
     }
-
-
-
 
 
     fun getLastPunishment(type: PunishmentType? = null): Punishment? {

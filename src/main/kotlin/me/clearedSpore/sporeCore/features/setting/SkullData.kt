@@ -1,4 +1,4 @@
-package me.clearedSpore.sporeCore.user.settings
+package me.clearedSpore.sporeCore.features.setting
 
 data class SkullData(
     val name: String,
