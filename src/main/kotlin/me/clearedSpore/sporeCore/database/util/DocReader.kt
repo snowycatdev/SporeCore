@@ -9,9 +9,8 @@ class DocReader(val doc: Document) {
     fun string(key: String): String? = doc.get(key)?.toString()
 
     fun boolean(key: String): Boolean =
-        (doc.get(key) as? Boolean)
-            ?: string(key)?.toBooleanStrictOrNull()
-            ?: false
+        ((doc.get(key) as? Boolean)
+                ?: string(key)?.toBooleanStrictOrNull() == true)
 
     fun int(key: String): Int =
         (doc.get(key) as? Number)?.toInt()
@@ -58,6 +57,7 @@ class DocReader(val doc: Document) {
                 Double::class -> (it.value as? Number)?.toDouble() ?: it.value.toString().toDoubleOrNull()
                 Number::class -> (it.value as? Number)
                     ?: it.value.toString().toDoubleOrNull()
+
                 String::class -> it.value?.toString()
                 else -> null
             }
