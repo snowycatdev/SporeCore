@@ -4,9 +4,10 @@ import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeCore.annotations.Setting
 import me.clearedSpore.sporeCore.features.setting.model.AbstractSetting
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
 import java.net.URLClassLoader
 import java.util.jar.JarFile
-import kotlin.reflect.full.createInstance
+import java.lang.reflect.Modifier
 
 class SettingRegistry(private val plugin: JavaPlugin) {
 
@@ -28,14 +29,14 @@ class SettingRegistry(private val plugin: JavaPlugin) {
 
         classes.forEach { clazz ->
             try {
-                val kClass = clazz.kotlin
-                val instance = kClass.objectInstance ?: kClass.createInstance()
-
-                if (instance is AbstractSetting<*>) {
-                    register(instance)
-                    total++
-                } else {
-                    Logger.warn("Class ${clazz.name} is annotated with @Setting but is not an AbstractSetting")
+                if (!Modifier.isAbstract(clazz.modifiers) && !clazz.isInterface) {
+                    val instance = clazz.getDeclaredConstructor().newInstance()
+                    if (instance is AbstractSetting<*>) {
+                        register(instance)
+                        total++
+                    } else {
+                        Logger.warn("Class ${clazz.name} is annotated with @Setting but is not an AbstractSetting")
+                    }
                 }
             } catch (ex: Exception) {
                 Logger.warn("Failed to instantiate setting ${clazz.name}: ${ex.message}")
@@ -47,22 +48,25 @@ class SettingRegistry(private val plugin: JavaPlugin) {
 
     private fun getClassesInPackage(packageName: String): List<Class<*>> {
         val path = packageName.replace('.', '/')
-        val classLoader = plugin.javaClass.classLoader as URLClassLoader
+        val classLoader = plugin.javaClass.classLoader
         val classes = mutableListOf<Class<*>>()
 
-        classLoader.urLs.forEach { url ->
-            if (url.path.endsWith(".jar")) {
-                val jarFile = JarFile(url.path)
-                jarFile.entries().asSequence().forEach { entry ->
-                    if (entry.name.endsWith(".class") && entry.name.startsWith(path)) {
-                        val className = entry.name.removeSuffix(".class").replace('/', '.')
-                        try {
-                            val clazz = Class.forName(className)
-                            if (clazz.getAnnotation(Setting::class.java) != null) {
-                                classes.add(clazz)
+        if (classLoader is URLClassLoader) {
+            classLoader.urLs.forEach { url ->
+                val file = File(url.toURI())
+                if (file.isFile && file.extension == "jar") {
+                    JarFile(file).use { jar ->
+                        jar.entries().asSequence()
+                            .filter { it.name.endsWith(".class") && it.name.startsWith(path) }
+                            .forEach { entry ->
+                                val className = entry.name.removeSuffix(".class").replace('/', '.')
+                                try {
+                                    val clazz = Class.forName(className)
+                                    if (clazz.getAnnotation(Setting::class.java) != null) {
+                                        classes.add(clazz)
+                                    }
+                                } catch (_: Exception) { }
                             }
-                        } catch (_: Exception) {
-                        }
                     }
                 }
             }

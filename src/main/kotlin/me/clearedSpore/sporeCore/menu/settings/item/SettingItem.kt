@@ -61,7 +61,8 @@ class SettingItem(
                     if (option == current) "• $option".green() else "• $option".red()
                 } + listOf(
                     "",
-                    "Left click to go forward, Right click to go backwards".gray()
+                    "Left click to go forward".gray(),
+                    "Right click to go backwards".gray()
                 )
             }
 
