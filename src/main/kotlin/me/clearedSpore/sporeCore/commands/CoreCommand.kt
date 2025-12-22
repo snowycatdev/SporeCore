@@ -4,15 +4,12 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
 import co.aikar.commands.annotation.Optional
-import com.google.common.reflect.TypeToken
-import com.google.gson.Gson
 import de.exlll.configlib.ConfigurationException
 import de.exlll.configlib.YamlConfigurations
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message
@@ -41,17 +38,12 @@ import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.Tasks
 import me.clearedSpore.sporeCore.util.button.CallbackRegistry
 import me.clearedSpore.sporeCore.util.button.TextButton
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.event.HoverEvent
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executor
 import kotlin.random.Random
 
 @CommandAlias("sporecore|core")
@@ -60,7 +52,7 @@ class CoreCommand : BaseCommand() {
     private val startTime = System.currentTimeMillis()
 
     @Default()
-    fun onHelp(help: CommandHelp){
+    fun onHelp(help: CommandHelp) {
         help.showHelp()
     }
 
@@ -87,7 +79,7 @@ class CoreCommand : BaseCommand() {
                     PunishmentService.load()
                 }
 
-                if(plugin.coreConfig.features.modes){
+                if (plugin.coreConfig.features.modes) {
                     ModeService.initialize()
                 }
 
@@ -275,11 +267,13 @@ class CoreCommand : BaseCommand() {
 
             val statsToRollback = staffUser.staffStats
                 .filter { it.date.time >= cutoff }
-                .filter { it.type in setOf(
-                    PunishmentType.BAN, PunishmentType.TEMPBAN,
-                    PunishmentType.MUTE, PunishmentType.TEMPMUTE,
-                    PunishmentType.WARN, PunishmentType.TEMPWARN
-                ) }
+                .filter {
+                    it.type in setOf(
+                        PunishmentType.BAN, PunishmentType.TEMPBAN,
+                        PunishmentType.MUTE, PunishmentType.TEMPMUTE,
+                        PunishmentType.WARN, PunishmentType.TEMPWARN
+                    )
+                }
                 .sortedByDescending { it.date.time }
 
             if (statsToRollback.isEmpty()) {
@@ -326,11 +320,26 @@ class CoreCommand : BaseCommand() {
 
                 val removed = when (punishment.type) {
                     PunishmentType.BAN, PunishmentType.TEMPBAN ->
-                        targetUser.unban(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unban(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     PunishmentType.MUTE, PunishmentType.TEMPMUTE ->
-                        targetUser.unmute(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unmute(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     PunishmentType.WARN, PunishmentType.TEMPWARN ->
-                        targetUser.unwarn(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unwarn(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     else -> false
                 }
 
@@ -345,7 +354,7 @@ class CoreCommand : BaseCommand() {
             Logger.log(sender, Perm.ADMIN_LOG, "rolled back punishments made by $staffName", true)
             val config = SporeCore.instance.coreConfig.discord
             val webhook = Webhook(config.staffRollback)
-            if(config.staffRollbackPing.isNullOrBlank()) {
+            if (config.staffRollbackPing.isNullOrBlank()) {
                 webhook.setMessage("${sender.name} has rolled back $rollbackCount punishments from $staffName in the last $timeArg")
             } else {
                 val ping = config.staffRollbackPing
@@ -353,8 +362,8 @@ class CoreCommand : BaseCommand() {
                     "$ping ${sender.name} has rolled back $rollbackCount punishments from $staffName in the last $timeArg"
                 )
             }
-                webhook.setUsername("SporeCore Logs")
-                    .setProfileURL("https://cdn.modrinth.com/data/8X4HqUuD/980c64224cb4fb48829d90a0d51c36b565ad8a05_96.webp")
+            webhook.setUsername("SporeCore Logs")
+                .setProfileURL("https://cdn.modrinth.com/data/8X4HqUuD/980c64224cb4fb48829d90a0d51c36b565ad8a05_96.webp")
 
             webhook.send()
 
@@ -375,6 +384,7 @@ class CoreCommand : BaseCommand() {
                 val userCollection = DatabaseManager.getUserCollection()
                 val serverCollection = DatabaseManager.getServerCollection()
                 val inventoryCollection = DatabaseManager.getInventoryCollection()
+                val logCollection = DatabaseManager.getLogsCollection()
 
                 val dump: MutableMap<String, List<Map<String, Any>>> = mutableMapOf()
 
@@ -390,7 +400,12 @@ class CoreCommand : BaseCommand() {
 
                 dump["inventories"] = inventoryCollection.find().map { doc ->
                     @Suppress("UNCHECKED_CAST")
-                    (doc as Map<String, Any>).mapValues { it.value!! }
+                    (doc as Map<String, Any>).mapValues { it.value }
+                }.toList()
+
+                dump["logs"] = logCollection.find().map { doc ->
+                    @Suppress("UNCHECKED_CAST")
+                    (doc as Map<String, Any>).mapValues { it.value }
                 }.toList()
 
                 val json = com.google.gson.GsonBuilder()
@@ -411,7 +426,7 @@ class CoreCommand : BaseCommand() {
     }
 
     @Subcommand("wiki")
-    @CommandCompletion("currency|punishments|channels|modes|inventory|discord")
+    @CommandCompletion("currency|punishments|channels|modes|inventory|discord|selector")
     fun onWiki(sender: CommandSender, @Optional @Name("feature") feature: String?) {
 
         val base = "https://spore-plugins.gitbook.io/sporecore/"
@@ -422,7 +437,8 @@ class CoreCommand : BaseCommand() {
             "channels" to "${base}channels",
             "modes" to "${base}modes",
             "inventory" to "${base}inventory",
-            "discord" to "${base}hooks/discord"
+            "discord" to "${base}hooks/discord",
+            "selector" to "${base}selector"
         )
 
         if (feature.isNullOrEmpty()) {
@@ -434,7 +450,7 @@ class CoreCommand : BaseCommand() {
         val url = pages[key]
 
         if (url == null) {
-            sender.sendMessage("Unknown wiki page. Use: currency, punishments, channels, modes".red())
+            sender.sendMessage("Unknown wiki page. Use: currency, punishments, channels, modes, inventory, discord, selector".red())
             return
         }
 
@@ -611,10 +627,14 @@ class CoreCommand : BaseCommand() {
         sender.sendMessage("UUID: ".white() + target.uniqueId.toString().green() + " (uuidStr)".gray())
         sender.sendMessage("First Join: ".white() + (user.firstJoin ?: "Unknown").green() + " (firstJoin)".gray())
         sender.sendMessage("Homes: ".white() + user.homes.size.toString().green() + " (homes)".gray())
-        sender.sendMessage("Pending Messages: ".white() + user.pendingMessages.size.toString().green() + " (pendingMessages)".gray())
+        sender.sendMessage(
+            "Pending Messages: ".white() + user.pendingMessages.size.toString().green() + " (pendingMessages)".gray()
+        )
         sender.sendMessage("Balance: ".white() + EconomyService.format(user.balance).green() + " (balance)".gray())
         sender.sendMessage("Last join: ".white() + user.lastJoin?.green() + " (lastJoin)".gray())
-        sender.sendMessage("Playtime: ".white() + StatService.getTotalPlaytime(user).toString().green() + " (totalPlaytime)".gray())
+        sender.sendMessage(
+            "Playtime: ".white() + StatService.getTotalPlaytime(user).toString().green() + " (totalPlaytime)".gray()
+        )
         sender.sendMessage("Credits: ".white() + user.credits.toString().gray() + " (credits)".gray())
         sender.sendMessage("Credits Spent: ".white() + user.creditsSpent + " (creditsSpent)".gray())
 
@@ -635,7 +655,11 @@ class CoreCommand : BaseCommand() {
             sender.sendMessage("   User has no pending payments".red())
         }
 
-        sender.sendMessage("Channel: ".white() + (user.channel ?: "Public").green() + " (channel)".gray())
+        sender.sendMessage(
+            "Channel: ".white() +
+                    (if (user.channel.isNullOrBlank()) "Public" else user.channel)?.green() +
+                    " (channel)".gray()
+        )
 
         sender.sendMessage("Pending inventories: ".white() + "(pendingInventories)".gray())
 
@@ -663,7 +687,7 @@ class CoreCommand : BaseCommand() {
         user.pendingInventories.forEachIndexed { index, id ->
             val inventory = InventoryManager.getInventory(id)
 
-            if(inventory == null){
+            if (inventory == null) {
                 sender.sendErrorMessage("Failed to load inventory!")
                 return
             }
@@ -680,7 +704,7 @@ class CoreCommand : BaseCommand() {
                         user.pendingInventories.remove(inventory.id)
                         sender.sendMessage("Successfully removed the inventory.".blue())
                         UserManager.save(user)
-                    } catch (e: Exception){
+                    } catch (e: Exception) {
                         sender.sendMessage("Failed to delete inventory!".red())
                     }
                 }

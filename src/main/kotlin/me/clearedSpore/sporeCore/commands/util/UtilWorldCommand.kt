@@ -1,26 +1,17 @@
 package me.clearedSpore.sporeCore.commands.util
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Name
-import co.aikar.commands.annotation.Optional
-import co.aikar.commands.annotation.Subcommand
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.gray
-import me.clearedSpore.sporeAPI.util.CC.green
-import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.button.TextButton
 import org.bukkit.Bukkit
-import org.bukkit.World
+import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.Location
 
 @CommandAlias("util")
 @CommandPermission(Perm.UTIL_COMMAND)
@@ -45,7 +36,7 @@ class UtilWorldCommand : BaseCommand() {
                 sender.sendSuccessMessage("Successfully copied!")
             }
             .build(sender)
-        if(sender is Player){
+        if (sender is Player) {
             sender.sendMessage(button)
         }
 
@@ -54,7 +45,7 @@ class UtilWorldCommand : BaseCommand() {
     @Subcommand("world getspawn")
     @CommandPermission(Perm.UTIL_WORLD)
     @CommandCompletion("@worlds")
-    fun getSpawn(sender: CommandSender, @Optional @Name("world")  worldName: String? = null) {
+    fun getSpawn(sender: CommandSender, @Optional @Name("world") worldName: String? = null) {
         val world = if (worldName != null) Bukkit.getWorld(worldName) else (sender as? Player)?.world
 
         if (world == null) {
@@ -72,7 +63,7 @@ class UtilWorldCommand : BaseCommand() {
                 sender.sendSuccessMessage("Successfully copied!")
             }
             .build(sender)
-        if(sender is Player){
+        if (sender is Player) {
             sender.sendMessage(button)
         }
     }
@@ -80,7 +71,13 @@ class UtilWorldCommand : BaseCommand() {
     @Subcommand("world setspawn")
     @CommandPermission(Perm.UTIL_WORLD)
     @CommandCompletion("@nothing @nothing @nothing @worlds")
-    fun setSpawn(sender: CommandSender, @Name("x") x: Int, @Name("y") y: Int, @Name("z") z: Int,@Optional @Name("world")  worldName: String? = null) {
+    fun setSpawn(
+        sender: CommandSender,
+        @Name("x") x: Int,
+        @Name("y") y: Int,
+        @Name("z") z: Int,
+        @Optional @Name("world") worldName: String? = null
+    ) {
         val world = if (worldName != null) Bukkit.getWorld(worldName) else (sender as? Player)?.world
 
         if (world == null) {
@@ -95,7 +92,11 @@ class UtilWorldCommand : BaseCommand() {
     @Subcommand("world weather")
     @CommandPermission(Perm.UTIL_WORLD)
     @CommandCompletion("@worlds")
-    fun setWeather(sender: CommandSender, @Name("type") weatherType: String, @Optional @Name("world")  worldName: String? = null) {
+    fun setWeather(
+        sender: CommandSender,
+        @Name("type") weatherType: String,
+        @Optional @Name("world") worldName: String? = null
+    ) {
         val world = if (worldName != null) Bukkit.getWorld(worldName) else (sender as? Player)?.world
 
         if (world == null) {
@@ -106,7 +107,10 @@ class UtilWorldCommand : BaseCommand() {
         when (weatherType.lowercase()) {
             "clear" -> world.setStorm(false)
             "rain" -> world.setStorm(true)
-            "thunder" -> { world.isThundering = true; world.setStorm(true) }
+            "thunder" -> {
+                world.isThundering = true; world.setStorm(true)
+            }
+
             else -> {
                 sender.sendErrorMessage("Invalid weather type! Use clear, rain, or thunder.")
                 return

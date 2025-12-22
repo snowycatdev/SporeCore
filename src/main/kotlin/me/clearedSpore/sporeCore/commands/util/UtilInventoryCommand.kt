@@ -1,14 +1,10 @@
 package me.clearedSpore.sporeCore.commands.util
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Name
-import co.aikar.commands.annotation.Subcommand
+import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
-import me.clearedSpore.sporeAPI.menu.Menu
 import me.clearedSpore.sporeAPI.menu.Item
+import me.clearedSpore.sporeAPI.menu.Menu
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.inventory.InventoryManager
@@ -16,8 +12,8 @@ import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.event.inventory.ClickType
+import org.bukkit.inventory.ItemStack
 
 @CommandAlias("util")
 @CommandPermission(Perm.UTIL_COMMAND)

@@ -1,19 +1,17 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.CommandExecutionContext
-import co.aikar.commands.CommandIssuer
 import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
 import me.clearedSpore.sporeCore.features.kit.KitService
-import me.clearedSpore.sporeCore.menu.util.confirm.ConfirmMenu
 import me.clearedSpore.sporeCore.menu.kits.KitsMenu
+import me.clearedSpore.sporeCore.menu.util.confirm.ConfirmMenu
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -52,12 +50,16 @@ class KitCommand : BaseCommand() {
     }
 
     @Subcommand("givekit")
-    @CommandCompletion("@kits @players|*")
-    @Syntax("<kit> [player|*]")
+    @CommandCompletion("@kits @targets")
+    @Syntax("<kit> [targets]")
     @CommandPermission(Perm.KIT_ADMIN)
-    fun onGiveKit(player: Player, kitName: String, @Optional targetName: String?) {
-        val kits = kitService.getAllKits()
-        val kit = kits.find { it.name.equals(kitName, ignoreCase = true) }
+    fun onGiveKit(
+        player: Player,
+        kitName: String,
+        @Optional targets: TargetPlayers?
+    ) {
+        val kit = kitService.getAllKits()
+            .find { it.name.equals(kitName, ignoreCase = true) }
 
         if (kit == null) {
             player.sendErrorMessage("There was no kit found with that name!")
@@ -69,34 +71,23 @@ class KitCommand : BaseCommand() {
             return
         }
 
-        val targets: List<Player> = when {
-            targetName == null -> listOf(player)
-            targetName == "*" -> {
-                if (!player.hasPermission(Perm.KIT_ADMIN)) {
-                    player.sendErrorMessage("You don't have permission to give kits to everyone!")
-                    return
-                }
-                player.server.onlinePlayers.toList()
-            }
-            else -> {
-                val found = player.server.getPlayer(targetName)
-                if (found == null) {
-                    player.sendErrorMessage("Player '$targetName' is not online!")
-                    return
-                }
-                listOf(found)
-            }
+        val resolvedTargets = targets ?: listOf(player)
+
+        if (resolvedTargets.isEmpty()) {
+            player.sendErrorMessage("No valid players selected.")
+            return
         }
 
-        targets.forEach { target ->
+        resolvedTargets.forEach { target ->
             kitService.giveKit(target, kit.name)
+
             if (target != player) {
                 player.sendSuccessMessage("You gave kit ${kit.name} to ${target.name}!")
             }
+
             target.sendSuccessMessage("You received kit ${kit.name}!")
         }
     }
-
 
 
     @Subcommand("create")

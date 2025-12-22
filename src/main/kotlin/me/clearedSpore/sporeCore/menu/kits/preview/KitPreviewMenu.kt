@@ -50,6 +50,6 @@ class KitPreviewMenu(
 
     private class SimpleItem(private val stack: ItemStack) : Item() {
         override fun createItem(): ItemStack = stack
-        override fun onClickEvent(clicker: Player, clickType: ClickType) { }
+        override fun onClickEvent(clicker: Player, clickType: ClickType) {}
     }
 }

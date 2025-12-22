@@ -5,8 +5,6 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
-import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.discord.DiscordService
@@ -76,7 +74,7 @@ class SoftRollbackItem(
                     data.rollbackIssuer = clicker.name
 
                     clicker.sendMessage("Successfully rolled back ${target.name}'s inventory &7(Soft)".blue())
-                } catch (e: Exception){
+                } catch (e: Exception) {
                     Logger.error("Failed to send discord message!")
                     e.printStackTrace()
                 }

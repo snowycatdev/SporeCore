@@ -38,7 +38,12 @@ object Tasks {
             unit.toSeconds(interval) * 20L
         )
 
-    fun runRepeatedAsync(runnable: Runnable, delay: Long, interval: Long, unit: TimeUnit = TimeUnit.SECONDS): BukkitTask =
+    fun runRepeatedAsync(
+        runnable: Runnable,
+        delay: Long,
+        interval: Long,
+        unit: TimeUnit = TimeUnit.SECONDS
+    ): BukkitTask =
         Bukkit.getScheduler().runTaskTimerAsynchronously(
             SporeCore.instance,
             runnable,

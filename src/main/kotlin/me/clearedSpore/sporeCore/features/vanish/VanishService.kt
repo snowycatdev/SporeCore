@@ -3,7 +3,7 @@ package me.clearedSpore.sporeCore.features.vanish
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
-import java.util.UUID
+import java.util.*
 
 
 object VanishService {
@@ -32,15 +32,15 @@ object VanishService {
         vanishedPlayers.remove(uuid)
     }
 
-    fun toggle(uuid: UUID){
-        if(isVanished(uuid)){
+    fun toggle(uuid: UUID) {
+        if (isVanished(uuid)) {
             unVanish(uuid)
         } else {
             vanish(uuid)
         }
     }
 
-    fun isVanished(uuid: UUID): Boolean{
+    fun isVanished(uuid: UUID): Boolean {
         return vanishedPlayers.contains(uuid)
     }
 

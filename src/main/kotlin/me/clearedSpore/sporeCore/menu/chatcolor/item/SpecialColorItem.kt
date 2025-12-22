@@ -33,12 +33,12 @@ class SpecialColorItem(
         val hasPerm = player.hasPermission(permission)
         val user = UserManager.get(player)
         val active = when (formatKey.lowercase()) {
-            "bold" -> user?.chatFormat?.bold ?: false
-            "italic" -> user?.chatFormat?.italic ?: false
-            "underline" -> user?.chatFormat?.underline ?: false
-            "strikethrough" -> user?.chatFormat?.striketrough ?: false
-            "magic" -> user?.chatFormat?.magic ?: false
-            else -> user?.chatFormat?.none ?: true
+            "bold" -> user?.chatFormat?.bold == true
+            "italic" -> user?.chatFormat?.italic == true
+            "underline" -> user?.chatFormat?.underline == true
+            "strikethrough" -> user?.chatFormat?.striketrough == true
+            "magic" -> user?.chatFormat?.magic == true
+            else -> user?.chatFormat?.none != false
         }
 
         meta.setDisplayName("${if (active) "&a" else "&c"}$codeSymbol$formatKey".translate())

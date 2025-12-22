@@ -7,13 +7,16 @@ import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Syntax
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Cooldown
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.StringUtil.joinWithSpaces
+import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
+import me.clearedSpore.sporeCore.extension.PlayerExtension.uuidStr
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
+import me.clearedSpore.sporeCore.features.setting.impl.PrivateMessagesSetting
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.Util.noTranslate
 import org.bukkit.Bukkit
@@ -44,12 +47,12 @@ class PrivateMessageCommand : BaseCommand() {
 
         val user = UserManager.get(target)
 
-        if(user == null){
+        if (user == null) {
             player.userJoinFail()
             return
         }
 
-        if (!user.isSettingEnabled(Setting.PRIVATE_MESSAGES) && !player.hasPermission(Perm.PM_BYPASS)) {
+        if (!user.getSettingOrDefault(PrivateMessagesSetting()) && !player.hasPermission(Perm.PM_BYPASS)) {
             player.sendErrorMessage("That player has private messages disabled!".red())
             return
         }
@@ -62,5 +65,20 @@ class PrivateMessageCommand : BaseCommand() {
 
         target.sendMessage("${player.name} » You &f".blue() + message.noTranslate())
         target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f)
+
+        if (SporeCore.instance.coreConfig.logs.privateMessages) {
+            LogsService.addLog(
+                player.uuidStr(),
+                "to=${target.name}: ${message.noTranslate()}",
+                LogType.PRIVATE_MESSAGE
+            )
+
+            LogsService.addLog(
+                target.uuidStr(),
+                "from=${player.name}: ${message.noTranslate()}",
+                LogType.PRIVATE_MESSAGE
+            )
+        }
+
     }
 }

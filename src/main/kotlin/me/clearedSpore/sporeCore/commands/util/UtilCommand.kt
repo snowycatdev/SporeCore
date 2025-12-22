@@ -12,7 +12,7 @@ import me.clearedSpore.sporeCore.util.Perm
 class UtilCommand : BaseCommand() {
 
     @Default
-    fun onHelp(help: CommandHelp){
+    fun onHelp(help: CommandHelp) {
         help.showHelp()
     }
 }

@@ -1,14 +1,8 @@
 package me.clearedSpore.sporeCore.util
 
-import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.translate
-import org.apache.commons.codec.language.Soundex
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
-import org.bukkit.Sound
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 

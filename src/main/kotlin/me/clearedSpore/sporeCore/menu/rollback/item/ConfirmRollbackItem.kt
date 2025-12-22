@@ -5,7 +5,6 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
 import me.clearedSpore.sporeCore.user.UserManager
@@ -47,11 +46,26 @@ class ConfirmRollbackItem(
 
                 val removed = when (punishment.type) {
                     PunishmentType.BAN, PunishmentType.TEMPBAN ->
-                        targetUser.unban(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unban(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     PunishmentType.MUTE, PunishmentType.TEMPMUTE ->
-                        targetUser.unmute(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unmute(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     PunishmentType.WARN, PunishmentType.TEMPWARN ->
-                        targetUser.unwarn(UserManager.getConsoleUser(), punishment.id, "Staff rollback - Issued by ${senderUser.playerName}")
+                        targetUser.unwarn(
+                            UserManager.getConsoleUser(),
+                            punishment.id,
+                            "Staff rollback - Issued by ${senderUser.playerName}"
+                        )
+
                     else -> false
                 }
 
@@ -65,7 +79,7 @@ class ConfirmRollbackItem(
             Logger.log(clicker, Perm.ADMIN_LOG, "rolled back punishments made by ${staff.name}", true)
             val config = SporeCore.instance.coreConfig.discord
             val webhook = Webhook(config.staffRollback)
-            if(config.staffRollbackPing.isNullOrBlank()) {
+            if (config.staffRollbackPing.isNullOrBlank()) {
                 webhook.setMessage("${clicker.name} has rolled back $rollbackCount punishments from ${staff.name} in the last $timeArg")
             } else {
                 val ping = config.staffRollbackPing

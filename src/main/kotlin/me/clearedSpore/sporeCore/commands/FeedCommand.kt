@@ -1,19 +1,12 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Optional
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.InvalidCommandArgument
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.Bukkit
-import org.bukkit.attribute.Attribute
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -22,48 +15,39 @@ import org.bukkit.entity.Player
 class FeedCommand : BaseCommand() {
 
     @Default
-    @CommandCompletion("@players")
-    @Syntax("<player>")
-    fun onHeal(sender: CommandSender, @Optional targetName: String?) {
+    @CommandCompletion("@targets")
+    fun onFeed(sender: CommandSender, @Optional targets: TargetPlayers?) {
 
-        if (sender !is Player && targetName == null) {
-            sender.sendMessage("You must specify a player name when running this command from console.".red())
-            return
+        val resolved = targets ?: when (sender) {
+            is Player -> listOf(sender)
+            else -> throw InvalidCommandArgument("You must specify a player.")
         }
 
-        val target: Player? = when {
-            sender is Player && targetName == null -> sender
-            targetName != null -> Bukkit.getPlayer(targetName)
-            else -> null
+        val players = resolved.filter {
+            sender == it || sender.hasPermission(Perm.FEED_OTHERS)
         }
 
-        if (target == null) {
-            sender.sendMessage("That player is not online!".red())
-            return
+        if (players.isEmpty()) {
+            throw InvalidCommandArgument("No valid players to feed.")
         }
 
-        if(target.name != sender.name && !sender.hasPermission(Perm.FEED_OTHERS)){
-            sender.sendMessage("You don't have permission to feed other players".red())
-            return
+        players.forEach {
+            it.foodLevel = 20
+            it.saturation = 20f
         }
 
-        target.foodLevel = 20
-        target.saturation = 20f
+        sender.sendMessage(
+            if (players.size == 1)
+                "You fed ${players.first().name}.".blue()
+            else
+                "You fed ${players.size} players.".blue()
+        )
 
-        Logger.log(sender, Perm.LOG, "fed ${target.name}", false)
-        sender.sendMessage("You have fed ".blue() + target.name + ".".blue())
-    }
-
-    @Subcommand("*")
-    @CommandPermission(Perm.FEED_OTHERS)
-    fun onAll(sender: CommandSender) {
-
-        Bukkit.getOnlinePlayers().forEach { player ->
-            player.foodLevel = 20
-            player.saturation = 20f
-        }
-
-        Logger.log(sender, Perm.LOG, "fed everyone", false)
-        sender.sendMessage("You fed everyone.".blue())
+        Logger.log(
+            sender,
+            Perm.LOG,
+            "fed ${players.size} player(s)",
+            false
+        )
     }
 }

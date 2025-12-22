@@ -8,7 +8,6 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
-import kotlin.math.tan
 
 
 class InvRollBackMenu(
@@ -36,5 +35,6 @@ class InvRollBackMenu(
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

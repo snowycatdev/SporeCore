@@ -8,8 +8,11 @@ import co.aikar.commands.annotation.Default
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
+import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 @CommandAlias("tphere|teleporthere|bring")
@@ -18,16 +21,30 @@ class TphereCommand : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onTphere(sender: Player, targetName: String) {
-        val target = Bukkit.getPlayer(targetName)
+    fun onTphere(sender: Player, targets: TargetPlayers) {
 
-        if (target == null || !target.isOnline) {
-            sender.sendErrorMessage("That player is not online.")
+        if (targets.isEmpty()) {
+            sender.sendErrorMessage("No valid players.")
             return
         }
 
-        Logger.log(sender, Perm.LOG, "teleported ${target.name} to themself", false)
-        target.teleport(sender.location)
-        sender.sendSuccessMessage("Teleported ${target.name} to you.")
+        targets.forEach { player ->
+            player.teleport(sender.location)
+        }
+
+        if (targets.size == 1) {
+            if (SporeCore.instance.coreConfig.logs.teleports) {
+                LogsService.addLog(sender.name, "Teleported ${targets.first().name} to them", LogType.TELEPORT)
+            }
+            Logger.log(sender, Perm.LOG, "Teleported ${targets.first().name} to them", false)
+            sender.sendSuccessMessage("Teleported ${targets.first().name} to you.")
+        } else {
+            if (SporeCore.instance.coreConfig.logs.teleports) {
+                LogsService.addLog(sender.name, "Teleported ${targets.size} players to them", LogType.TELEPORT)
+            }
+            Logger.log(sender, Perm.LOG, "Teleported ${targets.size} players to them", false)
+            sender.sendSuccessMessage("Teleported ${targets.size} players to you.")
+        }
+
     }
 }

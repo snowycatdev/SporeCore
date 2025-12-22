@@ -11,8 +11,6 @@ import me.clearedSpore.sporeCore.menu.invrollback.preview.item.ForceRollbackItem
 import me.clearedSpore.sporeCore.menu.invrollback.preview.item.InfoItem
 import me.clearedSpore.sporeCore.menu.invrollback.preview.item.LocationItem
 import me.clearedSpore.sporeCore.menu.invrollback.preview.item.SoftRollbackItem
-import me.clearedSpore.sporeCore.menu.kits.KitsMenu
-import me.clearedSpore.sporeCore.menu.kits.preview.KitPreviewMenu.SimpleItem
 import me.clearedSpore.sporeCore.menu.util.BackItem
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
@@ -62,7 +60,11 @@ class PreviewInventoryMenu(
 
         setMenuItem(9, 6, SoftRollbackItem(target, data))
         setMenuItem(8, 6, ForceRollbackItem(target, data))
-        setMenuItem(7, 6, InfoItem("Experience: ${data.experience.toString().green()}".blue(), Material.EXPERIENCE_BOTTLE, listOf()))
+        setMenuItem(
+            7,
+            6,
+            InfoItem("Experience: ${data.experience.toString().green()}".blue(), Material.EXPERIENCE_BOTTLE, listOf())
+        )
         setMenuItem(6, 6, LocationItem(player, data))
 
         fillEmptySlots()
@@ -70,6 +72,6 @@ class PreviewInventoryMenu(
 
     private class SimpleItem(private val stack: ItemStack) : Item() {
         override fun createItem(): ItemStack = stack
-        override fun onClickEvent(clicker: Player, clickType: ClickType) { }
+        override fun onClickEvent(clicker: Player, clickType: ClickType) {}
     }
 }

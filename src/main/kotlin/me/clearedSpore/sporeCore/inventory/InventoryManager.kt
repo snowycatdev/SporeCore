@@ -9,9 +9,8 @@ import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Tasks
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
-import org.dizitart.no2.filters.FluentFilter
-import org.bukkit.inventory.PlayerInventory
 import org.bukkit.scheduler.BukkitTask
+import org.dizitart.no2.filters.FluentFilter
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -63,7 +62,7 @@ object InventoryManager {
         inventoryCollection.remove(FluentFilter.where("id").eq(id))
     }
 
-    fun clearAll(){
+    fun clearAll() {
         cachedInventories.clear()
         inventoryCollection.clear()
     }
@@ -105,7 +104,7 @@ object InventoryManager {
 
                 RestoreMode.PENDING -> {
                     val user = UserManager.get(playerId)
-                    if(user == null){
+                    if (user == null) {
                         Logger.error("Failed to restore inventory! Player not found!")
                         return
                     }
@@ -116,7 +115,7 @@ object InventoryManager {
             }
         } else {
             val user = UserManager.get(playerId)
-            if(user == null){
+            if (user == null) {
                 Logger.error("Failed to restore inventory! Player not found!")
                 return
             }

@@ -14,7 +14,6 @@ import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 
-
 class FreezeListener : Listener {
 
     @EventHandler
@@ -35,10 +34,10 @@ class FreezeListener : Listener {
 
 
     @EventHandler()
-    fun onBlockPlace(event: BlockPlaceEvent){
+    fun onBlockPlace(event: BlockPlaceEvent) {
         val player = event.player
 
-        if(player.hasMetadata("frozen")){
+        if (player.hasMetadata("frozen")) {
             event.isCancelled = true
             player.updateInventory()
             player.sendMessage("You can't place blocks while being frozen!".red())
@@ -47,10 +46,10 @@ class FreezeListener : Listener {
     }
 
     @EventHandler()
-    fun onBlockBreak(event: BlockBreakEvent){
+    fun onBlockBreak(event: BlockBreakEvent) {
         val player = event.player
 
-        if(player.hasMetadata("frozen")){
+        if (player.hasMetadata("frozen")) {
             event.isCancelled = true
             player.updateInventory()
             player.sendMessage("You can't break blocks while being frozen!".red())
@@ -59,10 +58,10 @@ class FreezeListener : Listener {
     }
 
     @EventHandler()
-    fun onInteract(event: PlayerInteractEvent){
+    fun onInteract(event: PlayerInteractEvent) {
         val player = event.player
 
-        if(player.hasMetadata("frozen")){
+        if (player.hasMetadata("frozen")) {
             event.isCancelled = true
             player.updateInventory()
             player.sendMessage("You can't interact while being frozen!".red())
@@ -71,10 +70,10 @@ class FreezeListener : Listener {
     }
 
     @EventHandler()
-    fun onDropItem(event: PlayerDropItemEvent){
+    fun onDropItem(event: PlayerDropItemEvent) {
         val player = event.player
 
-        if(player.hasMetadata("frozen")){
+        if (player.hasMetadata("frozen")) {
             event.isCancelled = true
             player.updateInventory()
             player.sendMessage("You can't drop items while being frozen!".red())
@@ -103,7 +102,7 @@ class FreezeListener : Listener {
 
 
     @EventHandler()
-    fun onBlockBreak(event: EntityDamageByEntityEvent){
+    fun onBlockBreak(event: EntityDamageByEntityEvent) {
         if (event.damager !is Player) {
             return
         }
@@ -111,17 +110,16 @@ class FreezeListener : Listener {
         val damager = event.damager
 
 
-        if(damager.hasMetadata("frozen")){
+        if (damager.hasMetadata("frozen")) {
             event.isCancelled = true
             damager.sendMessage("You can't break blocks while being frozen!".red())
         }
 
-        if(event.entity is Player && event.entity.hasMetadata("frozen")){
+        if (event.entity is Player && event.entity.hasMetadata("frozen")) {
             damager.sendMessage("That player is currently frozen and can't take damage!")
             return
         }
     }
-
 
 
 }

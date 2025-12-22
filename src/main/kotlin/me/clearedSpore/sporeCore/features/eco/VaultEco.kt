@@ -131,7 +131,12 @@ class VaultEco : Economy {
         Tasks.runAsync {
             user.logEconomy(EcoAction.REMOVED, amount, "Vault withdrawal by a different plugin")
             UserManager.save(user)
-            EconomyService.logConsole(user.playerName, EcoAction.REMOVED, amount, "Vault withdrawal by a different plugin")
+            EconomyService.logConsole(
+                user.playerName,
+                EcoAction.REMOVED,
+                amount,
+                "Vault withdrawal by a different plugin"
+            )
         }
 
         return EconomyResponse(amount, user.balance, ResponseType.SUCCESS, null)
@@ -164,7 +169,12 @@ class VaultEco : Economy {
         Tasks.runAsync {
             user.logEconomy(EcoAction.ADDED, amount, "Vault deposit by a different plugin")
             UserManager.save(user)
-            EconomyService.logConsole(user.playerName, EcoAction.ADDED, amount, "Vault withdrawal by a different plugin")
+            EconomyService.logConsole(
+                user.playerName,
+                EcoAction.ADDED,
+                amount,
+                "Vault withdrawal by a different plugin"
+            )
         }
 
         return EconomyResponse(amount, user.balance, ResponseType.SUCCESS, null)

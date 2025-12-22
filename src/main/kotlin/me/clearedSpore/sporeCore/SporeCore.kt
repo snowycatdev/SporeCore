@@ -10,6 +10,15 @@ import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeCore.acf.ConfirmCondition
 import me.clearedSpore.sporeCore.acf.CooldownCondition
 import me.clearedSpore.sporeCore.acf.ItemCompletions.registerItemCompletions
+import me.clearedSpore.sporeCore.acf.TargetSelectorResolver
+import me.clearedSpore.sporeCore.acf.TargetType
+import me.clearedSpore.sporeCore.acf.error.PlayerOnlyResolver
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetEntities
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetSinglePlayer
+import me.clearedSpore.sporeCore.acf.targets.resolver.AnyTargetResolver
+import me.clearedSpore.sporeCore.acf.targets.resolver.SinglePlayerResolver
+import me.clearedSpore.sporeCore.annotations.Setting
 import me.clearedSpore.sporeCore.commands.*
 import me.clearedSpore.sporeCore.commands.channel.ChannelCommand
 import me.clearedSpore.sporeCore.commands.currency.CurrencyCommand
@@ -34,12 +43,7 @@ import me.clearedSpore.sporeCore.commands.privatemessages.ReplyCommand
 import me.clearedSpore.sporeCore.commands.spawn.SetSpawnCommand
 import me.clearedSpore.sporeCore.commands.spawn.SpawnCommand
 import me.clearedSpore.sporeCore.commands.teleport.*
-import me.clearedSpore.sporeCore.commands.util.UtilCommand
-import me.clearedSpore.sporeCore.commands.util.UtilInventoryCommand
-import me.clearedSpore.sporeCore.commands.util.UtilItemCommand
-import me.clearedSpore.sporeCore.commands.util.UtilPlayerCommand
-import me.clearedSpore.sporeCore.commands.util.UtilServerCommand
-import me.clearedSpore.sporeCore.commands.util.UtilWorldCommand
+import me.clearedSpore.sporeCore.commands.util.*
 import me.clearedSpore.sporeCore.commands.utilitymenus.*
 import me.clearedSpore.sporeCore.database.Database
 import me.clearedSpore.sporeCore.database.DatabaseManager
@@ -50,21 +54,19 @@ import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.features.eco.VaultEco
 import me.clearedSpore.sporeCore.features.homes.HomeService
 import me.clearedSpore.sporeCore.features.kit.KitService
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
 import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.features.mode.listener.ModeListener
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
+import me.clearedSpore.sporeCore.features.setting.SettingRegistry
 import me.clearedSpore.sporeCore.features.stats.PlaytimeTracker
 import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.features.warp.WarpService
 import me.clearedSpore.sporeCore.hook.PlaceholderAPIHook
 import me.clearedSpore.sporeCore.inventory.InventoryManager
-import me.clearedSpore.sporeCore.listener.ChatListener
-import me.clearedSpore.sporeCore.listener.DeathListener
-import me.clearedSpore.sporeCore.listener.FreezeListener
-import me.clearedSpore.sporeCore.listener.InventoryListener
-import me.clearedSpore.sporeCore.listener.LocationListener
-import me.clearedSpore.sporeCore.listener.LoggerEvent
+import me.clearedSpore.sporeCore.listener.*
 import me.clearedSpore.sporeCore.task.ActionBarTicker
 import me.clearedSpore.sporeCore.task.TpsTask
 import me.clearedSpore.sporeCore.task.VanishTask
@@ -76,16 +78,19 @@ import me.clearedSpore.sporeCore.util.UpdateChecker
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission
+import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import java.net.URLClassLoader
+import java.util.jar.JarFile
 
 
 class SporeCore : JavaPlugin() {
@@ -100,6 +105,9 @@ class SporeCore : JavaPlugin() {
     lateinit var coreConfig: CoreConfig
     lateinit var database: Database
 
+    lateinit var logService: LogsService
+    lateinit var resolver: TargetSelectorResolver
+    lateinit var settingRegistry: SettingRegistry
     lateinit var warpService: WarpService
     lateinit var homeService: HomeService
     lateinit var kitService: KitService
@@ -134,6 +142,8 @@ class SporeCore : JavaPlugin() {
         Perm.registerAll()
         chatInput = ChatInput(this)
 
+        val pluginID = 28481
+        Metrics(this, pluginID)
 
         updateChecker = UpdateChecker()
 
@@ -156,13 +166,18 @@ class SporeCore : JavaPlugin() {
 
         val features = coreConfig.features
 
-        if(features.modes){
+        if (features.modes) {
             ModeService.initialize()
 
             server.pluginManager.registerEvents(
                 ModeListener { player -> ModeService.getPlayerMode(player) },
                 this
             )
+        }
+
+        if (features.settings) {
+            settingRegistry = SettingRegistry(this)
+            settingRegistry.loadAllSettings()
         }
 
         if (features.warps) {
@@ -177,11 +192,11 @@ class SporeCore : JavaPlugin() {
             kitService = KitService()
         }
 
-        if(coreConfig.discord.enabled){
+        if (coreConfig.discord.enabled) {
             loadDiscord()
         }
 
-        if(features.vanish){
+        if (features.vanish) {
             VanishTask.start()
         }
 
@@ -203,11 +218,11 @@ class SporeCore : JavaPlugin() {
     override fun onDisable() {
         val features = coreConfig.features
 
-        if(features.modes){
+        if (features.modes) {
             ModeService.disableAll()
         }
 
-        if(features.vanish) {
+        if (features.vanish) {
             Logger.info("Unvanishing everyone....")
             val vanished = VanishService.vanishedPlayers.size
             VanishService.vanishedPlayers.forEach { uuid -> VanishService.unVanish(uuid) }
@@ -218,6 +233,8 @@ class SporeCore : JavaPlugin() {
 
         TpsTask.stop()
 
+        LogsService.cleanupLogs()
+        LogsService.stopCleanupTask()
 
         ActionBarTicker.stop()
 
@@ -253,7 +270,7 @@ class SporeCore : JavaPlugin() {
         }
     }
 
-    fun loadDiscord(){
+    fun loadDiscord() {
         try {
             DiscordService.start()
         } catch (e: Exception) {
@@ -297,14 +314,16 @@ class SporeCore : JavaPlugin() {
         perms = rsp?.provider
     }
 
+
     fun registerListeners() {
-        server.pluginManager.registerEvents(LoggerEvent(), this)
         server.pluginManager.registerEvents(ChatListener(), this)
         server.pluginManager.registerEvents(DeathListener(), this)
-        server.pluginManager.registerEvents(LocationListener(), this)
+        server.pluginManager.registerEvents(InventoryListener(), this)
+        server.pluginManager.registerEvents(CommandListener(), this)
         server.pluginManager.registerEvents(FreezeListener(), this)
+        server.pluginManager.registerEvents(LocationListener(), this)
         server.pluginManager.registerEvents(TpsTask, this)
-        if(coreConfig.features.invRollback) {
+        if (coreConfig.features.invRollback) {
             server.pluginManager.registerEvents(InventoryListener(), this)
         }
     }
@@ -363,13 +382,13 @@ class SporeCore : JavaPlugin() {
 
         val features = coreConfig.features
 
-        if(features.warps) {
+        if (features.warps) {
             commandManager.registerDependency(WarpService::class.java, warpService)
         }
-        if(features.homes) {
+        if (features.homes) {
             commandManager.registerDependency(HomeService::class.java, homeService)
         }
-        if(features.kits) {
+        if (features.kits) {
             commandManager.registerDependency(KitService::class.java, kitService)
         }
 
@@ -464,6 +483,7 @@ class SporeCore : JavaPlugin() {
         registerCommand(SudoCommand())
         registerCommand(PingCommand())
         registerCommand(WhoisCommand())
+        registerCommand(GetLogsCommand())
 
         //util commands
         commandManager.registerCommand(UtilCommand())
@@ -477,11 +497,11 @@ class SporeCore : JavaPlugin() {
             registerCommand(ChatColorCommand())
         }
 
-        if(features.vanish){
+        if (features.vanish) {
             registerCommand(VanishCommand())
         }
 
-        if(features.modes){
+        if (features.modes) {
             registerCommand(ModeCommand())
             for (mode in ModeService.getModes()) {
                 val cmd = CustomModeCommand(mode)
@@ -493,7 +513,7 @@ class SporeCore : JavaPlugin() {
             }
         }
 
-        if(features.invRollback) {
+        if (features.invRollback) {
             registerCommand(InvRollbackCommand())
         }
 
@@ -550,8 +570,16 @@ class SporeCore : JavaPlugin() {
         val locales = commandManager.locales
 
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_HEADER, "$prefix &fAvailable Commands:")
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_FORMAT, "/{command} &7{parameters} &f- {description}".blue())
-        locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_PAGE_INFORMATION, "Page {page} out of {totalpages} pages".blue())
+        locales.addMessage(
+            Locales.ENGLISH,
+            MessageKeys.HELP_FORMAT,
+            "/{command} &7{parameters} &f- {description}".blue()
+        )
+        locales.addMessage(
+            Locales.ENGLISH,
+            MessageKeys.HELP_PAGE_INFORMATION,
+            "Page {page} out of {totalpages} pages".blue()
+        )
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_NO_RESULTS, "No results were found!".red())
         locales.addMessage(Locales.ENGLISH, MessageKeys.HELP_SEARCH_HEADER, "Results for &f{search}".blue())
 
@@ -584,6 +612,8 @@ class SporeCore : JavaPlugin() {
         ConfirmCondition.register(commandManager)
         CooldownCondition.register(commandManager)
 
+        registerTargetSelectors()
+
         commandManager.commandContexts.registerContext(Enchantment::class.java) { c ->
             val input = c.popFirstArg().lowercase()
             val enchant = Enchantment.values().firstOrNull {
@@ -607,7 +637,7 @@ class SporeCore : JavaPlugin() {
             }
         }
 
-        commandManager.enableUnstableAPI("help");
+        commandManager.enableUnstableAPI("help")
 
     }
 
@@ -628,7 +658,7 @@ class SporeCore : JavaPlugin() {
                 .map { it.name.lowercase() }
         }
 
-        if(coreConfig.features.warps) {
+        if (coreConfig.features.warps) {
             commandManager.commandCompletions.registerCompletion("warps") { context ->
                 val player = context.player
                 if (player == null) return@registerCompletion emptyList<String>()
@@ -760,6 +790,10 @@ class SporeCore : JavaPlugin() {
             listOf("10s", "30s", "1m", "5m", "10m", "30m", "1h", "1d", "7d")
         }
 
+        commandManager.commandCompletions.registerCompletion("logtypes") { context ->
+            LogType.values().map { it.name }
+        }
+
 
         commandManager.commandCompletions.registerCompletion("removalReasons") { context ->
             PunishmentService.config.removalReasons.reasons.toList()
@@ -768,4 +802,62 @@ class SporeCore : JavaPlugin() {
 
         commandManager.registerItemCompletions()
     }
+
+    fun registerTargetSelectors() {
+        resolver = TargetSelectorResolver()
+
+        commandManager.commandContexts.registerContext(
+            TargetPlayers::class.java,
+            PlayerOnlyResolver()
+        )
+
+        commandManager.commandContexts.registerContext(
+            TargetEntities::class.java,
+            AnyTargetResolver()
+        )
+
+        commandManager.commandContexts.registerContext(
+            TargetSinglePlayer::class.java,
+            SinglePlayerResolver()
+        )
+
+
+        commandManager.commandContexts.registerContext(
+            Collection::class.java as Class<Collection<Entity>>
+        ) { ctx ->
+            TargetSelectorResolver(TargetType.ALL).getContext(ctx)
+        }
+
+        commandManager.commandCompletions.registerCompletion("targets") { context ->
+            val input = context.input ?: ""
+            resolver.getTabCompletions(input)
+        }
+    }
+
+    private fun getClassesInPackage(packageName: String): List<Class<*>> {
+        val path = packageName.replace('.', '/')
+        val classLoader = javaClass.classLoader as URLClassLoader
+        val classes = mutableListOf<Class<*>>()
+
+        classLoader.urLs.forEach { url ->
+            if (url.path.endsWith(".jar")) {
+                val jarFile = JarFile(url.path)
+                jarFile.entries().asSequence().forEach { entry ->
+                    if (entry.name.endsWith(".class") && entry.name.startsWith(path)) {
+                        val className = entry.name.removeSuffix(".class").replace('/', '.')
+                        try {
+                            val clazz = Class.forName(className)
+                            if (clazz.getAnnotation(Setting::class.java) != null) {
+                                classes.add(clazz)
+                            }
+                        } catch (_: Exception) {
+                        }
+                    }
+                }
+            }
+        }
+
+        return classes
+    }
+
 }

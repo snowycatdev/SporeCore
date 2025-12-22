@@ -8,7 +8,7 @@ data class ChatColor(
     var name: String,
     var colorString: String,
     var material: String
-){
+) {
 
     companion object {
         fun fromDocument(doc: Document?): ChatColor? {

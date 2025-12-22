@@ -1,6 +1,5 @@
 package me.clearedSpore.sporeCore.features.kit
 
-import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
@@ -12,7 +11,7 @@ import me.clearedSpore.sporeCore.features.kit.`object`.Kit
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 
 class KitService {
 

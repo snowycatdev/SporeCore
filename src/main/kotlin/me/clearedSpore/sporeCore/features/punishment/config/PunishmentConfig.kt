@@ -2,7 +2,6 @@ package me.clearedSpore.sporeCore.features.punishment.config
 
 import de.exlll.configlib.Comment
 import de.exlll.configlib.Configuration
-import me.clearedSpore.sporeCore.database.Database
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 
 @Configuration

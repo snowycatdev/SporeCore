@@ -1,12 +1,11 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
+import co.aikar.commands.InvalidCommandArgument
 import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -15,48 +14,34 @@ import org.bukkit.entity.Player
 class FlyCommand : BaseCommand() {
 
     @Default
-    @CommandCompletion("@players")
-    @Syntax("[player]")
-    fun onFly(sender: CommandSender, @Optional targetName: String?) {
-        val target: Player? = when {
-            sender is Player && targetName == null -> sender
-            targetName != null -> Bukkit.getPlayer(targetName)
-            else -> null
+    @CommandCompletion("@targets")
+    fun onFly(sender: CommandSender, @Optional targets: TargetPlayers?) {
+
+        val resolved = targets ?: when (sender) {
+            is Player -> listOf(sender)
+            else -> throw InvalidCommandArgument("You must specify a player.")
         }
 
-        if (target == null) {
-            sender.sendMessage("That player is not online!".red())
-            return
+        val players = resolved.filter {
+            sender == it || sender.hasPermission(Perm.FLIGHT_OTHERS)
         }
 
-        if (sender != target && !sender.hasPermission(Perm.FLIGHT_OTHERS)) {
-            sender.sendMessage("You don't have permission to toggle other players their flight".red())
-            return
+        if (players.isEmpty()) {
+            throw InvalidCommandArgument("No valid players.")
         }
 
-        val flyEnabled: Boolean = target.allowFlight
-        target.allowFlight = !flyEnabled
-
-        if (sender == target) {
-            sender.sendMessage("Your flight has been ${if (flyEnabled) "disabled" else "enabled"}".blue())
-        } else {
-            sender.sendMessage("You have ${if (flyEnabled) "disabled" else "enabled"} ${target.name}'s flight.".blue())
-            target.sendMessage("Your flight has been ${if (flyEnabled) "disabled" else "enabled"}".blue())
-        }
-    }
-
-    @Subcommand("*")
-    @CommandCompletion("true|false")
-    @CommandPermission(Perm.FLIGHT_OTHERS)
-    fun onAll(sender: CommandSender, status: Boolean) {
-
-        Bukkit.getOnlinePlayers().forEach { player ->
-            player.allowFlight = status
-            player.sendMessage("Your flight has been ${if (status) "disabled" else "enabled"}".blue())
+        players.forEach {
+            it.allowFlight = !it.allowFlight
+            it.sendMessage(
+                "Your flight has been ${if (it.allowFlight) "enabled" else "disabled"}.".blue()
+            )
         }
 
-        val players = Bukkit.getOnlinePlayers().size -1
-
-        sender.sendMessage("Successfully ${if (status) "disabled" else "enabled"} flight for $players players.".blue())
+        sender.sendMessage(
+            if (players.size == 1)
+                "Flight toggled for ${players.first().name}.".blue()
+            else
+                "Flight toggled for ${players.size} players.".blue()
+        )
     }
 }

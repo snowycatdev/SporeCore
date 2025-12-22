@@ -36,5 +36,6 @@ class WarpsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.instan
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

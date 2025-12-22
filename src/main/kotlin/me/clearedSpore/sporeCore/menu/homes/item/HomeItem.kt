@@ -2,16 +2,14 @@ package me.clearedSpore.sporeCore.menu.homes.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.green
+import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.homes.`object`.Home
 import me.clearedSpore.sporeCore.menu.util.confirm.ConfirmMenu
 import me.clearedSpore.sporeCore.user.User
-import me.clearedSpore.sporeCore.util.TeleportService.awaitTeleport
 import org.bukkit.Material
-import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
@@ -41,6 +39,7 @@ class HomeItem(
                 clicker.closeInventory()
                 clicker.teleport(home.location)
             }
+
             clickType.isRightClick && clickType.isShiftClick -> {
                 ConfirmMenu(clicker) {
                     homeService.deleteHome(user, home.name)

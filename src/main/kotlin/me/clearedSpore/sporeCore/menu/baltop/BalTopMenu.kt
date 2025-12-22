@@ -1,7 +1,6 @@
 package me.clearedSpore.sporeCore.menu.baltop
 
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
-import me.clearedSpore.sporeAPI.menu.PaginatedMenu
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.menu.baltop.item.BalTopItem
@@ -9,7 +8,6 @@ import me.clearedSpore.sporeCore.menu.baltop.item.NoBalancesItem
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
-import kotlin.math.max
 
 
 class BalTopMenu(private val viewer: Player) : BasePaginatedMenu(SporeCore.instance, true) {
@@ -25,7 +23,7 @@ class BalTopMenu(private val viewer: Player) : BasePaginatedMenu(SporeCore.insta
             addItem(NoBalancesItem())
             return
         }
-        
+
         addSearchItem(5, 6, SporeCore.instance.chatInput)
 
         topList.forEachIndexed { index, (player, balance) ->

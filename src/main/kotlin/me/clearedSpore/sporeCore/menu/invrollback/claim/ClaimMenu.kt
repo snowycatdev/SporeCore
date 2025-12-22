@@ -1,7 +1,6 @@
 package me.clearedSpore.sporeCore.menu.invrollback.claim
 
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
-import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.inventory.InventoryManager
 import me.clearedSpore.sporeCore.user.UserManager
@@ -35,5 +34,6 @@ class ClaimMenu(
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

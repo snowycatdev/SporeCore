@@ -1,12 +1,7 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
@@ -23,7 +18,7 @@ import org.bukkit.entity.Player
 class ChatColorCommand : BaseCommand() {
 
     @Default()
-    fun onChatColor(player: Player){
+    fun onChatColor(player: Player) {
         ChatColorMenu(player).open(player)
     }
 
@@ -32,19 +27,19 @@ class ChatColorCommand : BaseCommand() {
     @CommandCompletion("@players @colors")
     @CommandPermission(Perm.ADMIN)
     @Syntax("<player> <color>")
-    fun onSetColor(sender: CommandSender, targetName: String, colorStr: String){
+    fun onSetColor(sender: CommandSender, targetName: String, colorStr: String) {
         val target = Bukkit.getOfflinePlayer(targetName)
 
         val user = UserManager.get(target)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
 
         val color = ChatColorService.getColorByKey(colorStr)
 
-        if(color == null){
+        if (color == null) {
             sender.sendMessage("That color does not exist!".red())
             return
         }

@@ -1,34 +1,32 @@
 package me.clearedSpore.sporeCore.listener
 
-import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 
-
 class LocationListener : Listener {
 
 
     @EventHandler
-    fun onLeave(event: PlayerQuitEvent){
+    fun onLeave(event: PlayerQuitEvent) {
         val player = event.player
         val user = UserManager.get(player)
-        if(user == null) return
+        if (user == null) return
 
-        if(user.lastLocation != null){
+        if (user.lastLocation != null) {
             user.lastLocation = null
         }
 
     }
 
     @EventHandler
-    fun onTeleport(event: PlayerTeleportEvent){
+    fun onTeleport(event: PlayerTeleportEvent) {
         val player = event.player
         val from = event.from
         val user = UserManager.get(player)
-        if(user == null) return
+        if (user == null) return
 
         user.lastLocation = from
 

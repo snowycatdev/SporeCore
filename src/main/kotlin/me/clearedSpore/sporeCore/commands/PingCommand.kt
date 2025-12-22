@@ -7,11 +7,8 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.orange
 import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeAPI.util.CC.yellow
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 @CommandAlias("ping")
@@ -36,7 +33,7 @@ class PingCommand : BaseCommand() {
             sender.sendMessage("Your ping is $formattedPing".blue())
         } else {
 
-            if(!sender.hasPermission(Perm.PING_OTHERS)){
+            if (!sender.hasPermission(Perm.PING_OTHERS)) {
                 sender.sendErrorMessage("You don't have permission to check other players their ping!".red())
                 return
             }

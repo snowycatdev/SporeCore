@@ -3,12 +3,8 @@ package me.clearedSpore.sporeCore.menu.stat.item
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
-import me.clearedSpore.sporeAPI.util.CC.white
-import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.features.eco.EconomyService
-import me.clearedSpore.sporeCore.features.stats.StatService
 import me.clearedSpore.sporeCore.menu.util.NoUserItem
-import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
@@ -25,7 +21,7 @@ class BalanceItem(
 
         val user = UserManager.get(player)
 
-        if(user == null) return NoUserItem.toItemStack()
+        if (user == null) return NoUserItem.toItemStack()
 
         meta.setDisplayName("Balance".blue())
         meta.lore = listOf<String>(

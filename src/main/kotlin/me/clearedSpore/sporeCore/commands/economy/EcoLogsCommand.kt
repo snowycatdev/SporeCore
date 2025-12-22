@@ -22,7 +22,7 @@ class EcoLogsCommand : BaseCommand() {
         val logPage = page ?: 1
         val user = UserManager.get(Bukkit.getOfflinePlayer(targetName).uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }

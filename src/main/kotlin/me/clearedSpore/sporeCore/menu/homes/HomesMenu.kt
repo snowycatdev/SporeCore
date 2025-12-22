@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.menu.homes
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
-import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.features.homes.HomeService
 import me.clearedSpore.sporeCore.menu.homes.item.HomeItem
 import me.clearedSpore.sporeCore.menu.homes.item.NoHomesItem
@@ -27,7 +26,7 @@ class HomesMenu(
     override fun createItems() {
         val user = UserManager.get(player)
 
-        if(user == null){
+        if (user == null) {
             viewer.userFail()
             return
         }
@@ -48,5 +47,6 @@ class HomesMenu(
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

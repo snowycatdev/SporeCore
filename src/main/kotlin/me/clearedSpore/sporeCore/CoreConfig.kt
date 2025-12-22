@@ -43,6 +43,8 @@ data class CoreConfig(
 
     var inventories: InventoryConfig = InventoryConfig(),
 
+    var logs: LogsConfig = LogsConfig(),
+
     var broadcastConfig: BroadcastConfig = BroadcastConfig(),
 
     var economy: EconomyConfig = EconomyConfig(),
@@ -134,6 +136,36 @@ data class StoreReasonsConfig(
 )
 
 @Configuration
+data class LogsConfig(
+
+    @Comment(
+        "Enable or disable specific log types.",
+        "Set 'false' to stop storing logs of that type.",
+        "Here is an explanation for each log",
+        "",
+        "Join/Leave -> When a player joins or leaves the server",
+        "Private Message -> When a player sends or receives a private message",
+        "Teleport -> When a player teleports",
+        "Chat -> When a player sends a chat message",
+        "Command -> When a player runs a command",
+        "Freeze -> When a player freezes someone or they get frozen."
+    )
+    var joinLeave: Boolean = true,
+    var privateMessages: Boolean = true,
+    var teleports: Boolean = true,
+    var chat: Boolean = true,
+    var commands: Boolean = true,
+    var freeze: Boolean = true,
+
+    @Comment(
+        "Logs older than .... will be deleted",
+        "You can ues the s, m, h, d format!",
+        "example: 10s, 7m, 7d"
+    )
+    var cleanupTime: String = "7d"
+)
+
+@Configuration
 data class JoinConfig(
 
     @Comment(
@@ -209,7 +241,38 @@ data class ChatConfig(
     )
     var formatting: ChatFormatterConfig = ChatFormatterConfig(),
 
+    var mentions: MentionsConfig = MentionsConfig(),
+
     var channels: ChatChannelsConfig = ChatChannelsConfig()
+)
+
+@Configuration
+data class MentionsConfig(
+
+    @Comment(
+        "If you want the mentions feature to be enabled. This makes it so",
+        "when you say a players name in chat they receive a titl, actionbar, sound.",
+        "You can modify what the player sees when they get mentioned"
+    )
+    var enabled: Boolean = true,
+
+    @Comment(
+        "Set this to nothing if you don't want to",
+        "display a title!",
+        "You can use the %player% placeholder",
+        "to display the player that mentioned you."
+    )
+    var title: String = "&b&lMention!",
+
+    var subTitle: String = "&f%player% has mentioned you!",
+
+    var actionBar: String = "&f%player% &7has mentioned you in chat!",
+
+    @Comment(
+        "The sound the player will",
+        "hear when they get mentioned!"
+    )
+    var sound: String = "ENTITY_PLAYER_LEVELUP"
 )
 
 @Configuration
@@ -242,8 +305,24 @@ data class ChatChannelsConfig(
         "%message% -> The message from the player"
     )
     var channels: MutableMap<String, ChannelConfig> = mutableMapOf(
-        "staff" to ChannelConfig("Staff", "staff", "sporecore.channel.staff", "&b&lStaff", "&b&lStaff &7-> &9%player%&f: %message%", listOf("staffchat", "sc"), "#"),
-        "admin" to ChannelConfig("Admin", "admin", "sporecore.channel.admin", "&c&lAdmin", "&c&lAdmin &7-> &c%player%&f: %message%", listOf("adminchat", "ac"), "@")
+        "staff" to ChannelConfig(
+            "Staff",
+            "staff",
+            "sporecore.channel.staff",
+            "&b&lStaff",
+            "&b&lStaff &7-> &9%player%&f: %message%",
+            listOf("staffchat", "sc"),
+            "#"
+        ),
+        "admin" to ChannelConfig(
+            "Admin",
+            "admin",
+            "sporecore.channel.admin",
+            "&c&lAdmin",
+            "&c&lAdmin &7-> &c%player%&f: %message%",
+            listOf("adminchat", "ac"),
+            "@"
+        )
     )
 )
 

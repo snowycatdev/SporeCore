@@ -6,8 +6,8 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
 import me.clearedSpore.sporeCore.util.Perm
-import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -17,44 +17,33 @@ import org.bukkit.entity.Player
 class CreativeCommand : BaseCommand() {
 
     @Default
-    @CommandCompletion("@players")
+    @CommandCompletion("@targets")
     @Syntax("<player>")
-    fun onCreative(sender: CommandSender, @Optional targetName: String?) {
-        if (sender !is Player && targetName == null) {
-            sender.sendMessage("You must specify a player name when running this command from console.".red())
+    fun onCreative(sender: CommandSender, @Optional targets: TargetPlayers?) {
+
+        val resolved = targets ?: when (sender) {
+            is Player -> listOf(sender)
+            else -> {
+                sender.sendMessage("You must specify a player when running this command from console.".red())
+                return
+            }
+        }
+
+        val players = resolved.filter { sender == it || sender.hasPermission(Perm.GAMEMODE_OTHERS) }
+
+        if (players.isEmpty()) {
+            sender.sendMessage("No valid players.".red())
             return
         }
 
-        val target: Player? = when {
-            sender is Player && targetName == null -> sender
-            targetName != null -> Bukkit.getPlayerExact(targetName)
-            else -> null
+        players.forEach { target ->
+            target.gameMode = GameMode.CREATIVE
+            if (sender == target) {
+                Logger.log(sender, Perm.LOG, "changed their gamemode to Creative", false)
+            } else {
+                Logger.log(sender, Perm.LOG, "changed ${target.name}’s gamemode to Creative", false)
+            }
+            sender.sendMessage("You updated ".blue() + target.name.white() + "’s gamemode to Creative.".blue())
         }
-
-        if (target == null) {
-            sender.sendMessage("That player is not online!".red())
-            return
-        }
-
-        target.gameMode = GameMode.CREATIVE
-
-        if (sender == target) {
-            Logger.log(sender, Perm.LOG, "changed their gamemode to Creative", false)
-        } else {
-            Logger.log(sender, Perm.LOG, "changed ${target.name}’s gamemode to Creative", false)
-        }
-        sender.sendMessage(
-            "You updated ".blue() +
-                    target.name.white() +
-                    "’s gamemode to Creative.".blue()
-        )
-    }
-
-    @Subcommand("*")
-    @CommandPermission(Perm.GAMEMODE_OTHERS)
-    fun onAll(sender: CommandSender) {
-        Bukkit.getOnlinePlayers().forEach { it.gameMode = GameMode.CREATIVE }
-        Logger.log(sender, Perm.LOG, "set everyone’s gamemode to Creative", false)
-        sender.sendMessage("You set everyone’s gamemode to Creative.".blue())
     }
 }

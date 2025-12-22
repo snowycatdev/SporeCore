@@ -2,8 +2,8 @@ package me.clearedSpore.sporeCore.listener
 
 import me.clearedSpore.sporeAPI.event.PlayerPreLogEvent
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
+import me.clearedSpore.sporeCore.features.setting.impl.LogsSetting
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -23,7 +23,7 @@ class LoggerEvent : Listener {
         }
 
         if ((player.hasPermission(Perm.LOG) || player.hasPermission(Perm.ADMIN_LOG))
-            && !user.isSettingEnabled(Setting.LOGS)
+            && !user.getSettingOrDefault(LogsSetting())
         ) {
             event.isCancelled = true
         }

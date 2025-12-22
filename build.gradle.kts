@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "me.clearedSpore"
-version = "2.5"
+version = "2.6"
 
 repositories {
     mavenCentral()
@@ -21,9 +21,10 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    implementation("org.bstats:bstats-bukkit:3.1.0")
 
     implementation(kotlin("reflect"))
-    implementation(kotlin("stdlib"))
+    //implementation(kotlin("stdlib"))
 
     compileOnly("org.projectlombok:lombok:1.18.30")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
@@ -34,10 +35,12 @@ dependencies {
         exclude(group = "org.yaml", module = "snakeyaml")
     }
     implementation("com.github.Exlll.ConfigLib:configlib-yaml:v4.6.1")
-    implementation("com.github.Clearedspore:SporeAPI:2.1")
+    implementation("com.github.Clearedspore:SporeAPI:2.2")
     compileOnly("org.dizitart:nitrite:4.3.2")
     compileOnly(platform("org.dizitart:nitrite-bom:4.3.2"))
     compileOnly("org.dizitart:nitrite-mvstore-adapter:4.3.2")
+
+    compileOnly("org.reflections:reflections:0.10.2")
 
     compileOnly("com.github.ben-manes.caffeine:caffeine:3.2.3")
 
@@ -49,7 +52,7 @@ tasks {
     shadowJar {
         relocate("co.aikar.commands", "me.clearedspore.sporeCore.shaded.acf")
         relocate("co.aikar.locales", "me.clearedspore.sporeCore.shaded.acf.locales")
-
+        relocate("org.bstats", "me.clearedspore.sporeCore.shaded.bstats")
 
         manifest {
             attributes(

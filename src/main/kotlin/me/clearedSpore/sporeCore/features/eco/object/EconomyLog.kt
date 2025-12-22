@@ -21,7 +21,7 @@ data class EconomyLog(
             val action = EcoAction.valueOf(doc.get("action") as? String ?: EcoAction.ADDED.name)
             val amount = (doc.get("amount") as? Number)?.toDouble() ?: 0.0
             val reason = doc.get("reason") as? String ?: ""
-            val timestamp = when(val t = doc.get("timestamp")) {
+            val timestamp = when (val t = doc.get("timestamp")) {
                 is Long -> t
                 is Number -> t.toLong()
                 is String -> t.toLongOrNull() ?: System.currentTimeMillis()

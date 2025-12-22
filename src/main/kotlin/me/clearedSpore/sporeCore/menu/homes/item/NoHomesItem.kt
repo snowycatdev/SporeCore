@@ -21,8 +21,8 @@ class NoHomesItem(
         meta?.setDisplayName("No homes".red())
 
         val lore = mutableListOf<String>()
-        if(target == viewer){
-        lore.add("You don't have any homes!".white())
+        if (target == viewer) {
+            lore.add("You don't have any homes!".white())
         } else {
             lore.add("${target.name} does not have any homes!".white())
         }

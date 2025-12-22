@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.menu.invrollback.preview.item
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
-import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
@@ -40,7 +39,7 @@ class ForceRollbackItem(
     }
 
     override fun onClickEvent(clicker: Player, clickType: ClickType) {
-        if(!target.isOnline){
+        if (!target.isOnline) {
             clicker.sendErrorMessage("Player must be online to override!")
             return
         }
@@ -79,12 +78,12 @@ class ForceRollbackItem(
 
                     data.rollbackIssuer = clicker.name
 
-                    if(config.inventories.deleteAfterRestore) {
+                    if (config.inventories.deleteAfterRestore) {
                         InventoryManager.removeInventory(data.id)
                     }
 
                     clicker.sendSuccessMessage("Restored ${target.name}'s inventory!")
-                } catch (e: Exception){
+                } catch (e: Exception) {
                     Logger.error("Failed to send discord message!")
                     e.printStackTrace()
                 }

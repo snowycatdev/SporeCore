@@ -3,15 +3,17 @@ package me.clearedSpore.sporeCore.extension
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.util.*
 
 
 object PlayerExtension {
 
-    fun Player.refresh(){
+    fun Player.refresh() {
         Bukkit.getOnlinePlayers().forEach { onlinePlayer ->
             this.hidePlayer(SporeCore.instance, onlinePlayer)
             this.showPlayer(SporeCore.instance, onlinePlayer)
@@ -26,6 +28,17 @@ object PlayerExtension {
         }
     }
 
+    fun CommandSender.uuid(): UUID {
+        return if (this is Player) {
+            this.uniqueId
+        } else {
+            UUID.fromString(UserManager.getConsoleUser().uuidStr)
+        }
+    }
+
+    fun CommandSender.uuidStr(): String {
+        return if (this is Player) this.uniqueId.toString() else UserManager.getConsoleUser().uuid.toString()
+    }
 
     fun CommandSender.userFail() {
         val prefix = Logger.pluginName

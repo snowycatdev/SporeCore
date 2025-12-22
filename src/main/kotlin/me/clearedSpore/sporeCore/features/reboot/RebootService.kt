@@ -4,11 +4,9 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
-import okhttp3.Call
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.scheduler.BukkitTask
-import org.eclipse.sisu.inject.Sources
 import kotlin.math.roundToLong
 
 
@@ -81,7 +79,7 @@ object RebootService {
         val subtitle = "Rebooting in §f$formatted".blue()
 
         Bukkit.getOnlinePlayers().forEach {
-            if(isCountdown) {
+            if (isCountdown) {
                 it.sendTitle(title, subtitle, 0, 40, 0)
             } else {
                 it.sendTitle(title, subtitle, 10, 20, 10)

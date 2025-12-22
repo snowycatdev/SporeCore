@@ -1,35 +1,25 @@
 package me.clearedSpore.sporeCore.commands.util
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.CommandHelp
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Name
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeAPI.util.ItemUtil
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.StringUtil.joinWithSpaces
-import me.clearedSpore.sporeCore.extension.PlayerExtension
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.features.vanish.VanishService
-import me.clearedSpore.sporeCore.inventory.InventoryManager
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.button.TextButton
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.JoinConfiguration
 
 
 @CommandAlias("util")
@@ -39,10 +29,10 @@ class UtilPlayerCommand : BaseCommand() {
     @Subcommand("player uuid")
     @CommandPermission(Perm.UTIL_PLAYER)
     @CommandCompletion("@players")
-    fun getUUID(sender: CommandSender, @Name("player") targetName: String){
+    fun getUUID(sender: CommandSender, @Name("player") targetName: String) {
         val target = Bukkit.getOfflinePlayer(targetName)
 
-        if(!target.hasPlayedBefore()){
+        if (!target.hasPlayedBefore()) {
             sender.userJoinFail()
             return
         }
@@ -82,7 +72,11 @@ class UtilPlayerCommand : BaseCommand() {
     @Subcommand("player sendmessage")
     @CommandPermission(Perm.UTIL_PLAYER)
     @CommandCompletion("@players")
-    fun onSendMessage(sender: CommandSender, @Name("player") targetOnline: OnlinePlayer, @Name("message") messageParts: String){
+    fun onSendMessage(
+        sender: CommandSender,
+        @Name("player") targetOnline: OnlinePlayer,
+        @Name("message") messageParts: String
+    ) {
         val target = targetOnline.player
         val message = messageParts.joinWithSpaces()
 
@@ -97,7 +91,7 @@ class UtilPlayerCommand : BaseCommand() {
     fun skullId(sender: CommandSender, skullId: String) {
         val head = ItemStack(org.bukkit.Material.PLAYER_HEAD)
         val meta = head.itemMeta as SkullMeta
-        meta.setOwnerProfile(Bukkit.getOfflinePlayer(skullId).playerProfile)
+        meta.ownerProfile = Bukkit.getOfflinePlayer(skullId).playerProfile
         head.itemMeta = meta
 
 

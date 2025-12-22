@@ -1,27 +1,20 @@
 package me.clearedSpore.sporeCore.commands.currency
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Optional
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
-import me.clearedSpore.sporeCore.features.currency.menu.main.CurrencyMainMenu
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
+import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
+import me.clearedSpore.sporeCore.features.currency.menu.main.CurrencyMainMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import kotlin.text.ifEmpty
 
 @CommandAlias("%currencyalias")
 class CurrencyCommand : BaseCommand() {
@@ -45,6 +38,7 @@ class CurrencyCommand : BaseCommand() {
                 }
                 target
             }
+
             sender is Player -> sender
             else -> {
                 sender.sendMessage("You must specify a player.".red())
@@ -90,7 +84,7 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }
@@ -138,7 +132,7 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }
@@ -184,7 +178,8 @@ class CurrencyCommand : BaseCommand() {
                 return@thenAccept
             }
 
-            val title = if (lastMonthOnly) "Top $topLimit Spenders (Last 30 days)" else "Top $topLimit Spenders (All time)"
+            val title =
+                if (lastMonthOnly) "Top $topLimit Spenders (Last 30 days)" else "Top $topLimit Spenders (All time)"
             sender.sendMessage("=== $title ===".blue())
 
             topList.forEachIndexed { index, (player, spent) ->
@@ -196,16 +191,15 @@ class CurrencyCommand : BaseCommand() {
     }
 
 
-
     @Subcommand("logs|transactions")
     @CommandCompletion("@players @Range:1-10")
     @Syntax("<player> [page]")
     @CommandPermission(Perm.CURRENCY_ADMIN)
-    fun onLogs(sender: CommandSender, targetName: String, @Optional page: Int?){
+    fun onLogs(sender: CommandSender, targetName: String, @Optional page: Int?) {
         val logPage = page ?: 1
         val user = UserManager.get(Bukkit.getOfflinePlayer(targetName).uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
@@ -264,14 +258,14 @@ class CurrencyCommand : BaseCommand() {
             return
         }
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }
 
         val formatted = CurrencySystemService.format(amount)
 
-        if(user.credits < amount){
+        if (user.credits < amount) {
             sender.sendMessage("That user does not have $formatted".red())
             return
         }

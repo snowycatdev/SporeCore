@@ -4,10 +4,16 @@ import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
+import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
+import me.clearedSpore.sporeCore.extension.PlayerExtension.uuidStr
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
+import me.clearedSpore.sporeCore.features.setting.impl.AutoTeleportSetting
+import me.clearedSpore.sporeCore.features.setting.impl.ConfirmTpaSetting
+import me.clearedSpore.sporeCore.features.setting.impl.TeleportRequestSettings
 import me.clearedSpore.sporeCore.menu.util.confirm.TPAConfirmMenu
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.util.ActionBar.actionBar
 import me.clearedSpore.sporeCore.util.TeleportService.awaitTeleport
 import org.bukkit.entity.Player
@@ -41,7 +47,7 @@ object TeleportRequestService {
             return
         }
 
-        if (!targetUser.isSettingEnabled(Setting.TELEPORT_REQUESTS)) {
+        if (!targetUser.getSettingOrDefault(TeleportRequestSettings())) {
             requester.sendErrorMessage("That player has teleport requests disabled!".red())
             return
         }
@@ -59,7 +65,7 @@ object TeleportRequestService {
             requester.actionBar("tpa", "Teleport request sent to ${target.name}.")
             when (type) {
                 RequestType.TPA -> {
-                    if (targetUser.isSettingEnabled(Setting.AUTO_TELEPORT)) {
+                    if (targetUser.getSettingOrDefault(AutoTeleportSetting())) {
                         accept(target)
                         target.actionBar("tpa", "Accepted ${requester.name}'s request (Auto-TP)")
                         pendingRequests.remove(target)
@@ -67,13 +73,14 @@ object TeleportRequestService {
                         target.sendSuccessMessage("${requester.name} wants to teleport to you. Use /tpaaccept or /tpadeny.")
                     }
                 }
+
                 RequestType.TPAHERE -> {
                     target.sendSuccessMessage("${requester.name} wants you to teleport to them. Use /tpaaccept or /tpadeny.")
                 }
             }
         }
 
-        if (requesterUser.isSettingEnabled(Setting.CONFIRM_TPA)) {
+        if (requesterUser.getSettingOrDefault(ConfirmTpaSetting())) {
             TPAConfirmMenu(requester, target, executeRequest as () -> Unit).open(requester)
         } else {
             executeRequest()
@@ -90,7 +97,7 @@ object TeleportRequestService {
 
         val targetUser = UserManager.get(target)
 
-        if(targetUser == null){
+        if (targetUser == null) {
             request.requester.userJoinFail()
             return
         }
@@ -103,19 +110,49 @@ object TeleportRequestService {
                     request.requester.awaitTeleport(target.location)
                     request.requester.actionBar("tpa", "${target.name} accepted your teleport request.")
                     target.actionBar("tpa", "Accepted ${request.requester.name}'s teleport request.")
+
+                    if (SporeCore.instance.coreConfig.logs.teleports) {
+                        LogsService.addLog(
+                            request.requester.uuidStr(),
+                            "Teleported to ${target.name} (TPA request sent to ${target.name})",
+                            LogType.TELEPORT
+                        )
+
+                        LogsService.addLog(
+                            target.uuidStr(),
+                            "${request.requester.name} teleported to you (TPA request sent by ${request.requester.name})",
+                            LogType.TELEPORT
+                        )
+                    }
                 }
 
                 RequestType.TPAHERE -> {
                     target.awaitTeleport(request.requester.location)
                     target.actionBar("tpa", "Accepted ${request.requester.name}'s teleport request.")
                     request.requester.actionBar("tpa", "${target.name} accepted your teleport request.")
+
+                    if (SporeCore.instance.coreConfig.logs.teleports) {
+                        LogsService.addLog(
+                            target.uuidStr(),
+                            "Teleported to ${request.requester.name} (TpaHere request sent by ${request.requester.name})",
+                            LogType.TELEPORT
+                        )
+
+                        LogsService.addLog(
+                            request.requester.uuidStr(),
+                            "${target.name} teleported to you (TpaHere request sent to ${target.name})",
+                            LogType.TELEPORT
+                        )
+                    }
                 }
             }
         }
 
 
 
-        if (targetUser.isSettingEnabled(Setting.CONFIRM_TPA)) {
+
+
+        if (targetUser.getSettingOrDefault(ConfirmTpaSetting())) {
             TPAConfirmMenu(target, request.requester, executeTeleport).open(target)
         } else {
             executeTeleport()

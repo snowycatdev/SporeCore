@@ -18,7 +18,7 @@ import org.bukkit.entity.Player
 
 @CommandAlias("baltop|ecotop")
 @CommandPermission(Perm.ECO)
-class BalTopCommand: BaseCommand() {
+class BalTopCommand : BaseCommand() {
 
     @Default
     fun onTop(sender: CommandSender, @Optional page: Int?) {

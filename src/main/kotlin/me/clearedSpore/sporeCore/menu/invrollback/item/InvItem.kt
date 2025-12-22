@@ -35,7 +35,7 @@ class InvItem(
             .addLoreLine("")
             .addLoreLine("Left click to restore".gold())
 
-        if(viewer.hasPermission(Perm.INV_DELETE)){
+        if (viewer.hasPermission(Perm.INV_DELETE)) {
             builder.addLoreLine("Right click to delete".gold())
         }
 
@@ -43,10 +43,10 @@ class InvItem(
     }
 
     override fun onClickEvent(clicker: Player, clickType: ClickType) {
-        if(clickType.isLeftClick){
+        if (clickType.isLeftClick) {
             PreviewInventoryMenu(data, clicker, target).open(clicker)
-        } else if(clickType.isRightClick) {
-            if(!clicker.hasPermission(Perm.INV_DELETE)) return
+        } else if (clickType.isRightClick) {
+            if (!clicker.hasPermission(Perm.INV_DELETE)) return
 
             ConfirmMenu(clicker) {
                 InventoryManager.removeInventory(data.id)

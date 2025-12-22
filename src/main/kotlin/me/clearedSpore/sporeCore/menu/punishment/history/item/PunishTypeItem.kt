@@ -17,8 +17,7 @@ class PunishTypeItem(
     val type: PunishmentType,
     val name: String,
     val target: OfflinePlayer
-)
-    : Item() {
+) : Item() {
 
 
     override fun createItem(): ItemStack {
@@ -28,7 +27,7 @@ class PunishTypeItem(
         meta.setDisplayName(name.blue())
 
         val user = UserManager.get(target)
-        if(user == null){
+        if (user == null) {
             return NoUserItem.toItemStack()
         }
 

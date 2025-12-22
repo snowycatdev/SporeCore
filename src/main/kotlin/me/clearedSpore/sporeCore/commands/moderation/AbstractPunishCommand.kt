@@ -31,7 +31,7 @@ abstract class AbstractPunishCommand(
 
         val punisher = if (sender is Player) UserManager.get(sender.uniqueId) else UserManager.getConsoleUser()
 
-        if(punisher == null){
+        if (punisher == null) {
             sender.userFail()
             return
         }
@@ -72,23 +72,6 @@ abstract class AbstractPunishCommand(
             offenseEntry.reason to offenseEntry.time
         } else {
             (reasonKey ?: "No reason provided") to time
-        }
-
-
-        when (type) {
-            PunishmentType.BAN, PunishmentType.TEMPBAN -> {
-                if (targetUser.getActivePunishment(PunishmentType.BAN) != null) {
-                    sender.sendMessage("That user is already banned!".red())
-                    return
-                }
-            }
-            PunishmentType.MUTE, PunishmentType.TEMPMUTE -> {
-                if (targetUser.getActivePunishment(PunishmentType.MUTE) != null) {
-                    sender.sendMessage("That player is already muted!".red())
-                    return
-                }
-            }
-            else -> {}
         }
 
         try {

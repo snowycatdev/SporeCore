@@ -115,7 +115,14 @@ class EditItemCommand : BaseCommand() {
         val item = getItem(player)
         val meta = getItemMeta(player) ?: return
 
-        meta.addAttributeModifier(attribute, org.bukkit.attribute.AttributeModifier("custom", amount, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER))
+        meta.addAttributeModifier(
+            attribute,
+            org.bukkit.attribute.AttributeModifier(
+                "custom",
+                amount,
+                org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER
+            )
+        )
         item.itemMeta = meta
 
         player.sendSuccessMessage("Added $amount to attribute ${attribute.name.lowercase()}")
@@ -128,13 +135,13 @@ class EditItemCommand : BaseCommand() {
         val item = getItem(player)
         val meta = getItemMeta(player) ?: return
 
-        val modifiers = meta.getAttributeModifiers(attribute) ?: return player.sendErrorMessage("No modifiers for ${attribute.name.lowercase()} found")
+        val modifiers = meta.getAttributeModifiers(attribute)
+            ?: return player.sendErrorMessage("No modifiers for ${attribute.name.lowercase()} found")
         modifiers.forEach { meta.removeAttributeModifier(attribute, it) }
         item.itemMeta = meta
 
         player.sendSuccessMessage("Removed all modifiers for attribute ${attribute.name.lowercase()}")
     }
-
 
 
     @Subcommand("unbreakable")
@@ -180,7 +187,8 @@ class EditItemCommand : BaseCommand() {
     @Syntax("<damage>")
     fun onDurability(player: Player, damage: Int) {
         val item = getItem(player)
-        val meta = getItemMeta(player) as? Damageable ?: return player.sendErrorMessage("This item cannot have durability")
+        val meta =
+            getItemMeta(player) as? Damageable ?: return player.sendErrorMessage("This item cannot have durability")
         meta.damage = damage
         item.itemMeta = meta
         player.sendSuccessMessage("Set item durability to $damage")

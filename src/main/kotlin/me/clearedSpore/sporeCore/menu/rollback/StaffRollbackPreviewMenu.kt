@@ -2,12 +2,10 @@ package me.clearedSpore.sporeCore.menu.rollback
 
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
 import me.clearedSpore.sporeCore.menu.rollback.item.CancelRollbackItem
 import me.clearedSpore.sporeCore.menu.rollback.item.ConfirmRollbackItem
 import me.clearedSpore.sporeCore.menu.rollback.item.StaffRollbackPreviewItem
-import me.clearedSpore.sporeCore.menu.util.BackItem
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 
@@ -31,5 +29,10 @@ class StaffRollbackPreviewMenu(
         setGlobalMenuItem(6, 6, ConfirmRollbackItem(viewer, staff, timeArg, stats))
     }
 
-    override fun onInventoryClickEvent(clicker: Player, clickType: org.bukkit.event.inventory.ClickType, event: org.bukkit.event.inventory.InventoryClickEvent) {}
+    override fun onInventoryClickEvent(
+        clicker: Player,
+        clickType: org.bukkit.event.inventory.ClickType,
+        event: org.bukkit.event.inventory.InventoryClickEvent
+    ) {
+    }
 }

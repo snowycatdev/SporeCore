@@ -3,13 +3,13 @@ package me.clearedSpore.sporeCore.task
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.translate
-import org.bukkit.Bukkit
-import org.bukkit.scheduler.BukkitRunnable
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.ActionBar.actionBar
+import org.bukkit.Bukkit
+import org.bukkit.scheduler.BukkitRunnable
 
 object VanishTask {
 
@@ -25,7 +25,7 @@ object VanishTask {
                 for (player in Bukkit.getOnlinePlayers()) {
                     val isVanished = VanishService.isVanished(player.uniqueId)
                     val user = UserManager.get(player)
-                    if(user == null){
+                    if (user == null) {
                         return
                     }
 
@@ -33,12 +33,13 @@ object VanishTask {
 
                     var channel = "&7Public"
 
-                    if(userChannel != null && ChatChannelService.getChannelByName(userChannel) != null){
+                    if (userChannel != null && ChatChannelService.getChannelByName(userChannel) != null) {
                         channel = ChatChannelService.getChannelByName(userChannel)!!.prefix
                     }
 
                     if (isVanished) {
-                            player.actionBar("vanish",
+                        player.actionBar(
+                            "vanish",
                             "Vanished ".blue() + "|".gray() + " Channel: ".blue() + channel.translate(),
                             1500
                         )
@@ -48,8 +49,8 @@ object VanishTask {
         }.runTaskTimer(SporeCore.instance, 0L, 20L)
     }
 
-    fun stop(){
-        if(!running) return
+    fun stop() {
+        if (!running) return
         running = false
     }
 }

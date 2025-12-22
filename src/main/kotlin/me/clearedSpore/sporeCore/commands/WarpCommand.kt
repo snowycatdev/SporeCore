@@ -1,14 +1,7 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Dependency
-import co.aikar.commands.annotation.Optional
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
@@ -58,12 +51,12 @@ class WarpCommand : BaseCommand() {
     @CommandCompletion("@warps")
     @CommandPermission(Perm.WARP_CREATE)
     @Syntax("<name>")
-    fun createWarp(player: Player, name: String){
+    fun createWarp(player: Player, name: String) {
         val location = player.location
         val warps = warpService.getAllWarps()
         val warp = warps.find { it.name.equals(name, ignoreCase = true) }
 
-        if(warp != null){
+        if (warp != null) {
             player.sendErrorMessage("There is already a warp with that name!")
             return
         }
@@ -84,7 +77,7 @@ class WarpCommand : BaseCommand() {
         val warp = warps.find { it.name.equals(name, ignoreCase = true) }
 
         if (warp != null) {
-            ConfirmMenu(player){
+            ConfirmMenu(player) {
                 warpService.deleteWarp(name)
                 player.sendSuccessMessage("Warp '$name' has been deleted.")
             }.open(player)

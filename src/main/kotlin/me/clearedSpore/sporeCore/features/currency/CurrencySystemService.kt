@@ -11,29 +11,29 @@ import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.commands.currency.CurrencyCommand
 import me.clearedSpore.sporeCore.commands.currency.CurrencyShopCommand
+import me.clearedSpore.sporeCore.database.DatabaseManager
+import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.features.currency.config.*
 import me.clearedSpore.sporeCore.features.currency.`object`.CreditAction
 import me.clearedSpore.sporeCore.features.currency.`object`.CreditLog
 import me.clearedSpore.sporeCore.features.currency.`object`.PackagePurchase
-import me.clearedSpore.sporeCore.database.DatabaseManager
-import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
+import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
+import me.clearedSpore.sporeCore.features.setting.impl.CurrencyLogsSetting
 import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
+import me.clearedSpore.sporeCore.util.Perm
+import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.io.File
 import java.text.DecimalFormat
+import java.util.concurrent.CompletableFuture
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
-import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
-import me.clearedSpore.sporeCore.user.settings.Setting
-import me.clearedSpore.sporeCore.util.Perm
-import me.clip.placeholderapi.PlaceholderAPI
-import org.bukkit.OfflinePlayer
-import org.bukkit.command.CommandSender
-import java.util.concurrent.CompletableFuture
 
 object CurrencySystemService {
 
@@ -136,8 +136,6 @@ object CurrencySystemService {
     }
 
 
-
-
     fun addBalance(sender: CommandSender, user: User, amount: Double, reason: String) {
         user.credits = user.credits + amount
         user.logCredit(CreditAction.ADDED, amount, reason)
@@ -189,7 +187,7 @@ object CurrencySystemService {
 
         for (player in Bukkit.getOnlinePlayers()) {
             val playerUser = UserManager.get(player) ?: continue
-            if (!player.hasPermission(Perm.CURRENCY_NOTIFY) || !playerUser.isSettingEnabled(Setting.CURRENCY_LOGS)) continue
+            if (!player.hasPermission(Perm.CURRENCY_NOTIFY) || !playerUser.getSettingOrDefault(CurrencyLogsSetting())) continue
 
             val message = when (action) {
                 CreditAction.ADDED ->
@@ -357,7 +355,6 @@ object CurrencySystemService {
     }
 
 
-
     fun handlePurchase(player: Player, item: ShopItemConfig) {
         val user = UserManager.get(player)
         if (user == null) {
@@ -404,7 +401,7 @@ object CurrencySystemService {
             return
         }
 
-        removeBalance(user, item.price, "Bought the ${item.name}"  + " package")
+        removeBalance(user, item.price, "Bought the ${item.name}" + " package")
         val db = DatabaseManager.getServerData()
         db.packagePurchases.add(PackagePurchase(item.name, 1))
         db.save(DatabaseManager.getServerCollection())
@@ -415,7 +412,7 @@ object CurrencySystemService {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cleanCommand)
         }
 
-        val formattedPrice = format(item.price)
+        format(item.price)
         player.sendMessage(
             parsePlaceholders(
                 "You successfully purchased '%package_name%".green() + "' for %costs%!".green(),
@@ -440,7 +437,10 @@ object CurrencySystemService {
         }
     }
 
-    fun topSpenders(lastMonthOnly: Boolean = false, limit: Int = 10): CompletableFuture<List<Pair<OfflinePlayer, Double>>> {
+    fun topSpenders(
+        lastMonthOnly: Boolean = false,
+        limit: Int = 10
+    ): CompletableFuture<List<Pair<OfflinePlayer, Double>>> {
         val cutoff = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000
         val uuids = UserManager.getAllStoredUUIDsFromDB().distinct()
 
@@ -469,8 +469,6 @@ object CurrencySystemService {
     }
 
 
-
-
     fun topBoughtPackages(lastMonthOnly: Boolean = false, limit: Int = 10): List<Pair<String, Int>> {
         val db = DatabaseManager.getServerData()
         val cutoff = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000
@@ -484,7 +482,6 @@ object CurrencySystemService {
             .take(limit)
             .map { it.key to it.value }
     }
-
 
 
     fun topCredits(limit: Int = 10): CompletableFuture<List<Pair<OfflinePlayer, Double>>> {
@@ -509,8 +506,6 @@ object CurrencySystemService {
                 .take(limit)
         }
     }
-
-
 
 
     fun getCategory(key: String): ShopCategoryConfig? = categories[key.lowercase()]

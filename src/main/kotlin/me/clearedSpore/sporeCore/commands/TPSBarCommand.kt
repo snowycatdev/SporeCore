@@ -15,9 +15,9 @@ import org.bukkit.entity.Player
 class TPSBarCommand : BaseCommand() {
 
     @Default
-    fun onTpsBar(player: Player){
+    fun onTpsBar(player: Player) {
         val user = UserManager.get(player)
-        if(user == null){
+        if (user == null) {
             player.userFail()
             return
         }

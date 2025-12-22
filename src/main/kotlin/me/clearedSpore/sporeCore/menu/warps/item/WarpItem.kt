@@ -2,8 +2,8 @@ package me.clearedSpore.sporeCore.menu.warps.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.green
+import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.warp.`object`.Warp
@@ -44,6 +44,7 @@ class WarpItem(
                 clicker.closeInventory()
                 clicker.awaitTeleport(warp.location)
             }
+
             clickType.isRightClick && clickType.isShiftClick -> {
                 if (clicker.hasPermission(Perm.WARP_DELETE)) {
                     ConfirmMenu(clicker) {

@@ -26,12 +26,12 @@ class LinkCommand : BaseCommand() {
             return
         }
 
-        if(user.discordID != null){
+        if (user.discordID != null) {
             player.sendMessage("You have already linked your account!".red())
             return
         }
 
-        if(DiscordService.hasCode(player.uniqueId)){
+        if (DiscordService.hasCode(player.uniqueId)) {
             player.sendErrorMessage("You already have a code!")
             return
         }

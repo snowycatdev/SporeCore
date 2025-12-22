@@ -6,10 +6,10 @@ import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
 import me.clearedSpore.sporeCore.features.currency.config.ShopCategoryConfig
 import me.clearedSpore.sporeCore.features.currency.menu.main.CurrencyMainMenu
-import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
 import me.clearedSpore.sporeCore.menu.util.confirm.ConfirmMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material

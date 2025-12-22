@@ -1,11 +1,7 @@
 package me.clearedSpore.sporeCore.commands.moderation.mode
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Name
-import co.aikar.commands.annotation.Optional
+import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
@@ -26,26 +22,26 @@ class CustomModeCommand(
 ) : BaseCommand() {
 
     @Default()
-    fun onModeToggle(sender: CommandSender, @Optional @Name("target") target: OnlinePlayer?){
-        if(target == null && sender is ConsoleCommandSender){
+    fun onModeToggle(sender: CommandSender, @Optional @Name("target") target: OnlinePlayer?) {
+        if (target == null && sender is ConsoleCommandSender) {
             sender.sendMessage("Console must provide a target!")
             return
         }
 
         val service = ModeService
-        if(service.getModeById(mode.id) == null){
+        if (service.getModeById(mode.id) == null) {
             sender.sendMessage("Failed to apply mode!".red())
             return
         }
 
-        if(target == null){
+        if (target == null) {
             val player = Bukkit.getPlayer(sender.name)
-            if(player == null){
+            if (player == null) {
                 sender.userFail()
                 return
             }
 
-            if(!player.hasPermission(mode.permission)){
+            if (!player.hasPermission(mode.permission)) {
                 player.sendErrorMessage("You don't have permission to toggle this mode!")
                 return
             }
@@ -58,7 +54,7 @@ class CustomModeCommand(
             Logger.log(sender, Perm.LOG, "$status ${mode.name}", false)
         } else {
 
-            if(!sender.hasPermission(Perm.MODE_OTHERS) && !sender.hasPermission(mode.permission)){
+            if (!sender.hasPermission(Perm.MODE_OTHERS) && !sender.hasPermission(mode.permission)) {
                 sender.sendMessage("You don't have permission to toggle that mode for another player!".red())
                 return
             }

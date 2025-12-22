@@ -2,7 +2,7 @@ package me.clearedSpore.sporeCore.util.button
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import org.bukkit.command.CommandSender
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 object CallbackRegistry {

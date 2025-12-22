@@ -1,4 +1,5 @@
 package me.clearedSpore.sporeCore.features.mode.item.impl
+
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeCore.features.mode.item.`object`.ModeItem
@@ -24,15 +25,15 @@ class HistoryItem : ModeItem("history"), Listener {
     }
 
     @EventHandler
-    fun onRightClick(event: PlayerInteractEntityEvent){
+    fun onRightClick(event: PlayerInteractEntityEvent) {
         val player = event.player
         val item = player.itemInHand
         val entity = event.rightClicked
 
-        if(entity !is Player) return
-        if(!isItem(item)) return
+        if (entity !is Player) return
+        if (!isItem(item)) return
 
-        if(!canUse(player)) return
+        if (!canUse(player)) return
 
         triggerCooldown(player)
         player.performCommand("history ${entity.name}")

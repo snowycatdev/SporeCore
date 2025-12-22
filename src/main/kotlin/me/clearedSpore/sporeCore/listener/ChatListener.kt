@@ -7,19 +7,27 @@ import me.clearedSpore.sporeAPI.util.Message
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
+import me.clearedSpore.sporeCore.extension.PlayerExtension.uuidStr
 import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.`object`.ChatFormat
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
 import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
+import me.clearedSpore.sporeCore.features.setting.impl.ChatEnabledSetting
+import me.clearedSpore.sporeCore.features.setting.impl.MentionOption
+import me.clearedSpore.sporeCore.features.setting.impl.MentionTitleSetting
 import me.clearedSpore.sporeCore.features.vanish.VanishService
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.user.settings.Setting
+import me.clearedSpore.sporeCore.util.ActionBar.actionBar
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.Tasks
+import me.clearedSpore.sporeCore.util.Util.noTranslate
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -35,8 +43,7 @@ class ChatListener : Listener {
             return
         }
 
-
-        if (!senderUser.isSettingEnabled(Setting.CHAT_ENABLED) && SporeCore.instance.coreConfig.features.settings) {
+        if (!senderUser.getSettingOrDefault(ChatEnabledSetting())) {
             player.sendErrorMessage("You can't send messages while having chat disabled!")
             event.isCancelled = true
             return
@@ -76,54 +83,47 @@ class ChatListener : Listener {
             val symbol = msg.substring(0, 1)
             val channel = ChatChannelService.getChannelBySymbol(symbol)
 
-            if (channel != null) {
-                if (player.hasPermission(channel.permission)) {
-                    val cleanedMessage = msg.substring(1)
-                    ChatChannelService.sendChannelMessage(player, cleanedMessage, channel)
-                    event.isCancelled = true
-                    return
-                }
+            if (channel != null && player.hasPermission(channel.permission)) {
+                val cleanedMessage = msg.substring(1)
+                ChatChannelService.sendChannelMessage(player, cleanedMessage, channel)
+                event.isCancelled = true
+                return
             }
         }
 
         val userChannelId = senderUser.channel
-        if (userChannelId != null && SporeCore.instance.coreConfig.features.channels) {
+        if (!userChannelId.isNullOrEmpty() && SporeCore.instance.coreConfig.features.channels) {
             val channel = ChatChannelService.getChannelByName(userChannelId)
             if (channel != null) {
                 if (!player.hasPermission(channel.permission) || !player.hasPermission(Perm.CHANNEL_ALLOW)) {
                     player.sendErrorMessage("You don't have permission to type in this channel!")
                     player.sendErrorMessage("Your channel has been set to global!")
-                    val user = UserManager.get(player)
-                    if (user != null) {
-                        ChatChannelService.resetChannel(user)
-                    }
+                    UserManager.get(player)?.let { ChatChannelService.resetChannel(it) }
                     event.isCancelled = true
                     return
                 }
-
                 ChatChannelService.sendChannelMessage(player, event.message, channel)
                 event.isCancelled = true
                 return
             } else {
-                Logger.error("Failed to find channel with id '$userChannelId'")
+                Logger.info("User channel is empty or invalid, sending to global chat")
             }
         }
 
-        if(ModeService.isInMode(player)){
+
+        if (ModeService.isInMode(player)) {
             val mode = ModeService.getPlayerMode(player)!!
-            if(!mode.chat){
+            if (!mode.chat) {
                 event.isCancelled = true
                 player.sendMessage("You can't talk while in ${mode.name} mode!".red())
                 return
             }
         }
 
-
-        val toRemove = event.recipients.filter { recipient ->
-            val recipientUser = UserManager.get(recipient)
+        val toRemove = event.recipients.filter {
+            val recipientUser = UserManager.get(it)
             recipientUser == null ||
-                    (!player.hasPermission(Perm.CHAT_BYPASS) &&
-                            !recipientUser.isSettingEnabled(Setting.CHAT_ENABLED))
+                    (!player.hasPermission(Perm.CHAT_BYPASS) && !recipientUser.getSettingOrDefault(ChatEnabledSetting()))
         }
         Tasks.run { event.recipients.removeAll(toRemove) }
 
@@ -135,7 +135,6 @@ class ChatListener : Listener {
             message = PlaceholderAPI.setPlaceholders(player, message)
         }
 
-
         if (player.hasPermission(Perm.COLORED_CHAT) && config.features.coloredChat) {
             message = message.translate()
         } else {
@@ -145,21 +144,31 @@ class ChatListener : Listener {
                 .replace(Regex("<[a-zA-Z_]+>"), "")
         }
 
-
-        val chatColor = if (config.chat.chatColor.enabled)
-            ChatColorService.getColor(senderUser)
-        else null
+        val chatColor = if (config.chat.chatColor.enabled) ChatColorService.getColor(senderUser) else null
         val appliedColor = chatColor?.colorString ?: ""
-
-
         val chatFormat = senderUser.chatFormat?.toCodeString() ?: ""
-
 
         message = "$appliedColor$chatFormat$message".translate()
 
+        val mentionsConfig = config.chat.mentions
+        val mentionedPlayers = mutableSetOf<Player>()
+
+        if (mentionsConfig.enabled) {
+            for (target in Bukkit.getOnlinePlayers()) {
+                if (target.uniqueId == player.uniqueId) continue
+
+                val nameRegex = Regex(Regex.escape(target.name), RegexOption.IGNORE_CASE)
+                if (nameRegex.containsMatchIn(message)) {
+                    mentionedPlayers.add(target)
+                    message = message.replace(nameRegex) {
+                        "&a${it.value}$appliedColor"
+                    }
+                }
+            }
+        }
+
         val prefix = chatService?.getPlayerPrefix(player)?.translate() ?: ""
         var suffix = chatService?.getPlayerSuffix(player)?.translate() ?: ""
-
         val chatFormatConfig = config.chat.formatting
 
         if (VanishService.isVanished(senderUser.uuid) && chatFormatConfig.hideVanishSuffix) {
@@ -182,6 +191,54 @@ class ChatListener : Listener {
             "$prefix${player.name}$suffix: $message".translate()
         }
 
+        mentionedPlayers.forEach { target ->
+            val targetUser = UserManager.get(target) ?: return@forEach
+
+            val titleEnabled = targetUser.getSettingOrDefault(MentionTitleSetting()) == MentionOption.TITLE_ENABLED
+            val soundEnabled = targetUser.getSettingOrDefault(MentionTitleSetting()) == MentionOption.SOUND_ENABLED
+            val allEnabled = targetUser.getSettingOrDefault(MentionTitleSetting()) == MentionOption.TITLE_AND_SOUND
+
+            val actionbar = config.chat.mentions.actionBar
+
+            if (actionbar.isNotBlank()) {
+                val formatted = actionbar
+                    .replace("%player%", player.name)
+
+                target.actionBar("mention", formatted.translate())
+            }
+
+            if (titleEnabled || allEnabled) {
+                val title = mentionsConfig.title
+                val subTitle = mentionsConfig.subTitle
+                if (!title.isNullOrBlank() || !subTitle.isNullOrBlank()) {
+                    target.sendTitle(
+                        title.replace("%player%", player.name).translate(),
+                        subTitle.replace("%player%", player.name).translate(),
+                        10,
+                        40,
+                        10
+                    )
+                }
+            }
+
+            if (soundEnabled || allEnabled) {
+                val soundName = mentionsConfig.sound
+                if (soundName.isNotBlank()) {
+                    runCatching {
+                        target.playSound(
+                            target.location,
+                            org.bukkit.Sound.valueOf(soundName),
+                            1f,
+                            1f
+                        )
+                    }
+                }
+            }
+        }
+
+        if (config.logs.chat) {
+            LogsService.addLog(player.uuidStr(), message.noTranslate(), LogType.CHAT)
+        }
 
         event.isCancelled = true
         event.recipients.forEach { it.sendMessage(formattedMessage) }

@@ -2,8 +2,7 @@ package me.clearedSpore.sporeCore.commands.privatemessages
 
 
 import org.bukkit.entity.Player
-import java.util.UUID
-
+import java.util.*
 
 
 object PMService {

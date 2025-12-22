@@ -144,7 +144,6 @@ object EconomyService {
     }
 
 
-
     fun set(user: User, amount: Double, reason: String = "") {
         user.balance = amount
         user.logEconomy(EcoAction.SET, amount, reason)

@@ -13,7 +13,7 @@ object ChatColorService {
         UserManager.save(user)
     }
 
-    fun resetColor(user: User){
+    fun resetColor(user: User) {
         user.chatColor = getDefaultColor()
         UserManager.save(user)
     }

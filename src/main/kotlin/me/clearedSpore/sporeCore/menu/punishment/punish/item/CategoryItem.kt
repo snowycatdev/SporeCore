@@ -2,7 +2,6 @@ package me.clearedSpore.sporeCore.menu.punishment.punish.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.gold
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.StringUtil.capitalizeFirstLetter
 import me.clearedSpore.sporeCore.menu.punishment.punish.PunishCategoryMenu

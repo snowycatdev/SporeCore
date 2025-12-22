@@ -8,7 +8,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerRespawnEvent
 
-
 class DeathListener : Listener {
 
     @EventHandler
@@ -24,7 +23,7 @@ class DeathListener : Listener {
 
             val kit = kits.find { it.name.equals(kitName, ignoreCase = true) }
 
-            if(kit == null){
+            if (kit == null) {
                 Logger.error("Failed to give death kit to ${player.name}")
                 return
             }

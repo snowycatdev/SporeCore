@@ -49,10 +49,10 @@ class PunishmentMenu(
     }
 
 
-
     override fun onInventoryClickEvent(
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

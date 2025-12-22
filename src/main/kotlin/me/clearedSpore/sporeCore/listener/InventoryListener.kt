@@ -32,6 +32,7 @@ class InventoryListener : Listener {
                     EntityDamageEvent.DamageCause.FALL -> "Fell from a high place"
                     EntityDamageEvent.DamageCause.FIRE,
                     EntityDamageEvent.DamageCause.FIRE_TICK -> "Burned to death"
+
                     EntityDamageEvent.DamageCause.LAVA -> "Burned in lava"
                     EntityDamageEvent.DamageCause.DROWNING -> "Drowned"
                     EntityDamageEvent.DamageCause.SUFFOCATION -> "Suffocated in a wall"
@@ -45,6 +46,7 @@ class InventoryListener : Listener {
                     EntityDamageEvent.DamageCause.ENTITY_ATTACK -> "Killed by an entity"
                     EntityDamageEvent.DamageCause.ENTITY_EXPLOSION,
                     EntityDamageEvent.DamageCause.BLOCK_EXPLOSION -> "Killed by an explosion"
+
                     EntityDamageEvent.DamageCause.PROJECTILE -> "Killed by a projectile"
                     EntityDamageEvent.DamageCause.CUSTOM -> "Died"
                     EntityDamageEvent.DamageCause.FLY_INTO_WALL -> "Flew into a wall"

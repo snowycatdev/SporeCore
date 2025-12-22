@@ -52,6 +52,7 @@ class TextButton(private val text: String) {
                 }
                 ClickEvent.runCommand("/sporecore callback $id")
             }
+
             else -> clickEvent
         }
 

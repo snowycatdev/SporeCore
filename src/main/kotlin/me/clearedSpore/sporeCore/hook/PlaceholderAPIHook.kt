@@ -69,6 +69,7 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
                         "compact" -> BalanceFormat.COMPACT
                         null -> runCatching { BalanceFormat.valueOf(settings.balanceFormat.uppercase()) }
                             .getOrDefault(BalanceFormat.PLAIN)
+
                         else -> runCatching { BalanceFormat.valueOf(settings.balanceFormat.uppercase()) }
                             .getOrDefault(BalanceFormat.PLAIN)
                     }
@@ -79,7 +80,7 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
 
             params.equals("vanish_tag", ignoreCase = true) -> {
                 if (!features.vanish) return null
-                if (VanishService.isVanished(user.uuid)){
+                if (VanishService.isVanished(user.uuid)) {
                     val text = config.general.vanishTag
                     return text.translate()
                 } else {

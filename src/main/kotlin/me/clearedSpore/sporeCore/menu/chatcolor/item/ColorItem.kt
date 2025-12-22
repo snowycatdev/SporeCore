@@ -5,8 +5,8 @@ import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.ChatService
+import me.clearedSpore.sporeCore.features.chat.color.ChatColorService
 import me.clearedSpore.sporeCore.features.chat.color.`object`.ChatColor
 import me.clearedSpore.sporeCore.menu.util.NoUserItem
 import me.clearedSpore.sporeCore.user.UserManager
@@ -37,11 +37,11 @@ class ColorItem(
 
         val hasPerm = player.hasPermission(permission)
         val user = UserManager.get(player)
-        if(user == null){
+        if (user == null) {
             return NoUserItem.toItemStack()
         }
         val currentColor = ChatColorService.getColor(user)
-        if(currentColor.name == color.name){
+        if (currentColor.name == color.name) {
             meta.setEnchantmentGlintOverride(true)
         }
 

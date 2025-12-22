@@ -7,13 +7,12 @@ import me.clearedSpore.sporeCore.features.mode.item.impl.PunishSwordItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.SpeedItem
 import me.clearedSpore.sporeCore.features.mode.item.`object`.ModeItem
 import org.bukkit.Bukkit
-import org.bukkit.plugin.Plugin
 
 object ModeItemManager {
 
     private val items = mutableMapOf<String, ModeItem>()
 
-    fun registerItems(){
+    fun registerItems() {
         register(FreezeItem())
         register(PunishSwordItem())
         register(SpeedItem())

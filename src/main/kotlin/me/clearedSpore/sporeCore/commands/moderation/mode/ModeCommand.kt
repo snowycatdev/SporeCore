@@ -108,7 +108,7 @@ class ModeCommand : BaseCommand() {
 
     @Subcommand("itemlist")
     @CommandPermission(Perm.ADMIN)
-    fun onItemList(sender: CommandSender){
+    fun onItemList(sender: CommandSender) {
         sender.sendMessage("Mode items list:".blue())
         ModeItemManager.getAllItems().forEach { item ->
             sender.sendMessage("&7- &f${item.id}".translate())

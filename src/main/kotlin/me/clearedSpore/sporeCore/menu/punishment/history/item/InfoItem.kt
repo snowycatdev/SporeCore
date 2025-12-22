@@ -22,7 +22,7 @@ class InfoItem(
         val meta = item.itemMeta
 
         val user = UserManager.get(target)
-        if(user == null){
+        if (user == null) {
             return NoUserItem.toItemStack()
         }
 
@@ -41,7 +41,7 @@ class InfoItem(
         lore.add("Warns: &f$warns".blue())
         lore.add("Mutes: &f$mutes".blue())
         lore.add("Kicks: &f$kicks".blue())
-        if(lastPunishment != null) {
+        if (lastPunishment != null) {
             lore.add("".blue())
             lore.add("Last punishment: ".blue())
             lore.add("  Type: &f${lastPunishment.type.displayName}".blue())

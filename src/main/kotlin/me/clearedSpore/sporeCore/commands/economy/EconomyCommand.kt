@@ -26,7 +26,7 @@ class EconomyCommand : BaseCommand() {
 
         val user = UserManager.get(target.uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
@@ -48,12 +48,12 @@ class EconomyCommand : BaseCommand() {
         val target = Bukkit.getOfflinePlayer(targetName)
         val user = UserManager.get(target.uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }
@@ -76,18 +76,18 @@ class EconomyCommand : BaseCommand() {
         val target = Bukkit.getOfflinePlayer(targetName)
         val user = UserManager.get(target.uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
 
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }
 
-        if(user.balance < amount){
+        if (user.balance < amount) {
             sender.sendMessage("That player does not have enough money!".red())
             return
         }
@@ -108,12 +108,12 @@ class EconomyCommand : BaseCommand() {
         val target = Bukkit.getOfflinePlayer(targetName)
         val user = UserManager.get(target.uniqueId)
 
-        if(user == null){
+        if (user == null) {
             sender.userJoinFail()
             return
         }
 
-        if(amount < 0){
+        if (amount < 0) {
             sender.sendMessage("Amount must be above 0!".red())
             return
         }

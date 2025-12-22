@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.features.punishment.`object`
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.database.util.DocWriter
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
-import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment.Companion.SYSTEM_UUID
 import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.entity.Player
@@ -82,9 +81,12 @@ data class Punishment(
             val typeName = doc.get("type", String::class.java) ?: return null
             val type = runCatching { PunishmentType.valueOf(typeName) }.getOrElse { return null }
 
-            val userUuid = runCatching { UUID.fromString(doc.get("userUuid", String::class.java)) }.getOrNull() ?: return null
-            val punisherUuid = runCatching { UUID.fromString(doc.get("punisherUuid", String::class.java)) }.getOrNull() ?: return null
-            val removalUserUuid = runCatching { doc.get("removalUserUuid", String::class.java)?.let { UUID.fromString(it) } }.getOrNull()
+            val userUuid =
+                runCatching { UUID.fromString(doc.get("userUuid", String::class.java)) }.getOrNull() ?: return null
+            val punisherUuid =
+                runCatching { UUID.fromString(doc.get("punisherUuid", String::class.java)) }.getOrNull() ?: return null
+            val removalUserUuid =
+                runCatching { doc.get("removalUserUuid", String::class.java)?.let { UUID.fromString(it) } }.getOrNull()
 
             val expireDate = (doc.get("expireDate") as? Number)?.let { Date(it.toLong()) }
             val punishDate = (doc.get("punishDate") as? Number)?.let { Date(it.toLong()) } ?: Date()
@@ -124,8 +126,6 @@ data class Punishment(
     }
 
 
-
-
     fun getPunishmentDuration(): String {
         return expireDate?.let {
             val durationMillis = it.time - punishDate.time
@@ -134,7 +134,7 @@ data class Punishment(
     }
 
     fun isExpired(): Boolean {
-        return expireDate?.let { Date().after(it) } ?: false
+        return expireDate?.let { Date().after(it) } == true
     }
 
     fun isActive(): Boolean {

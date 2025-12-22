@@ -1,12 +1,10 @@
 package me.clearedSpore.sporeCore.util
 
-import net.md_5.bungee.api.ChatMessageType
-import net.md_5.bungee.api.chat.TextComponent
+import me.clearedSpore.sporeAPI.util.CC.translate
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import me.clearedSpore.sporeAPI.util.CC.translate
 
 object ActionBar {
 
@@ -55,7 +53,6 @@ object ActionBar {
 
         player.sendActionBar(combined)
     }
-
 
 
     fun tick() {

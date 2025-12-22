@@ -1,7 +1,10 @@
 package me.clearedSpore.sporeCore.commands.home
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.*
+import co.aikar.commands.annotation.CommandAlias
+import co.aikar.commands.annotation.Default
+import co.aikar.commands.annotation.Dependency
+import co.aikar.commands.annotation.Syntax
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
@@ -20,7 +23,7 @@ class CreateHomeCommand() : BaseCommand() {
     fun onCreate(player: Player, name: String) {
         val user = UserManager.get(player)
 
-        if(user == null){
+        if (user == null) {
             player.userJoinFail()
             return
         }

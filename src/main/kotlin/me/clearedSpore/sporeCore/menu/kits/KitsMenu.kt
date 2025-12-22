@@ -37,5 +37,6 @@ class KitsMenu(private val player: Player) : BasePaginatedMenu(SporeCore.instanc
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

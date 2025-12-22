@@ -2,11 +2,8 @@ package me.clearedSpore.sporeCore.menu.rollback.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.translate
-import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
-import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
+import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player

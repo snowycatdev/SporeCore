@@ -1,11 +1,7 @@
 package me.clearedSpore.sporeCore.commands.utilitymenus
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Optional
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeCore.util.Perm
@@ -18,7 +14,7 @@ class CartographyTableCommand() : BaseCommand() {
 
     @Default
     @CommandCompletion("@players")
-    fun onCarography(player: Player, @Optional targetName: String?){
+    fun onCarography(player: Player, @Optional targetName: String?) {
         if (targetName == null) {
             player.openCartographyTable(player.location, true)
             return

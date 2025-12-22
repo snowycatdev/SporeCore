@@ -8,8 +8,7 @@ import me.clearedSpore.sporeCore.util.ActionBar.actionBar
 import org.bukkit.Location
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import java.util.Collections
-import java.util.WeakHashMap
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -26,7 +25,7 @@ object TeleportService {
     fun Player.awaitTeleport(location: Location, seconds: Int = teleportTime) {
         val player = this
 
-        if(isTeleporting(player)){
+        if (isTeleporting(player)) {
             player.sendMessage("You are already teleporting!".red())
             player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f)
             return
@@ -71,14 +70,14 @@ object TeleportService {
                     player.teleport(location)
                     teleportingPlayers.remove(player)
                     player.playSound(player.location, Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f)
-                    player.actionBar("tp",  "Teleported successfully!".blue())
+                    player.actionBar("tp", "Teleported successfully!".blue())
                 }
                 Task.cancel(key)
                 return@Runnable
             }
 
             Task.runTask {
-                player.actionBar("tp",  "Teleporting in ${timeLeft}s...".blue())
+                player.actionBar("tp", "Teleporting in ${timeLeft}s...".blue())
                 player.playSound(player.location, Sound.UI_BUTTON_CLICK, 1f, 1f)
             }
 

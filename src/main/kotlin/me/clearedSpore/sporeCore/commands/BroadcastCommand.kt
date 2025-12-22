@@ -1,18 +1,11 @@
 package me.clearedSpore.sporeCore.commands
 
 import co.aikar.commands.BaseCommand
-import co.aikar.commands.annotation.CommandAlias
-import co.aikar.commands.annotation.CommandCompletion
-import co.aikar.commands.annotation.CommandPermission
-import co.aikar.commands.annotation.Default
-import co.aikar.commands.annotation.Description
-import co.aikar.commands.annotation.Subcommand
-import co.aikar.commands.annotation.Syntax
+import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Message
-import me.clearedSpore.sporeAPI.util.StringUtil.joinWithSpaces
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.command.CommandSender

@@ -4,8 +4,7 @@ import me.clearedSpore.sporeAPI.util.Logger
 import org.bukkit.Bukkit
 import org.bukkit.permissions.Permission
 import org.bukkit.permissions.PermissionDefault
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.KVisibility
+import java.lang.reflect.Modifier
 
 object Perm {
     const val MAIN = "sporecore."
@@ -25,12 +24,12 @@ object Perm {
 
 
     //gamemode
-    const val GAMEMODE  = MAIN + "gamemode"
-    const val GAMEMODE_OTHERS  = MAIN + "gamemode.others"
-    const val CREATIVE  = MAIN + "gamemode.creative"
-    const val SURVIVAL  = MAIN + "gamemode.survival"
-    const val ADVENTURE  = MAIN + "gamemode.adventure"
-    const val SPECTATOR  = MAIN + "gamemode.spectator"
+    const val GAMEMODE = MAIN + "gamemode"
+    const val GAMEMODE_OTHERS = MAIN + "gamemode.others"
+    const val CREATIVE = MAIN + "gamemode.creative"
+    const val SURVIVAL = MAIN + "gamemode.survival"
+    const val ADVENTURE = MAIN + "gamemode.adventure"
+    const val SPECTATOR = MAIN + "gamemode.spectator"
 
     //teleport
     const val TELEPORT = MAIN + "teleport"
@@ -111,9 +110,9 @@ object Perm {
     const val ALTS_DEEP = "$PUNISHMENTS.alts.deep"
     const val FREEZE = MAIN + "freeze"
 
-    const val STAFF = "staff"
-
     const val CLEAR_CHAT = MAIN + "clearchat"
+
+    const val VIEW_LOGS = MAIN + "logs.view"
 
     //warps
     const val WARP = MAIN + "warp."
@@ -185,9 +184,11 @@ object Perm {
         val pluginManager = Bukkit.getPluginManager()
         var count = 0
 
-        for (prop in Perm::class.memberProperties) {
-            if (prop.visibility == KVisibility.PUBLIC && prop.returnType.classifier == String::class) {
-                val value = prop.getter.call() as? String ?: continue
+        val permClass = Perm::class.java
+        for (field in permClass.declaredFields) {
+            if (field.type == String::class.java && Modifier.isStatic(field.modifiers)) {
+                field.isAccessible = true
+                val value = field.get(null) as? String ?: continue
                 if (pluginManager.getPermission(value) == null) {
                     pluginManager.addPermission(Permission(value, default))
                     count++
@@ -197,5 +198,4 @@ object Perm {
 
         Logger.info("Registered $count permissions successfully.")
     }
-
 }

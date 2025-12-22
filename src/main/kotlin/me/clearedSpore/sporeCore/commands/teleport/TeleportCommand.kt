@@ -3,8 +3,13 @@ package me.clearedSpore.sporeCore.commands.teleport
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
-import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
+import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
+import me.clearedSpore.sporeCore.extension.PlayerExtension.uuidStr
+import me.clearedSpore.sporeCore.features.logs.LogsService
+import me.clearedSpore.sporeCore.features.logs.`object`.LogType
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -16,116 +21,160 @@ import org.bukkit.entity.Player
 class TeleportCommand : BaseCommand() {
 
     @Default
-    @CommandCompletion("@players|~ @players|~ ~ ~")
+    @CommandCompletion("@targets|~ @targets|~ ~ ~")
     fun onTp(
         sender: CommandSender,
         arg1: String,
         @Optional arg2: String?,
         @Optional arg3: String?,
-        @Optional arg4: String?
+        @Optional arg4: String?,
+        @Optional targets: TargetPlayers?
     ) {
-        val player = sender as? Player
+        val playerSender = sender as? Player
+
+        val firstTargets = targets ?: run {
+            Bukkit.getPlayerExact(arg1)?.let { listOf(it) } ?: emptyList()
+        }
+
+        val shouldLog = SporeCore.instance.coreConfig.logs.teleports
 
         when {
-            arg2 == null -> {
-                val target = Bukkit.getPlayer(arg1)
-                if (target == null) {
-                    sender.sendMessage("That player is not online.".red())
+            arg2 == null && firstTargets.isNotEmpty() -> {
+                if (playerSender == null) {
+                    sender.sendErrorMessage("Console must specify a target player.")
                     return
                 }
-
-                if (player == null) {
-                    sender.sendMessage("Console must specify a target to teleport.".red())
-                    return
-                }
-
-                player.teleport(target.location)
+                val target = firstTargets.first()
+                playerSender.teleport(target.location)
                 Logger.log(sender, Perm.LOG, "teleported to ${target.name}", false)
                 sender.sendMessage("Teleported to ${target.name}.".blue())
+                if (shouldLog) {
+                    LogsService.addLog(sender.uuidStr(), "Teleported to ${target.name}", LogType.TELEPORT)
+                }
             }
 
             arg2 != null && arg3 == null -> {
-                val target1 = Bukkit.getPlayer(arg1)
-                val target2 = Bukkit.getPlayer(arg2)
-
-                if (target1 == null || target2 == null) {
-                    sender.sendMessage("One of the specified players is not online.".red())
+                val secondTarget = Bukkit.getPlayerExact(arg2)
+                if (secondTarget == null) {
+                    sender.sendErrorMessage("The target player '${arg2}' is not online.")
                     return
                 }
 
-                if (!sender.hasPermission(Perm.TELEPORT_OTHERS)) {
-                    sender.sendMessage("You don't have permission to teleport other players!".red())
+                if (!sender.hasPermission(Perm.TELEPORT_OTHERS) && playerSender !in firstTargets) {
+                    sender.sendErrorMessage("You don't have permission to teleport others!")
                     return
                 }
 
-                target1.teleport(target2.location)
-                Logger.log(sender, Perm.LOG, "teleported ${target1.name} to ${target2.name}", false)
-                sender.sendMessage("Teleported ${target1.name} to ${target2.name}.".blue())
+                firstTargets.forEach { it.teleport(secondTarget.location) }
+                firstTargets.forEach {
+                    Logger.log(sender, Perm.LOG, "teleported ${it.name} to ${secondTarget.name}", false)
+                    sender.sendMessage("Teleported ${it.name} to ${secondTarget.name}.".blue())
+                    if (shouldLog) {
+                        LogsService.addLog(
+                            sender.uuidStr(),
+                            "Teleported ${it.name} to ${secondTarget.name}",
+                            LogType.TELEPORT
+                        )
+                    }
+                }
             }
 
             arg2 != null && arg3 != null && arg4 == null -> {
-                if (player == null) {
-                    sender.sendMessage("Console must specify a player for coordinate teleport.".red())
+                if (playerSender == null) {
+                    sender.sendErrorMessage("Console must specify a player for coordinate teleport.")
                     return
                 }
-
                 if (!sender.hasPermission(Perm.TELEPORT_CORDS)) {
-                    sender.sendMessage("You don't have permission to use coordinate teleport!".red())
+                    sender.sendErrorMessage("You don't have permission to use coordinate teleport.")
                     return
                 }
 
-                val loc = parseCoordinates(player.location, arg1, arg2, arg3) ?: run {
-                    sender.sendMessage("Invalid coordinates.".red())
+                val loc = parseCoordinates(playerSender.location, arg1, arg2, arg3)
+                if (loc == null) {
+                    sender.sendErrorMessage("Invalid coordinates.")
                     return
                 }
 
-                val x = parseCoordinate(loc.x, arg1)?.let { String.format("%.1f", it).toDouble() }
-                val y = parseCoordinate(loc.y, arg2)?.let { String.format("%.1f", it).toDouble() }
-                val z = parseCoordinate(loc.z, arg3)?.let { String.format("%.1f", it).toDouble() }
+                playerSender.teleport(loc)
+                Logger.log(
+                    sender,
+                    Perm.LOG,
+                    "teleported ${playerSender.name} to coordinates ${loc.x} ${loc.y} ${loc.z}",
+                    false
+                )
+                sender.sendMessage(
+                    "Teleported to &f${formatCoord(loc.x)} ${formatCoord(loc.y)} ${formatCoord(loc.z)}".blue()
+                )
+                if (shouldLog) {
+                    LogsService.addLog(
+                        sender.uuidStr(),
+                        "Teleported to ${playerSender.name} to coordinates ${loc.x} ${loc.y} ${loc.z}",
+                        LogType.TELEPORT
+                    )
+                }
 
-                player.teleport(loc)
-                Logger.log(sender, Perm.LOG, "teleported ${player.name} to coordinates $x $y $z", false)
-                sender.sendMessage("Teleported to &f$x $y $z".blue())
             }
 
             arg2 != null && arg3 != null && arg4 != null -> {
-                val target = Bukkit.getPlayer(arg1)
-                if (target == null) {
-                    sender.sendMessage("That player is not online.".red())
-                    return
-                }
-
                 if (!sender.hasPermission(Perm.TELEPORT_CORDS)) {
-                    sender.sendMessage("You don't have permission to teleport players to coordinates!".red())
+                    sender.sendErrorMessage("You don't have permission to teleport players to coordinates!")
+                    return
+                }
+                if (firstTargets.isEmpty() && playerSender == null) {
+                    sender.sendErrorMessage("No valid players to teleport.")
                     return
                 }
 
-                val loc = parseCoordinates(target.location, arg2, arg3, arg4) ?: run {
-                    sender.sendMessage("Invalid coordinates.".red())
+                if (firstTargets.isEmpty()) {
+                    sender.sendErrorMessage("That player is not online.")
                     return
                 }
 
-                val x = parseCoordinate(loc.x, arg2)?.let { String.format("%.1f", it).toDouble() }
-                val y = parseCoordinate(loc.y, arg3)?.let { String.format("%.1f", it).toDouble() }
-                val z = parseCoordinate(loc.z, arg4)?.let { String.format("%.1f", it).toDouble() }
+                val targetsToTeleport = firstTargets
 
+                val loc = parseCoordinates(targetsToTeleport.first().location, arg2, arg3, arg4)
+                if (loc == null) {
+                    sender.sendErrorMessage("Invalid coordinates.")
+                    return
+                }
 
-                target.teleport(loc)
-                Logger.log(sender, Perm.LOG, "teleported ${target.name} to coordinates $x $y $z", false)
-                sender.sendMessage("Teleported ${target.name} to &f$x $y $z".blue())
+                targetsToTeleport.forEach { target ->
+                    target.teleport(loc)
+                    Logger.log(
+                        sender,
+                        Perm.LOG,
+                        "teleported ${target.name} to coordinates ${loc.x} ${loc.y} ${loc.z}",
+                        false
+                    )
+                    sender.sendMessage(
+                        "Teleported ${target.name} to &f${formatCoord(loc.x)} ${formatCoord(loc.y)} ${formatCoord(loc.z)}".blue()
+                    )
+                    if (shouldLog) {
+                        LogsService.addLog(
+                            sender.uuidStr(),
+                            "Teleported ${target.name} to ${formatCoord(loc.x)} ${formatCoord(loc.y)} ${formatCoord(loc.z)}",
+                            LogType.TELEPORT
+                        )
+                    }
+                }
             }
 
-            else -> sender.sendMessage("Invalid usage: /tp <player> | <player1> <player2> | <x> <y> <z> | <player> <x> <y> <z>".red())
+            else -> sender.sendErrorMessage(
+                "Invalid usage: /tp <player> | /tp <player1> <player2> | /tp <x> <y> <z> | /tp <player(s)> <x> <y> <z>"
+            )
         }
     }
 
+    private fun formatCoord(value: Double): String {
+        return String.format("%.1f", value)
+    }
+
+
     private fun parseCoordinates(base: Location, xArg: String, yArg: String, zArg: String): Location? {
         val world = base.world ?: return null
-
         val x = parseCoordinate(base.x, xArg) ?: return null
         val y = parseCoordinate(base.y, yArg) ?: return null
         val z = parseCoordinate(base.z, zArg) ?: return null
-
         return Location(world, x, y, z)
     }
 

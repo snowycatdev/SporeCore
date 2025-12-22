@@ -2,9 +2,9 @@ package me.clearedSpore.sporeCore.menu.util.confirm
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.menu.Menu
+import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeCore.SporeCore
 import org.bukkit.Bukkit
@@ -13,8 +13,8 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.inventory.meta.SkullMeta
 
 class TPAConfirmMenu(
     private val player: Player,
@@ -64,6 +64,7 @@ class TPAConfirmMenu(
                 item.itemMeta = meta
                 return item
             }
+
             override fun onClickEvent(clicker: Player, clickType: ClickType) {}
         })
 
@@ -97,6 +98,7 @@ class TPAConfirmMenu(
                 item.itemMeta = meta
                 return item
             }
+
             override fun onClickEvent(clicker: Player, clickType: ClickType) {}
         })
     }

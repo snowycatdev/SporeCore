@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.menu.punishment.punish
 import me.clearedSpore.sporeAPI.menu.BasePaginatedMenu
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
-import me.clearedSpore.sporeCore.menu.punishment.punish.PunishMenu
 import me.clearedSpore.sporeCore.menu.punishment.punish.item.PunishItem
 import me.clearedSpore.sporeCore.menu.util.BackItem
 import org.bukkit.OfflinePlayer

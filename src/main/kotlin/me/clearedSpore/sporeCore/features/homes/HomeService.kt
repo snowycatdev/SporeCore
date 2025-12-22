@@ -1,12 +1,10 @@
 package me.clearedSpore.sporeCore.features.homes
 
 import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.features.homes.`object`.Home
 import me.clearedSpore.sporeCore.user.User
+import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Location
-import java.util.*
-import java.util.concurrent.CompletableFuture
 
 class HomeService {
 
@@ -17,7 +15,7 @@ class HomeService {
 
 
     fun createHome(user: User, name: String, location: Location) {
-        val key = name.lowercase()
+        name.lowercase()
 
         if (user.homes.any { it.name.equals(name, ignoreCase = true) }) {
             Logger.warn("Home '$name' already exists for player ${user.playerName}. Skipping creation.")

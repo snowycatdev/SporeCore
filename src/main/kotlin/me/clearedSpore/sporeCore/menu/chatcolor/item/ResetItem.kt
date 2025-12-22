@@ -34,7 +34,7 @@ class ResetItem(
     override fun onClickEvent(clicker: Player, clickType: ClickType) {
         val user = UserManager.get(player)
 
-        if(user == null){
+        if (user == null) {
             player.closeInventory()
             player.userFail()
             return

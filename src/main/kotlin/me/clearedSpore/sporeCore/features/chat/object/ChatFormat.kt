@@ -10,7 +10,7 @@ data class ChatFormat(
     var striketrough: Boolean = false,
     var magic: Boolean = false,
     var none: Boolean = true
-){
+) {
 
     companion object {
         fun fromDocument(doc: Document?): ChatFormat? {

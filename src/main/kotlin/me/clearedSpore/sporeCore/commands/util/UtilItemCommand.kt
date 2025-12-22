@@ -33,7 +33,7 @@ class UtilItemCommand : BaseCommand() {
 
         val base64 = ItemUtil.itemStackToBase64(item)
 
-        if(base64 == null){
+        if (base64 == null) {
             player.sendErrorMessage("Failed to load item from Base64!")
             return
         }
@@ -56,7 +56,7 @@ class UtilItemCommand : BaseCommand() {
         try {
             val item = ItemUtil.itemStackFromBase64(base64)
 
-            if(item == null){
+            if (item == null) {
                 player.sendErrorMessage("Failed to load item from Base64!")
                 return
             }
@@ -175,7 +175,7 @@ class UtilItemCommand : BaseCommand() {
     fun onClearNBT(player: Player) {
         val item = player.itemInHand
 
-        if(item.type == Material.AIR) {
+        if (item.type == Material.AIR) {
             player.sendErrorMessage("You must be holding an item!")
             return
         }
@@ -190,13 +190,13 @@ class UtilItemCommand : BaseCommand() {
     @CommandPermission(Perm.UTIL_ITEM)
     fun onListNBT(player: Player) {
         val item = player.itemInHand
-        if(item.type == Material.AIR) {
+        if (item.type == Material.AIR) {
             player.sendErrorMessage("You must be holding an item!")
             return
         }
         val meta = item.itemMeta ?: return
         val keys = meta.persistentDataContainer.keys
-        if(keys.isEmpty()) player.sendErrorMessage("No NBT tags found.")
+        if (keys.isEmpty()) player.sendErrorMessage("No NBT tags found.")
         else {
             player.sendSuccessMessage("NBT tags: " + keys.joinToString(", ") { it.key })
         }
@@ -207,7 +207,7 @@ class UtilItemCommand : BaseCommand() {
     fun onToJson(player: Player) {
         val item = player.itemInHand
 
-        if(item == null || item.type == Material.AIR) {
+        if (item == null || item.type == Material.AIR) {
             player.sendErrorMessage("You must be holding an item!")
             return
         }

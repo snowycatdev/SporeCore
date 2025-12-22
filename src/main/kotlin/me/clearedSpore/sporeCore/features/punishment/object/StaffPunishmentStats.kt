@@ -1,7 +1,7 @@
 package me.clearedSpore.sporeCore.features.punishment.`object`
 
-import org.dizitart.no2.collection.Document
 import me.clearedSpore.sporeCore.database.util.DocWriter
+import org.dizitart.no2.collection.Document
 import java.util.*
 
 data class StaffPunishmentStats(

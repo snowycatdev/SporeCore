@@ -54,5 +54,6 @@ class ChatColorMenu(private val player: Player) : BasePaginatedMenu(SporeCore.in
         clicker: Player,
         clickType: ClickType,
         event: InventoryClickEvent
-    ) {}
+    ) {
+    }
 }

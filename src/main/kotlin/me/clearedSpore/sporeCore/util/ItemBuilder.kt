@@ -1,5 +1,6 @@
 package me.clearedSpore.sporeCore.util
 
+import me.clearedSpore.sporeCore.SporeCore
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
@@ -8,7 +9,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
-import me.clearedSpore.sporeCore.SporeCore
 
 class ItemBuilder(private val material: Material, private var amount: Int = 1) {
 

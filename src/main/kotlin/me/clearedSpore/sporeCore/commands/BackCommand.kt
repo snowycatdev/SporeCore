@@ -5,9 +5,7 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
-import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userFail
-import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.TeleportService.awaitTeleport
@@ -19,9 +17,9 @@ import org.bukkit.entity.Player
 class BackCommand : BaseCommand() {
 
     @Default
-    fun onBack(player: Player){
+    fun onBack(player: Player) {
         val user = UserManager.get(player)
-        if (user == null){
+        if (user == null) {
             player.userFail()
             return
         }
@@ -29,7 +27,7 @@ class BackCommand : BaseCommand() {
         val currentLocation = player.location
         val lastLocation = user.lastLocation
 
-        if(lastLocation == null){
+        if (lastLocation == null) {
             player.sendErrorMessage("You don't have any locations to teleport to!")
             return
         }

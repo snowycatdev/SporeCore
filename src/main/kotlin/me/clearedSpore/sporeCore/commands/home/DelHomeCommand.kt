@@ -22,7 +22,7 @@ class DelHomeCommand() : BaseCommand() {
     fun onDelete(player: Player, name: String) {
         val user = UserManager.get(player)
 
-        if(user == null){
+        if (user == null) {
             player.userJoinFail()
             return
         }

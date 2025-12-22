@@ -16,9 +16,9 @@ import me.clearedSpore.sporeCore.features.punishment.config.ReasonDefinition
 import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
+import me.clearedSpore.sporeCore.features.setting.impl.PunishmentLogsSetting
 import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.user.settings.Setting
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -84,7 +84,7 @@ object PunishmentService {
 
         if (!discordConfig.enabled || discordConfig.punishment.isNullOrBlank()) return
 
-        if(discordConfig.enabled && !SporeCore.instance.discordEnabled){
+        if (discordConfig.enabled && !SporeCore.instance.discordEnabled) {
             Logger.error("Failed to load discord: Discord config enabled but the service is not initialized!")
             return
         }
@@ -103,7 +103,8 @@ object PunishmentService {
         val skinURL = DiscordService.getAvatarURL(target.uniqueId)
 
         val issuer = punishment.getPunisher() ?: UserManager.getConsoleUser()
-        val issuerSkinURL = issuer.player?.let { DiscordService.getAvatarURL(issuer.uuid) } ?: "https://mc-heads.net/avatar/Console/100"
+        val issuerSkinURL =
+            issuer.player?.let { DiscordService.getAvatarURL(issuer.uuid) } ?: "https://mc-heads.net/avatar/Console/100"
         val linkedStaffId = issuer.discordID
 
         if (config.discord.requireLinked && linkedStaffId == null && issuer.player != null) {
@@ -139,7 +140,6 @@ object PunishmentService {
             Logger.error("Failed to send punishment webhook: ${ex.message}")
         }
     }
-
 
 
     private fun Collection<MutableMap<String, ReasonDefinition>>.flattenToMap(): Map<String, ReasonDefinition> {
@@ -189,7 +189,7 @@ object PunishmentService {
 
         val linkedDCID = punisher.discordID
 
-        if(linkedDCID == null && punisher is Player){
+        if (linkedDCID == null && punisher is Player) {
             punisher.sendMessage("You must have your account linked before you can punish".red())
             punisher.sendMessage("Run /link to link your account!".blue())
             return
@@ -223,9 +223,22 @@ object PunishmentService {
             )
         }
 
-        if (targetUser.getActivePunishment(type) != null) {
-            punisher.sendMessage("That player is already punished!".red())
-            return
+        when (type) {
+            PunishmentType.BAN, PunishmentType.TEMPBAN -> {
+                if (targetUser.getActivePunishment(PunishmentType.BAN) != null) {
+                    punisher.sendMessage("That user is already banned!".red())
+                    return
+                }
+            }
+
+            PunishmentType.MUTE, PunishmentType.TEMPMUTE -> {
+                if (targetUser.getActivePunishment(PunishmentType.MUTE) != null) {
+                    punisher.sendMessage("That player is already muted!".red())
+                    return
+                }
+            }
+
+            else -> {}
         }
 
         val now = Date()
@@ -433,7 +446,7 @@ object PunishmentService {
         for (player in Bukkit.getOnlinePlayers()) {
             if (player.hasPermission(Perm.PUNISH_LOG)) {
                 val user = UserManager.get(player)
-                if (user != null && user.isSettingEnabled(Setting.PUNISHMENT_LOGS)) {
+                if (user != null && user.getSetting(PunishmentLogsSetting()) == true) {
                     player.sendMessage(message.translate())
                 }
             }

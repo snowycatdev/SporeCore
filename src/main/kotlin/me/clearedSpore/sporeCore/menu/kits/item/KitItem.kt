@@ -32,7 +32,7 @@ class KitItem(
         val canClaim = !user.hasKitCooldown(kit.id)
 
         val lore = mutableListOf<String>()
-        if(canClaim){
+        if (canClaim) {
             lore.add("Left click to claim".blue())
         } else {
             val timeleft = TimeUtil.formatDuration(user.getKitCooldownRemaining(kit.id))
@@ -54,6 +54,7 @@ class KitItem(
                 clicker.closeInventory()
                 kitService.giveKit(player, kit.name)
             }
+
             clickType.isRightClick -> {
                 KitPreviewMenu(kit, player).open(player)
             }

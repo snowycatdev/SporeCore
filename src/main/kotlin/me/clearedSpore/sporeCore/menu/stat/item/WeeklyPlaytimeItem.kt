@@ -3,7 +3,6 @@ package me.clearedSpore.sporeCore.menu.stat.item
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.gray
-import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.features.stats.StatService
 import me.clearedSpore.sporeCore.menu.util.NoUserItem
@@ -23,7 +22,7 @@ class WeeklyPlaytimeItem(
 
         val user = UserManager.get(player)
 
-        if(user == null) return NoUserItem.toItemStack()
+        if (user == null) return NoUserItem.toItemStack()
 
         meta.setDisplayName("Weekly Playtime".blue())
         meta.lore = listOf<String>(

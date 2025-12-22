@@ -6,14 +6,12 @@ import me.clearedSpore.sporeCore.database.util.DocWriter
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.dizitart.no2.collection.Document
-import java.util.Base64
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
+import org.dizitart.no2.collection.Document
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.util.*
 
 
 data class InventoryData(

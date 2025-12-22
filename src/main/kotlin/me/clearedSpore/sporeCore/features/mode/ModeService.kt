@@ -2,7 +2,6 @@ package me.clearedSpore.sporeCore.features.mode
 
 import de.exlll.configlib.ConfigurationException
 import de.exlll.configlib.YamlConfigurations
-import lombok.extern.java.Log
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.mode.config.ModeConfig
@@ -45,8 +44,8 @@ object ModeService {
         }
     }
 
-    fun setMode(player: Player, enabled: Boolean, id: String? = null){
-        if(enabled){
+    fun setMode(player: Player, enabled: Boolean, id: String? = null) {
+        if (enabled) {
             val current = activeModes[player]!!
             removeModeSettings(player, current)
             activeModes.remove(player)
@@ -136,7 +135,7 @@ object ModeService {
 
     fun disableAll() {
         Bukkit.getOnlinePlayers().forEach { player ->
-            if(isInMode(player)){
+            if (isInMode(player)) {
                 toggleMode(player)
             }
         }
@@ -159,7 +158,7 @@ object ModeService {
 
             mode.items?.forEach { (slot, itemId) ->
 
-                if(ModeItemManager.getItem(itemId) == null){
+                if (ModeItemManager.getItem(itemId) == null) {
                     Logger.error("Failed to give item ${itemId}: Item does not exist!")
                     return
                 }
@@ -170,7 +169,7 @@ object ModeService {
             }
 
             val gamemode = GameMode.valueOf(mode.gamemode.uppercase())
-            if(gamemode == null){
+            if (gamemode == null) {
                 Logger.error("Failed to apply gamemode!")
             } else {
                 player.gameMode = gamemode

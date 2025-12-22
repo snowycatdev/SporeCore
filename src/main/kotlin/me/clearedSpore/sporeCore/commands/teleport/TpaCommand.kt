@@ -5,9 +5,6 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
-import me.clearedSpore.sporeAPI.util.CC.red
-import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 @CommandAlias("tpa")

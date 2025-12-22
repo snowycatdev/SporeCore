@@ -14,8 +14,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitRunnable
 import java.lang.reflect.Field
-import java.lang.reflect.Method
-import kotlin.math.max
 import kotlin.math.min
 
 object TpsTask : Listener {
@@ -47,7 +45,8 @@ object TpsTask : Listener {
                         val msptColor = colorMspt(mspt)
                         val pingColor = colorPing(ping)
 
-                        val title = "TPS: $tpsColor$tps &r   MSPT: $msptColor$mspt &r   Ping: $pingColor$ping".translate()
+                        val title =
+                            "TPS: $tpsColor$tps &r   MSPT: $msptColor$mspt &r   Ping: $pingColor$ping".translate()
                         bar.setTitle(title)
 
                         val score = computeScore(tps, mspt, ping)

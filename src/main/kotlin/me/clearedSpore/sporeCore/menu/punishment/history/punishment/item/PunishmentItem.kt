@@ -54,7 +54,7 @@ class PunishmentItem(
         if (!clickType.isRightClick) return
 
         val type = punishment.type
-        val permission = when(type) {
+        val permission = when (type) {
             PunishmentType.MUTE, PunishmentType.TEMPMUTE -> Perm.UNMUTE
             PunishmentType.BAN, PunishmentType.TEMPBAN -> Perm.UNBAN
             PunishmentType.WARN, PunishmentType.TEMPWARN -> Perm.UNWARN
@@ -73,7 +73,7 @@ class PunishmentItem(
                 return@awaitChatInput
             }
 
-            val success = when(type) {
+            val success = when (type) {
                 PunishmentType.MUTE, PunishmentType.TEMPMUTE ->
                     user.unmute(remover, punishment.id, reason)
 
@@ -91,7 +91,7 @@ class PunishmentItem(
                 return@awaitChatInput
             }
 
-            val logMsg = when(type) {
+            val logMsg = when (type) {
                 PunishmentType.MUTE, PunishmentType.TEMPMUTE -> PunishmentService.config.logs.unMute
                 PunishmentType.BAN, PunishmentType.TEMPBAN -> PunishmentService.config.logs.unBan
                 PunishmentType.WARN, PunishmentType.TEMPWARN -> PunishmentService.config.logs.unWarn

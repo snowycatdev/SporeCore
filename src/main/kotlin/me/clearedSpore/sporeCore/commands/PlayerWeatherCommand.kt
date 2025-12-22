@@ -38,11 +38,23 @@ class PlayerWeatherCommand : BaseCommand() {
 
         target.setPlayerWeather(type)
 
-        if(target == sender){
-            sender.sendMessage("Your personal weather has been set to ${type.toString().capitalizeFirstLetter()}".blue())
+        if (target == sender) {
+            sender.sendMessage(
+                "Your personal weather has been set to ${
+                    type.toString().capitalizeFirstLetter()
+                }".blue()
+            )
         } else {
-            sender.sendMessage("You have set ${targetName}'s weather to ${type.toString().capitalizeFirstLetter()}".blue())
-            target.sendMessage("Your personal weather has been set to ${type.toString().capitalizeFirstLetter()}".blue())
+            sender.sendMessage(
+                "You have set ${targetName}'s weather to ${
+                    type.toString().capitalizeFirstLetter()
+                }".blue()
+            )
+            target.sendMessage(
+                "Your personal weather has been set to ${
+                    type.toString().capitalizeFirstLetter()
+                }".blue()
+            )
         }
     }
 }
