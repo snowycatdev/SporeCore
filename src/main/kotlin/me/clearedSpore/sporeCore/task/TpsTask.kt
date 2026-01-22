@@ -13,7 +13,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitRunnable
-import java.lang.reflect.Field
 import kotlin.math.min
 
 object TpsTask : Listener {
@@ -28,7 +27,11 @@ object TpsTask : Listener {
         object : BukkitRunnable() {
             override fun run() {
                 val tps = getCurrentTPS()
-                val mspt = (if (tps > 0) 1000.0 / tps else Double.MAX_VALUE).toInt()
+
+                val runtime = Runtime.getRuntime()
+                val used = runtime.totalMemory() - runtime.freeMemory()
+                val max = runtime.maxMemory()
+                val memoryPercent = round1((used.toDouble() / max.toDouble()) * 100.0)
 
                 for (player in Bukkit.getOnlinePlayers()) {
                     val user = UserManager.get(player)
@@ -41,18 +44,20 @@ object TpsTask : Listener {
                         }
 
                         val ping = player.ping
+
                         val tpsColor = colorTps(tps)
-                        val msptColor = colorMspt(mspt)
+                        val memoryColor = colorMemory(memoryPercent)
                         val pingColor = colorPing(ping)
 
                         val title =
-                            "TPS: $tpsColor$tps &r   MSPT: $msptColor$mspt &r   Ping: $pingColor$ping".translate()
+                            "TPS: $tpsColor$tps &r   MEM: $memoryColor$memoryPercent% &r   Ping: $pingColor$ping"
+                                .translate()
+
                         bar.setTitle(title)
 
-                        val score = computeScore(tps, mspt, ping)
+                        val score = computeScore(tps, memoryPercent, ping)
                         bar.progress = score
                         bar.color = barColor(score)
-
                     } else {
                         val bar = bars.remove(player)
                         bar?.removeAll()
@@ -65,22 +70,19 @@ object TpsTask : Listener {
     fun stop() {
         if (!running) return
         running = false
-        for (bar in bars.values) {
-            bar.isVisible = false
-        }
+        bars.values.forEach { it.isVisible = false }
         bars.clear()
     }
 
+    private fun round1(value: Double): Double {
+        return kotlin.math.round(value * 10.0) / 10.0
+    }
+
     private fun getCurrentTPS(): Double {
-        try {
-            val server = Bukkit.getServer()
-            val minecraftServerClass = server.javaClass.getMethod("getServer").declaringClass
-            val serverField: Field = minecraftServerClass.getDeclaredField("recentTps")
-            serverField.isAccessible = true
-            val recent = serverField.get(server) as DoubleArray
-            return min(20.0, recent[0])
+        return try {
+            round1(min(20.0, SporeCore.instance.server.tps[0]))
         } catch (ex: Exception) {
-            return 20.0
+            20.0
         }
     }
 
@@ -92,10 +94,10 @@ object TpsTask : Listener {
         }
     }
 
-    private fun colorMspt(mspt: Int): String {
+    private fun colorMemory(percent: Double): String {
         return when {
-            mspt < 40 -> "&a"
-            mspt < 55 -> "&6"
+            percent < 50.0 -> "&a"
+            percent < 70.0 -> "&6"
             else -> "&c"
         }
     }
@@ -108,11 +110,11 @@ object TpsTask : Listener {
         }
     }
 
-    private fun computeScore(tps: Double, mspt: Int, ping: Int): Double {
+    private fun computeScore(tps: Double, memoryPercent: Double, ping: Int): Double {
         val tpsScore = 1.0 - (tps / 20.0)
-        val msptScore = min(1.0, mspt / 100.0)
+        val memoryScore = min(1.0, memoryPercent / 100.0)
         val pingScore = min(1.0, ping / 300.0)
-        return min(1.0, tpsScore * 0.5 + msptScore * 0.3 + pingScore * 0.2)
+        return min(1.0, tpsScore * 0.5 + memoryScore * 0.3 + pingScore * 0.2)
     }
 
     private fun barColor(score: Double): BarColor {
@@ -142,6 +144,4 @@ object TpsTask : Listener {
         val bar = bars.remove(player)
         bar?.removeAll()
     }
-
-
 }
