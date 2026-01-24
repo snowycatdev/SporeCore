@@ -9,11 +9,11 @@ import org.bukkit.Material
 @Setting
 class TryLogSetting : ToggleSetting(
     key = "try-logs",
-    displayName = "Try Logs",
+    displayName = "Try logs",
     item = Material.BELL,
     lore = listOf(
-        "| Controls whether you are able to see players",
-        "| attempting to join while banned from the server."
+        "If you want to receive a message when someone",
+        "tries to join while being banned."
     ),
     permission = Perm.PUNISH_LOG
 ) {

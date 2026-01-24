@@ -14,10 +14,10 @@ enum class MentionOption {
 
     override fun toString(): String {
         return when (this) {
-            TITLE_ENABLED -> "Title"
-            SOUND_ENABLED -> "Sound"
-            TITLE_AND_SOUND -> "Title & Sound"
-            NONE -> "Disabled"
+            TITLE_ENABLED -> "Mention title enabled"
+            SOUND_ENABLED -> "Mention sound enabled"
+            TITLE_AND_SOUND -> "Mention title & sound enabled"
+            NONE -> "No mention sound or title enabled"
         }
     }
 }
@@ -28,8 +28,8 @@ class MentionTitleSetting : OptionSetting<MentionOption>(
     displayName = "Mentions",
     item = Material.LECTERN,
     lore = listOf(
-        "| Controls what you want to see or",
-        "| hear when you are mentioned in chat."
+        "If you want to hear the mention sound or if you want",
+        "to see a title when a player mentions you in chat."
     ),
 ) {
     override fun values(): List<MentionOption> = listOf(

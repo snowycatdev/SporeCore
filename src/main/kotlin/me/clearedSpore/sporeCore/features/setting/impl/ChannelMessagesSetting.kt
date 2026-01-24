@@ -9,11 +9,11 @@ import org.bukkit.Material
 @Setting
 class ChannelMessagesSetting : ToggleSetting(
     key = "channel-messages",
-    displayName = "Staff Messages",
+    displayName = "Channel messages",
     item = Material.PAPER,
     lore = listOf(
-        "| Controls whether you are able to see messages",
-        "| sent by staff in staff channels."
+        "If you want to receive a message when someone",
+        "types in a chat channel"
     ),
     permission = Perm.CHANNEL_ALLOW
 ) {

@@ -9,11 +9,11 @@ import org.bukkit.Material
 @Setting
 class ChatEnabledSetting : ToggleSetting(
     key = "chat-enabled",
-    displayName = "Chat Enabled",
+    displayName = "Chat enabled",
     item = Material.PAPER,
     lore = listOf(
-        "| Controls whether you see chat messages",
-        "| from players (excluding staff)"
+        "If you can see chat messages sent by players",
+        "Staff will bypass this!"
     )
 ) {
     override fun defaultValue(): Boolean = true

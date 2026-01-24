@@ -9,11 +9,10 @@ import org.bukkit.Material
 @Setting
 class CurrencyLogsSetting : ToggleSetting(
     key = "currency-logs",
-    displayName = "Currency Logs",
+    displayName = "Currency logs",
     item = Material.GOLD_INGOT,
     lore = listOf(
-        "| Controls whether changes in a player's currency",
-        "| are sent to you."
+        "If you can see the custom currency logs."
     ),
     permission = Perm.CURRENCY_NOTIFY
 ) {

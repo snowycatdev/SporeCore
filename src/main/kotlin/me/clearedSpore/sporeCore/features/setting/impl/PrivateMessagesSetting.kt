@@ -8,11 +8,11 @@ import org.bukkit.Material
 @Setting
 class PrivateMessagesSetting : ToggleSetting(
     key = "private-msgs",
-    displayName = "Private Messages",
+    displayName = "Private messages",
     item = Material.WRITTEN_BOOK,
     lore = listOf(
-        "| Controls whether you receive private",
-        "| messages from players (excluding staff)."
+        "If players can send you private messages",
+        "Staff will bypass this!"
     )
 ) {
     override fun defaultValue(): Boolean = true
