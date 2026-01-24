@@ -323,6 +323,8 @@ class UserListener : Listener {
         } ?: System.currentTimeMillis()
 
         if (features.modes && ModeService.isInMode(player)) {
+            event.quitMessage(null)
+            wasVanished = true
             ModeService.toggleMode(player)
         }
 
