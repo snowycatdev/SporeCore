@@ -1,9 +1,11 @@
 package me.clearedSpore.sporeCore.features.vanish
 
 import me.clearedSpore.sporeAPI.exception.LoggedException
+import me.clearedSpore.sporeAPI.util.CC.yellow
 import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.discord.DiscordService
+import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import java.util.*
@@ -15,15 +17,17 @@ object VanishService {
 
     fun vanish(uuid: UUID) {
         val userPlayer = Bukkit.getPlayer(uuid) ?: return
+        val wasInMode = ModeService.isInMode(userPlayer)
 
         vanishedPlayers.add(uuid)
+        if (!wasInMode) Bukkit.broadcastMessage("${userPlayer.name} left the server".yellow())
 
         for (player in Bukkit.getOnlinePlayers()) {
             if (player.hasPermission(Perm.VANISH_SEE)) continue
             player.hidePlayer(SporeCore.instance, userPlayer)
         }
 
-        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
+        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty() && !wasInMode) {
             val embed = Webhook.Embed()
                 .setColor(0xFF0000)
                 .setDescription("**${userPlayer.name} left the server**")
@@ -50,14 +54,16 @@ object VanishService {
 
     fun unVanish(uuid: UUID) {
         val userPlayer = Bukkit.getPlayer(uuid) ?: return
+        val wasInMode = ModeService.isInMode(userPlayer)
 
         for (player in Bukkit.getOnlinePlayers()) {
             player.showPlayer(SporeCore.instance, userPlayer)
         }
 
         vanishedPlayers.remove(uuid)
+        if (!wasInMode) Bukkit.broadcastMessage("${userPlayer.name} joined the server".yellow())
 
-        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
+        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty() && !wasInMode) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${userPlayer.name} joined the server**")
