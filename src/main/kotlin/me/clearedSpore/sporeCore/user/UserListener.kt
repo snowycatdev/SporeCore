@@ -154,6 +154,9 @@ class UserListener : Listener {
         val joinConfig = SporeCore.instance.coreConfig.join
         val db = DatabaseManager.getServerData()
         val features = SporeCore.instance.coreConfig.features
+        val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
+
+        if (autoStaff) event.joinMessage(null)
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
