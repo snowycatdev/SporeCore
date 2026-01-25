@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerRespawnEvent
 class DeathListener : Listener {
 
     @EventHandler
-    fun onDeath(event: PlayerRespawnEvent) {
+    fun onRespawn(event: PlayerRespawnEvent) {
         val player = event.player
         val config = SporeCore.instance.coreConfig
         val kitService = SporeCore.instance.kitService
