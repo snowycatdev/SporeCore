@@ -156,7 +156,7 @@ class UserListener : Listener {
         val features = SporeCore.instance.coreConfig.features
         val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
 
-        if (autoStaff) event.joinMessage(null)
+        if (autoStaff && player.hasPermission(Perm.MODE_ALLOW)) event.joinMessage(null)
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
@@ -254,7 +254,7 @@ class UserListener : Listener {
                 ModeService.toggleMode(player, mode.id)
                 player.sendMessage("Enabled ${mode.name} mode".blue())
             }
-        }, 500, TimeUnit.MILLISECONDS)
+        }, 100, TimeUnit.MILLISECONDS)
 
 
 
@@ -282,7 +282,7 @@ class UserListener : Listener {
             )
         }
 
-        if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
+        if (config.discord.chat.isNotEmpty() && !ModeService.isInMode(player) && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${player.name} joined the server**")
