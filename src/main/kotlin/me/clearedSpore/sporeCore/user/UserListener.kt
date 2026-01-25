@@ -154,6 +154,9 @@ class UserListener : Listener {
         val joinConfig = SporeCore.instance.coreConfig.join
         val db = DatabaseManager.getServerData()
         val features = SporeCore.instance.coreConfig.features
+        val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
+
+        if (autoStaff) event.joinMessage(null)
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
@@ -279,7 +282,7 @@ class UserListener : Listener {
             )
         }
 
-        if (config.discord.chat.isNotEmpty() && !VanishService.isVanished(player.uniqueId)) {
+        if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${player.name} joined the server**")
@@ -311,7 +314,7 @@ class UserListener : Listener {
         val config = SporeCore.instance.coreConfig
         val features = SporeCore.instance.coreConfig.features
 
-        val wasVanished = VanishService.isVanished(player.uniqueId)
+        var wasVanished = false
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val joinTime = user.lastJoin?.let {
@@ -320,6 +323,8 @@ class UserListener : Listener {
         } ?: System.currentTimeMillis()
 
         if (features.modes && ModeService.isInMode(player)) {
+            event.quitMessage(null)
+            wasVanished = true
             ModeService.toggleMode(player)
         }
 
