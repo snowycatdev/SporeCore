@@ -1,13 +1,13 @@
 package me.clearedSpore.sporeCore.features.vanish
 
 import me.clearedSpore.sporeAPI.exception.LoggedException
-import me.clearedSpore.sporeAPI.util.CC.yellow
 import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import java.util.*
 
 
@@ -20,7 +20,7 @@ object VanishService {
         val wasInMode = ModeService.isInMode(userPlayer)
 
         vanishedPlayers.add(uuid)
-        if (!wasInMode) Bukkit.broadcastMessage("${userPlayer.name} left the server".yellow())
+        if (!wasInMode) Bukkit.broadcastMessage("${ChatColor.YELLOW}${userPlayer.name} left the game")
 
         for (player in Bukkit.getOnlinePlayers()) {
             if (player.hasPermission(Perm.VANISH_SEE)) continue
@@ -61,7 +61,7 @@ object VanishService {
         }
 
         vanishedPlayers.remove(uuid)
-        if (!wasInMode) Bukkit.broadcastMessage("${userPlayer.name} joined the server".yellow())
+        if (!wasInMode) Bukkit.broadcastMessage("${ChatColor.YELLOW}${userPlayer.name} joined the game")
 
         if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty() && !wasInMode) {
             val embed = Webhook.Embed()
