@@ -156,7 +156,7 @@ class UserListener : Listener {
         val features = SporeCore.instance.coreConfig.features
         val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
 
-        if (autoStaff) event.joinMessage(null)
+        if (autoStaff) event.joinMessage = null
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
@@ -282,6 +282,14 @@ class UserListener : Listener {
             )
         }
 
+
+        if (config.joinLeaveMessages.join.isNotBlank() && !autoStaff) {
+            event.joinMessage = config.joinLeaveMessages.join
+                .translate()
+                .parsePlaceholders(player)
+        }
+
+
         if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
@@ -334,7 +342,6 @@ class UserListener : Listener {
         }
 
 
-
         val logConfig = config.logs
         if (logConfig.joinLeave) {
             LogsService.addLog(player.uuidStr(), "Left the server", LogType.JOIN_LEAVE)
@@ -351,6 +358,16 @@ class UserListener : Listener {
 
         UserManager.stopAutoSave(player.uniqueId)
         UserManager.remove(player.uniqueId)
+
+        if (wasVanished) {
+            event.quitMessage = null
+        } else {
+            if (config.joinLeaveMessages.leave.isNotBlank()) {
+                event.quitMessage = config.joinLeaveMessages.join
+                    .translate()
+                    .parsePlaceholders(player)
+            }
+        }
 
         if (config.discord.chat.isNotEmpty() && !wasVanished) {
             val embed = Webhook.Embed()
