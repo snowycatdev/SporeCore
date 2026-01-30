@@ -250,16 +250,14 @@ class UserListener : Listener {
             }
         }
 
-        Task.runLater({
-            if (user.getSettingOrDefault(StaffmodeOnJoinSetting()) &&
-                features.modes &&
-                player.hasPermission(Perm.MODE_ALLOW)
-            ) {
-                val mode = ModeService.getHighestMode(player) ?: return@runLater
-                ModeService.toggleMode(player, mode.id)
-                player.sendMessage("Enabled ${mode.name} mode".blue())
-            }
-        }, 100, TimeUnit.MILLISECONDS)
+        if (user.getSettingOrDefault(StaffmodeOnJoinSetting()) &&
+            features.modes &&
+            player.hasPermission(Perm.MODE_ALLOW)
+        ) {
+            val mode = ModeService.getHighestMode(player) ?: return
+            ModeService.toggleMode(player, mode.id)
+            player.sendMessage("Enabled ${mode.name} mode".blue())
+        }
 
 
 
