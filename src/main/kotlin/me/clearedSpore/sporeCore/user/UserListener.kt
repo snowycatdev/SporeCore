@@ -156,7 +156,12 @@ class UserListener : Listener {
         val features = SporeCore.instance.coreConfig.features
         val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
 
-        if (autoStaff) event.joinMessage = null
+        if (autoStaff && player.hasPermission(Perm.MODE_ALLOW)) {
+            Logger.log(player, Perm.LOG, "joined the game silently", false)
+            event.joinMessage(null)
+        } else if (!autoStaff && player.hasPermission(Perm.MODE_ALLOW)) {
+            Logger.log(player, Perm.LOG, "joined the server", false) //remove if too repetitive
+        }
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
