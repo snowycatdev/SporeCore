@@ -1,6 +1,8 @@
 package me.clearedSpore.sporeCore.features.mode.item
 
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.features.mode.item.impl.BookItem
+import me.clearedSpore.sporeCore.features.mode.item.impl.CompassItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.FreezeItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.HistoryItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.PunishSwordItem
@@ -17,6 +19,8 @@ object ModeItemManager {
         register(PunishSwordItem())
         register(SpeedItem())
         register(HistoryItem())
+        register(BookItem())
+        register(CompassItem())
     }
 
     fun register(item: ModeItem) {
