@@ -226,13 +226,43 @@ class SporeCore : JavaPlugin() {
 
         logStartupBanner()
         Task.runLater({ freshStartup = false }, 20)
+
+        val consoleHeadURL = "https://mc-heads.net/avatar/Console/100"
+
+        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
+            try {
+                val webhook = Webhook(SporeCore.instance.coreConfig.discord.chat)
+
+                webhook.setMessage("✅ The server has started!")
+                webhook.setUsername("Console")
+                webhook.setProfileURL(consoleHeadURL)
+                webhook.send()
+            } catch (ex: Exception) {
+                Logger.error("Failed to send server status webhook: ${ex.message}")
+            }
+        }
+
     }
 
     override fun onDisable() {
         val features = coreConfig.features
+        val consoleHeadURL = "https://mc-heads.net/avatar/Console/100"
 
         if (features.modes) {
             ModeService.forceRestoreAllInventoriesOnShutdown()
+        }
+
+        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
+            try {
+                val webhook = Webhook(SporeCore.instance.coreConfig.discord.chat)
+
+                webhook.setMessage("🛑 The server has stopped!")
+                webhook.setUsername("Console")
+                webhook.setProfileURL(consoleHeadURL)
+                webhook.send()
+            } catch (ex: Exception) {
+                Logger.error("Failed to send server status webhook: ${ex.message}")
+            }
         }
 
         if (features.vanish) {
