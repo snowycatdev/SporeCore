@@ -367,7 +367,7 @@ class UserListener : Listener {
             event.quitMessage = null
         } else {
             if (config.joinLeaveMessages.leave.isNotBlank()) {
-                event.quitMessage = config.joinLeaveMessages.join
+                event.quitMessage = config.joinLeaveMessages.leave
                     .translate()
                     .parsePlaceholders(player)
             }
