@@ -156,7 +156,12 @@ class UserListener : Listener {
         val features = SporeCore.instance.coreConfig.features
         val autoStaff = user.getSettingOrDefault(StaffmodeOnJoinSetting())
 
-        if (autoStaff) event.joinMessage = null
+        if (autoStaff && player.hasPermission(Perm.MODE_ALLOW)) {
+            Logger.log(player, Perm.LOG, "joined the game silently", false)
+            event.joinMessage(null)
+        } else if (!autoStaff && player.hasPermission(Perm.MODE_ALLOW)) {
+            Logger.log(player, Perm.LOG, "joined the server", false) //remove if too repetitive
+        }
 
         if (!user.hasJoinedBefore) {
             user.hasJoinedBefore = true
@@ -288,7 +293,7 @@ class UserListener : Listener {
         }
 
 
-        if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
+        if (config.discord.chat.isNotEmpty() && !ModeService.isInMode(player) && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${player.name} joined the server**")
@@ -362,7 +367,7 @@ class UserListener : Listener {
             event.quitMessage = null
         } else {
             if (config.joinLeaveMessages.leave.isNotBlank()) {
-                event.quitMessage = config.joinLeaveMessages.join
+                event.quitMessage = config.joinLeaveMessages.leave
                     .translate()
                     .parsePlaceholders(player)
             }
