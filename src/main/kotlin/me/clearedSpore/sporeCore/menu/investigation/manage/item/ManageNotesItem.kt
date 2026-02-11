@@ -17,8 +17,8 @@ class ManageNotesItem(
     override fun createItem(): ItemStack {
         val investigation = IGService.findInvestigation(investigationID)!!
         return ItemBuilder(Material.PAPER)
-            .setName("Manage notes".blue())
-            .addLoreLine("Notes: ${investigation.notes.size}".blue())
+            .setName("Notes: &f${investigation.notes.size}".blue())
+            .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage notes")
             .build()
     }

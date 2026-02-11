@@ -34,22 +34,21 @@ class InfoItem(
         val lastPunishment = user.getLastPunishment()
 
         val lore = mutableListOf<String>()
-
-        lore.add("Total punishments: &f$total".blue())
         lore.add("".blue())
-        lore.add("Bans: &f$bans".blue())
-        lore.add("Warns: &f$warns".blue())
-        lore.add("Mutes: &f$mutes".blue())
-        lore.add("Kicks: &f$kicks".blue())
+        lore.add("Total Punishments: &f$total".blue())
+        lore.add("&7| Bans: &f$bans".blue())
+        lore.add("&7| Warns: &f$warns".blue())
+        lore.add("&7| Mutes: &f$mutes".blue())
+        lore.add("&7| Kicks: &f$kicks".blue())
         if (lastPunishment != null) {
             lore.add("".blue())
-            lore.add("Last punishment: ".blue())
-            lore.add("  Type: &f${lastPunishment.type.displayName}".blue())
-            lore.add("  Expires: &f${lastPunishment.getDurationFormatted()}".blue())
+            lore.add("Last Punishment: ".blue())
+            lore.add("&7| Type: &f${lastPunishment.type.displayName}".blue())
+            lore.add("&7| Expires: &f${lastPunishment.getDurationFormatted()}".blue())
             val timeAgo = lastPunishment.getTimeSincePunished()
-            lore.add("  Date: &f${lastPunishment.punishDate} ($timeAgo)".blue())
-            lore.add("  Reason: &f${lastPunishment.reason}".blue())
-            lore.add("  Issuer: &f${lastPunishment.getPunisherName(viewer)}".blue())
+            lore.add("&7| Date: &f${lastPunishment.punishDate} ($timeAgo)".blue())
+            lore.add("&7| Reason: &f${lastPunishment.reason}".blue())
+            lore.add("&7| Issuer: &f${lastPunishment.getPunisherName(viewer)}".blue())
         }
 
         meta.lore = lore

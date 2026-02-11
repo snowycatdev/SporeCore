@@ -11,8 +11,9 @@ class JoinMsgSetting : ToggleSetting(
     displayName = "Join Message",
     item = Material.REDSTONE_LAMP,
     lore = listOf(
-        "| Controls whether you see",
-        "| the info message on join"
+        "",
+        "| &fControls whether you see",
+        "| &fthe info message on join"
     )
 ) {
     override fun defaultValue(): Boolean = true

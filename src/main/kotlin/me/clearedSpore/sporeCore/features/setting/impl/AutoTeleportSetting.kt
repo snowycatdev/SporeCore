@@ -11,7 +11,8 @@ class AutoTeleportSetting : ToggleSetting(
     displayName = "Auto Teleport",
     item = Material.LIME_WOOL,
     lore = listOf(
-        "| Controls whether to auto accept all /tpa requests."
+        "",
+        "| &fControls whether to auto accept all /tpa requests."
     )
 ) {
     override fun defaultValue(): Boolean = false

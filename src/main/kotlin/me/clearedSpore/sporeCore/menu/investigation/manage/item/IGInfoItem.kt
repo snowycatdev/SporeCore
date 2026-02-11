@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.features.investigation.IGService
@@ -22,12 +23,12 @@ class IGInfoItem(
     override fun createItem(): ItemStack {
         val investigation = IGService.findInvestigation(investigationID)!!
         val item = ItemBuilder(Material.BOOK)
-            .setName("Investigation info".blue())
+            .setName("Investigation Info".blue())
 
             .addLoreLine("")
-            .addLoreLine("Name: &f${investigation.name}".blue())
-            .addLoreLine("Creator: &f${investigation.getCreatorName() ?: "None".red()}".blue())
-            .addLoreLine("Description: &f${investigation.description}".blue())
+            .addLoreLine("|".gray() + " Name: &f${investigation.name}".blue())
+            .addLoreLine("|".gray() + " Creator: &f${investigation.getCreatorName() ?: "None".red()}".blue())
+            .addLoreLine("|".gray() + " Description: &f${investigation.description}".blue())
 
         val age = System.currentTimeMillis() - investigation.timestamp
         val timeAgo = TimeUtil.formatDuration(age, TimeUtil.TimeUnitStyle.SHORT, 2)
@@ -36,14 +37,15 @@ class IGInfoItem(
             Instant.ofEpochMilli(investigation.timestamp).atZone(ZoneId.systemDefault())
         )
 
-        item.addLoreLine("Timestamp: &f$date ($timeAgo)".blue())
-        item.addLoreLine("Notes: &f${investigation.notes.size}".blue())
-        item.addLoreLine("Linked Reports: &f${investigation.linkedReports.size}".blue())
-        item.addLoreLine("Linked Punishments: &f${investigation.linkedPunishments.size}".blue())
-        item.addLoreLine("Suspects/Players: &f${investigation.suspects.size}".blue())
-        item.addLoreLine("Staff: &f${investigation.staff.size}".blue())
-        item.addLoreLine("Priority: &f${investigation.getPriorityText()}".blue())
-        item.addLoreLine("Status: &f${investigation.status.displayName}".blue())
+        item.addLoreLine("|".gray() + " Timestamp: &f$date ($timeAgo)".blue())
+        item.addLoreLine("|".gray() + " Notes: &f${investigation.notes.size}".blue())
+        item.addLoreLine("|".gray() + " Linked Reports: &f${investigation.linkedReports.size}".blue())
+        item.addLoreLine("|".gray() + " Linked Punishments: &f${investigation.linkedPunishments.size}".blue())
+        item.addLoreLine("|".gray() + " Suspects/Players: &f${investigation.suspects.size}".blue())
+        item.addLoreLine("|".gray() + " Staff: &f${investigation.staff.size}".blue())
+        item.addLoreLine("|".gray() + " Priority: &f${investigation.getPriorityText()}".blue())
+        item.addLoreLine("|".gray() + " Status: &f${investigation.status.displayName}".blue())
+        item.addLoreLine("")
 
         item.addUsageLine(ClickType.LEFT, "copy the Investigation ID")
         return item.build()

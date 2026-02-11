@@ -12,8 +12,9 @@ class ChannelMessagesSetting : ToggleSetting(
     displayName = "Staff Messages",
     item = Material.PAPER,
     lore = listOf(
-        "| Controls whether you are able to see messages",
-        "| sent by staff in staff channels."
+        "",
+        "| &fControls whether you are able to see messages",
+        "| &fsent by staff in staff channels."
     ),
     permission = Perm.CHANNEL_ALLOW
 ) {

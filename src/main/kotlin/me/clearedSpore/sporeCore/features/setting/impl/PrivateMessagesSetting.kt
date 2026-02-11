@@ -11,8 +11,9 @@ class PrivateMessagesSetting : ToggleSetting(
     displayName = "Private Messages",
     item = Material.WRITTEN_BOOK,
     lore = listOf(
-        "| Controls whether you receive private",
-        "| messages from players (excluding staff)."
+        "",
+        "| &fControls whether you receive private",
+        "| &fmessages from players (excluding staff)."
     )
 ) {
     override fun defaultValue(): Boolean = true

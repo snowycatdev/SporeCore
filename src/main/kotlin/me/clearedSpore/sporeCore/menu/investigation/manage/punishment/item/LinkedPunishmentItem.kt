@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.punishment.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.ChatInputService
 import me.clearedSpore.sporeAPI.util.Message
@@ -36,15 +37,15 @@ class LinkedPunishmentItem(
 
         item.setName(punishment.id.blue())
         item.addLoreLine("")
-        item.addLoreLine("Reason: &f${punishment.reason}".blue())
-        item.addLoreLine("Issuer: &f${punishment.getPunisherName(viewer)}".blue())
+        item.addLoreLine("|".gray() + " Reason: &f${punishment.reason}".blue())
+        item.addLoreLine("|".gray() + " Issuer: &f${punishment.getPunisherName(viewer)}".blue())
         val colorCode = if (punishment.isActive()) "&a" else "&c"
-        item.addLoreLine("Expires in: $colorCode${punishment.getDurationFormatted()}".blue())
+        item.addLoreLine("|".gray() + " Expires: $colorCode${punishment.getDurationFormatted()}".blue())
         if (!active) {
             item.addLoreLine("")
-            item.addLoreLine("Removal issuer: &f${punishment.getRemovalUserName(viewer)}".blue())
-            item.addLoreLine("Removal reason: &f${punishment.removalReason}".blue())
-            item.addLoreLine("Removal Date: &f${punishment.removalDate}".blue())
+            item.addLoreLine("|".gray() + " Removed By: &f${punishment.getRemovalUserName(viewer)}".blue())
+            item.addLoreLine("|".gray() + " Reason: &f${punishment.removalReason}".blue())
+            item.addLoreLine("|".gray() + " Date: &f${punishment.removalDate}".blue())
         }
 
         item.addLoreLine("")

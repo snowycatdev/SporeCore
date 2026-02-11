@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeCore.features.investigation.IGService
 import me.clearedSpore.sporeCore.features.investigation.`object`.Investigation
 import me.clearedSpore.sporeCore.menu.investigation.manage.role.RoleManageMenu
@@ -19,9 +20,11 @@ class ManageStaffItem(
     override fun createItem(): ItemStack {
         val investigation = IGService.findInvestigation(investigationID)!!
         return ItemBuilder(Material.BEACON)
-            .setName("Manage staff".blue())
-            .addLoreLine("Staff: ${investigation.staff.size}".blue())
-            .addLoreLine("Admins: ${investigation.admin.size}".blue())
+            .setName("Manage Staff".blue())
+            .addLoreLine("")
+            .addLoreLine("|".gray() + " Staff: &f${investigation.staff.size}".blue())
+            .addLoreLine("|".gray() + " Admins: &f${investigation.admin.size}".blue())
+            .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage staff")
             .build()
     }

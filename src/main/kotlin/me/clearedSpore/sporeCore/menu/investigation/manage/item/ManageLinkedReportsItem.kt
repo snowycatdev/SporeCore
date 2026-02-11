@@ -27,8 +27,8 @@ class ManageLinkedReportsItem(
         }
 
         return ItemBuilder(Material.DIAMOND_SWORD)
-            .setName("Manage linked reports".blue())
-            .addLoreLine("Linked reports: ${investigation.linkedReports.size}".blue())
+            .setName("Linked Reports: &f${investigation.linkedReports.size}".blue())
+            .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage linked reports")
             .build()
     }

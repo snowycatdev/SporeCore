@@ -11,7 +11,8 @@ class TeleportRequestSettings : ToggleSetting(
     displayName = "Teleport Requests",
     item = Material.ENDER_EYE,
     lore = listOf(
-        "| Controls whether players can send you teleport requests."
+        "",
+        "| &fControls whether players can send you teleport requests."
     )
 ) {
     override fun defaultValue(): Boolean = true

@@ -12,8 +12,9 @@ class ChatEnabledSetting : ToggleSetting(
     displayName = "Chat Enabled",
     item = Material.PAPER,
     lore = listOf(
-        "| Controls whether you see chat messages",
-        "| from players (excluding staff)"
+        "",
+        "| &fControls whether you see chat messages",
+        "| &ffrom players (excluding staff)"
     )
 ) {
     override fun defaultValue(): Boolean = true

@@ -12,8 +12,9 @@ class ConfirmTpaSetting : ToggleSetting(
     displayName = "Confirm TPA",
     item = Material.PLAYER_HEAD,
     lore = listOf(
-        "| Controls whether /tpa or /tpahere requests are",
-        "| confirmed via a GUI."
+        "",
+        "| &fControls whether /tpa or /tpahere requests are",
+        "| &fconfirmed via a GUI."
     )
 ) {
 
