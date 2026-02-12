@@ -122,7 +122,17 @@ data class DiscordConfig(
         "make it send in to a discord channel.",
         "If you don't want this feature leave it empty"
     )
-    var chat: String = ""
+    var chat: String = "",
+
+    @Comment(
+        "Do you want it to send death messages to discord?"
+    )
+    var deathMessages: Boolean = true,
+
+    @Comment(
+        "Do you want it to send a message when someone achieves an advancement?"
+    )
+    var advancements: Boolean = true,
 )
 
 @Configuration
@@ -333,16 +343,15 @@ data class JoinConfig(
     @Comment(
         "What message should the players receive when they join?",
         "Leave it empty if you don't want to send messages",
-        "You can user PlaceholderAPI for placeholders.",
-        "for %player_name% & %localtime_time% you need to",
-        "download the LocalTime and Player using placeholderAPI",
+        "You can use PlaceholderAPI for placeholders.",
+        "for %localtime_time% you need to",
+        "download the LocalTime placeholder using placeholderAPI",
         "You can do that by doing the following commands:",
-        "- /papi ecloud download Player",
         "- /papi ecloud download LocalTime",
         "- /papi reload"
     )
     var message: List<String> = listOf(
-        "&cbWelcome back %player_name%!!",
+        "&cbWelcome back %sporecore_player_name%!!",
         "&cbTime: &f%localtime_time%",
         "&cbRun /help for a guide!"
     ),
@@ -644,13 +653,13 @@ data class JoinLeaveMessages(
         "join message",
         "leave it empty if you want no message"
     )
-    var join: String = "&7[&a+&7] &f%player_name% &ahas joined the server",
+    var join: String = "&7[&a+&7] &f%sporecore_player_name% &ahas joined the server",
 
     @Comment(
         "leave message",
         "leave it empty if you want no message"
     )
-    var leave: String = "&7[&c-&7] &f%player_name% &chas left the server"
+    var leave: String = "&7[&c-&7] &f%sporecore_player_name% &chas left the server"
 )
 
 @Configuration

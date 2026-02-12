@@ -22,7 +22,7 @@ class DeathListener : Listener {
         val config = SporeCore.instance.coreConfig
         val deathMessage = event.deathMessage
 
-        if (config.discord.chat.isNotEmpty()) {
+        if (config.discord.deathMessages && config.discord.chat.isNotEmpty()) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${deathMessage}**")
