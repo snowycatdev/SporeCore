@@ -3,6 +3,7 @@ package me.clearedSpore.sporeCore
 import co.aikar.commands.*
 import de.exlll.configlib.ConfigurationException
 import de.exlll.configlib.YamlConfigurations
+import me.clearedSpore.sporeAPI.SporeAPI
 import me.clearedSpore.sporeAPI.util.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.red
@@ -29,7 +30,6 @@ import me.clearedSpore.sporeCore.commands.economy.BalTopCommand
 import me.clearedSpore.sporeCore.commands.economy.EcoLogsCommand
 import me.clearedSpore.sporeCore.commands.economy.EconomyCommand
 import me.clearedSpore.sporeCore.commands.economy.PayCommand
-import me.clearedSpore.sporeCore.commands.gamemode.*
 import me.clearedSpore.sporeCore.commands.home.CreateHomeCommand
 import me.clearedSpore.sporeCore.commands.home.DelHomeCommand
 import me.clearedSpore.sporeCore.commands.home.HomeCommand
@@ -41,8 +41,10 @@ import me.clearedSpore.sporeCore.commands.privatemessages.PrivateMessageCommand
 import me.clearedSpore.sporeCore.commands.privatemessages.ReplyCommand
 import me.clearedSpore.sporeCore.commands.spawn.SetSpawnCommand
 import me.clearedSpore.sporeCore.commands.spawn.SpawnCommand
-import me.clearedSpore.sporeCore.commands.teleport.*
-import me.clearedSpore.sporeCore.commands.util.*
+import me.clearedSpore.sporeCore.commands.teleport.TpaAcceptCommand
+import me.clearedSpore.sporeCore.commands.teleport.TpaCommand
+import me.clearedSpore.sporeCore.commands.teleport.TpaDenyCommand
+import me.clearedSpore.sporeCore.commands.teleport.TpaHereCommand
 import me.clearedSpore.sporeCore.commands.utilitymenus.*
 import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
@@ -71,10 +73,10 @@ import me.clearedSpore.sporeCore.task.TpsTask
 import me.clearedSpore.sporeCore.task.VanishTask
 import me.clearedSpore.sporeCore.user.UserListener
 import me.clearedSpore.sporeCore.user.UserManager
-import me.clearedSpore.sporeCore.util.registry.ListenerRegistry
 import me.clearedSpore.sporeCore.util.Perm
 import me.clearedSpore.sporeCore.util.UpdateChecker
 import me.clearedSpore.sporeCore.util.registry.CommandRegistry
+import me.clearedSpore.sporeCore.util.registry.ListenerRegistry
 import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission
@@ -97,6 +99,7 @@ class SporeCore : JavaPlugin() {
 
     companion object {
         lateinit var instance: SporeCore
+        lateinit var version: Version
     }
 
     lateinit var commandManager: PaperCommandManager
@@ -126,6 +129,9 @@ class SporeCore : JavaPlugin() {
     override fun onEnable() {
         totalCommands = 0
         instance = this
+
+        version = Version.PUBLIC
+
         coreConfig = loadConfig()
         Logger.initialize(
             coreConfig.general.prefix,
@@ -208,7 +214,7 @@ class SporeCore : JavaPlugin() {
 
         TpsTask.start()
 
-        if(features.reports){
+        if (features.reports) {
             ReportService.startCleanupTask()
         }
 
@@ -224,37 +230,36 @@ class SporeCore : JavaPlugin() {
         registerCompletions()
         registerCommands()
 
-        logStartupBanner()
-        Task.runLater({ freshStartup = false }, 20)
+        Task.runLater({
+            freshStartup = false
+            logStartupBanner()
+            val consoleHeadURL = DiscordService.getConsoleAvatar()
+            if (coreConfig.discord.chat.isNotEmpty()) {
+                try {
+                    val webhook = Webhook(coreConfig.discord.chat)
 
-        val consoleHeadURL = "https://mc-heads.net/avatar/Console/100"
-
-        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
-            try {
-                val webhook = Webhook(SporeCore.instance.coreConfig.discord.chat)
-
-                webhook.setMessage("✅ The server has started!")
-                webhook.setUsername("Console")
-                webhook.setProfileURL(consoleHeadURL)
-                webhook.send()
-            } catch (ex: Exception) {
-                Logger.error("Failed to send server status webhook: ${ex.message}")
+                    webhook.setMessage("✅ The server has started!")
+                    webhook.setUsername("Console")
+                    webhook.setProfileURL(consoleHeadURL)
+                    webhook.send()
+                } catch (ex: Exception) {
+                    Logger.error("Failed to send server status webhook: ${ex.message}")
+                }
             }
-        }
-
+        }, 3)
     }
 
     override fun onDisable() {
         val features = coreConfig.features
-        val consoleHeadURL = "https://mc-heads.net/avatar/Console/100"
+        val consoleHeadURL = DiscordService.getConsoleAvatar()
 
         if (features.modes) {
             ModeService.forceRestoreAllInventoriesOnShutdown()
         }
 
-        if (SporeCore.instance.coreConfig.discord.chat.isNotEmpty()) {
+        if (coreConfig.discord.chat.isNotEmpty()) {
             try {
-                val webhook = Webhook(SporeCore.instance.coreConfig.discord.chat)
+                val webhook = Webhook(coreConfig.discord.chat)
 
                 webhook.setMessage("🛑 The server has stopped!")
                 webhook.setUsername("Console")
@@ -278,7 +283,7 @@ class SporeCore : JavaPlugin() {
         TpsTask.stop()
         LogsService.cleanupLogs()
         LogsService.stopCleanupTask()
-        if(features.reports) {
+        if (features.reports) {
             ReportService.cleanupReports()
             ReportService.stopCleanupTask()
         }
@@ -388,7 +393,6 @@ class SporeCore : JavaPlugin() {
 
     fun logStartupBanner() {
         val pluginName = "SporeCore"
-        val version = "v${description.version}"
         val author = "ClearedSpore"
         val serverType = Bukkit.getServer().name + " - " + Bukkit.getServer().version
 
@@ -401,6 +405,11 @@ class SporeCore : JavaPlugin() {
         if (DiscordService.initialized) features.add("§9Discord")
         val featureLine = if (features.isNotEmpty()) features.joinToString(" §7| ") else "§7No features enabled"
 
+        val formattedVersion = when (version) {
+            Version.PUBLIC -> "§a${version.withVersion()}"
+            Version.DEV, Version.PRE_RELEASE -> "§e${version.withVersion()}"
+        }
+
         val banner = listOf(
             "",
             "   _____  _____ ".blue(),
@@ -410,7 +419,7 @@ class SporeCore : JavaPlugin() {
             "  ____) | |____ ".blue(),
             " |_____/ \\_____|".blue(),
             "",
-            "§f$pluginName §e$version",
+            "§f$pluginName $formattedVersion",
             "§fAuthor: $author",
             "§fServer: $serverType",
             "§fFeatures: $featureLine",
@@ -419,6 +428,15 @@ class SporeCore : JavaPlugin() {
 
         banner.forEach { line ->
             Bukkit.getConsoleSender().sendMessage(line)
+        }
+
+        if(version == Version.DEV) {
+            Bukkit.getConsoleSender().sendMessage("")
+            Bukkit.getConsoleSender().sendMessage("§9[SporeCore] §eYou are using a Developer version")
+            Bukkit.getConsoleSender().sendMessage("§9[SporeCore] §eof the plugin. This version may")
+            Bukkit.getConsoleSender().sendMessage("§9[SporeCore] §econtain bugs. Please report them")
+            Bukkit.getConsoleSender().sendMessage("§9[SporeCore] §eto §fClearedSpore")
+            Bukkit.getConsoleSender().sendMessage("")
         }
     }
 
@@ -504,7 +522,7 @@ class SporeCore : JavaPlugin() {
             registerCommand(VanishCommand())
         }
 
-        if(features.investigation){
+        if (features.investigation) {
             registerCommand(InvestigationCommand())
         }
 
@@ -523,7 +541,7 @@ class SporeCore : JavaPlugin() {
         }
 
 
-        if(features.reports){
+        if (features.reports) {
             registerCommand(ReportCommand())
         }
 
@@ -535,10 +553,11 @@ class SporeCore : JavaPlugin() {
                 val combinedAlias = channel.commands.joinToString("|")
                 commandManager.commandReplacements.addReplacement("channelalias", combinedAlias)
 
-                registerCommand(cmd)
+                commandManager.registerCommand(cmd)
                 Logger.info("Registered ${channel.id} channel")
             }
         }
+
 
         if (features.currency.enabled) {
             val singular = CurrencySystemService.config.currencySettings.singularName.lowercase()
