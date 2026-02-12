@@ -160,7 +160,7 @@ class UserListener : Listener {
             Logger.log(player, Perm.LOG, "joined the game silently", false)
             event.joinMessage(null)
         } else if (!autoStaff && player.hasPermission(Perm.MODE_ALLOW)) {
-            Logger.log(player, Perm.LOG, "joined the server", false) //remove if too repetitive
+            Logger.log(player, Perm.LOG, "joined the server", false)
         }
 
         if (!user.hasJoinedBefore) {
@@ -293,7 +293,7 @@ class UserListener : Listener {
         }
 
 
-        if (config.discord.chat.isNotEmpty() && !ModeService.isInMode(player) && !VanishService.isVanished(player.uniqueId)) {
+        if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${player.name} joined the server**")
@@ -367,7 +367,7 @@ class UserListener : Listener {
             event.quitMessage = null
         } else {
             if (config.joinLeaveMessages.leave.isNotBlank()) {
-                event.quitMessage = config.joinLeaveMessages.leave
+                event.quitMessage = config.joinLeaveMessages.join
                     .translate()
                     .parsePlaceholders(player)
             }
