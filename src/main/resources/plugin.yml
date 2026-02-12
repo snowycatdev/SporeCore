@@ -1,5 +1,5 @@
 name: SporeCore
-version: '2.7'
+version: '2.8.1'
 main: me.clearedSpore.sporeCore.SporeCore
 api-version: '1.17'
 authors: [ ClearedSpore ]
@@ -8,6 +8,7 @@ softdepend:
   - Vault
   - PlaceholderAPI
   - WorldGuard
+  - LuckPerms
 libraries:
   - net.dv8tion:JDA:6.1.2
   - org.dizitart:nitrite:4.3.2

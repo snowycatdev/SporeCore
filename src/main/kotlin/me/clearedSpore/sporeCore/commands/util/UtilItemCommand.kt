@@ -43,9 +43,6 @@ class UtilItemCommand : BaseCommand() {
         val button = TextButton("[Click to copy]".blue())
             .copyToClipboard(base64)
             .hoverEvent("Click to copy")
-            .onClick {
-                player.sendSuccessMessage("Successfully copied!")
-            }
             .build(player)
 
 
@@ -84,9 +81,6 @@ class UtilItemCommand : BaseCommand() {
         val button = TextButton("[Click to copy]")
             .copyToClipboard(nbt)
             .hoverEvent("Copy NBT")
-            .onClick {
-                player.sendSuccessMessage("Successfully copied!")
-            }
             .build(player)
 
         player.sendMessage("Item NBT:")
@@ -108,9 +102,6 @@ class UtilItemCommand : BaseCommand() {
         val button = TextButton("[Copy]".blue())
             .copyToClipboard(hash)
             .hoverEvent("Click to copy!")
-            .onClick {
-                player.sendSuccessMessage("Successfully copied!")
-            }
             .build(player)
         player.sendMessage(button)
     }
@@ -222,9 +213,6 @@ class UtilItemCommand : BaseCommand() {
         val button = TextButton("[Copy]".blue())
             .copyToClipboard(json)
             .hoverEvent("Click to copy!")
-            .onClick {
-                player.sendSuccessMessage("Successfully copied!")
-            }
             .build(player)
         player.sendMessage(button)
     }

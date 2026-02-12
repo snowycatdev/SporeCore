@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.ItemStack
 
 
-class BookItem : ModeItem("invsee"), Listener {
+class InvseeItem : ModeItem("invsee"), Listener {
 
     override fun getItemStack(): ItemStack {
         val item = ItemBuilder(Material.BOOK)

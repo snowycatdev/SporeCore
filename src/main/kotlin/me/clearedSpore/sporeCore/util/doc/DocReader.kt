@@ -3,6 +3,7 @@ package me.clearedSpore.sporeCore.util.doc
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.dizitart.no2.collection.Document
+import java.util.UUID
 
 class DocReader(val doc: Document) {
 
@@ -16,6 +17,11 @@ class DocReader(val doc: Document) {
         (doc.get(key) as? Number)?.toInt()
             ?: string(key)?.toIntOrNull()
             ?: 0
+
+    fun id(key: String): UUID? {
+        val raw = string(key) ?: return null
+        return runCatching { UUID.fromString(raw) }.getOrNull()
+    }
 
     fun long(key: String): Long =
         when (val value = doc.get(key)) {

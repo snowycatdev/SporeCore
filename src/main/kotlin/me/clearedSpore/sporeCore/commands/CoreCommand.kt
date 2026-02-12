@@ -92,6 +92,7 @@ class CoreCommand : BaseCommand() {
 
                 val duration = System.currentTimeMillis() - startTime
                 sender.sendMessage("Reload complete. Took ${duration}ms.".blue())
+                plugin.logStartupBanner()
                 Logger.info("SporeCore reloaded in ${duration}ms, by ${sender.name}.")
                 Logger.log(sender, Perm.ADMIN_LOG, "reloaded the plugin", false)
             }

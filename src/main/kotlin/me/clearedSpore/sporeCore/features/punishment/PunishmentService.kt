@@ -104,7 +104,7 @@ object PunishmentService {
 
         val issuer = punishment.getPunisher() ?: UserManager.getConsoleUser()
         val issuerSkinURL =
-            issuer.player?.let { DiscordService.getAvatarURL(issuer.uuid) } ?: "https://mc-heads.net/avatar/Console/100"
+            issuer.player?.let { DiscordService.getAvatarURL(issuer.uuid) } ?: DiscordService.getConsoleAvatar()
         val linkedStaffId = issuer.discordID
 
         if (config.discord.requireLinked && linkedStaffId == null && issuer.player != null) {

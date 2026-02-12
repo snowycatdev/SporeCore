@@ -48,7 +48,7 @@ class InvestigationCommand : BaseCommand() {
         }
 
 
-        player.sendSuccessMessage("Please provide the description of the investigation.")
+        player.sendSuccessMessage("Please provide the description of the investigation in chat.")
         ChatInputService.begin(player, true) { input ->
             service.startInvestigation(player, name, input, priority)
         }

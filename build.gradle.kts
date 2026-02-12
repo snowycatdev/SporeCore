@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     kotlin("jvm") version "2.2.20"
-    id("io.github.goooler.shadow") version "8.1.8"
+    id("com.gradleup.shadow") version "9.3.1"
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
 group = "me.clearedSpore"
-version = "2.7"
+version = "2.8.1"
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ dependencies {
         exclude(group = "org.yaml", module = "snakeyaml")
     }
     implementation("com.github.Exlll.ConfigLib:configlib-yaml:v4.6.1")
-    implementation("com.github.Clearedspore:SporeAPI:4.0")
+    implementation("com.github.Clearedspore:SporeAPI:4.3")
     compileOnly("org.dizitart:nitrite:4.3.2")
     compileOnly(platform("org.dizitart:nitrite-bom:4.3.2"))
     compileOnly("org.dizitart:nitrite-mvstore-adapter:4.3.2")
@@ -47,6 +47,8 @@ dependencies {
 
     compileOnly("net.dv8tion:JDA:6.1.2")
     compileOnly("me.clip:placeholderapi:2.11.6")
+
+    compileOnly("net.luckperms:api:5.4")
 
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.4") {
         exclude(group = "org.spigotmc", module = "spigot-api")

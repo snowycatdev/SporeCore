@@ -38,21 +38,13 @@ class AddNoteItem(
     }
 
     override fun onClickEvent(clicker: Player, clickType: ClickType) {
-        val investigation = IGService.findInvestigation(investigationID)!!
-        clicker.sendSuccessMessage("Please provide the note name")
+        clicker.sendSuccessMessage("Please provide the note name in chat")
         ChatInputService.begin(clicker, true) { name ->
-            clicker.sendSuccessMessage("Please provide the note description")
+            clicker.sendSuccessMessage("Please provide the note description in chat")
             ChatInputService.begin(clicker, true) { description ->
 
                 IGService.addNote(investigationID, name, description, clicker)
-                IGService.updateInvestigation(investigation)
                 clicker.sendSuccessMessage("Successfully added $name as a note to the investigation.")
-                logAction(
-                    investigation.id,
-                    IGLogType.STAFF,
-                    clicker.safeUuidStr(),
-                    "Added $name as a note to the investigation."
-                )
             }
         }
     }

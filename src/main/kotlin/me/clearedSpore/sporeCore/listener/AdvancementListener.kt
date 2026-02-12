@@ -5,22 +5,30 @@ import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.annotations.AutoListener
 import me.clearedSpore.sporeCore.features.discord.DiscordService
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerAdvancementDoneEvent
 
 
+//@AutoListener
 class AdvancementListener : Listener {
+
+
     @EventHandler
     fun onAdvancement(event: PlayerAdvancementDoneEvent) {
+        val display = event.advancement.display ?: return
+
+        val title = PlainTextComponentSerializer.plainText()
+            .serialize(display.title())
+
         val player = event.player
         val config = SporeCore.instance.coreConfig
-        val advancementType = event.advancement.displayName()
 
-        if (config.discord.chat.isNotEmpty()) {
+        if (config.discord.chat.isNotEmpty() && config.discord.advancements) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
-                .setDescription("**${player.name}** has completed the advancement **${advancementType}**")
+                .setDescription("**${player.name}** has completed the advancement **$title**")
 
             val webhook = Webhook(config.discord.chat)
                 .setProfileURL(DiscordService.getAvatarURL(player.uniqueId))

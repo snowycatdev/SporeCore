@@ -77,6 +77,10 @@ object DiscordService : ListenerAdapter() {
         return "https://mc-heads.net/avatar/${UUID}/100"
     }
 
+    fun getConsoleAvatar() : String {
+        return "https://mc-heads.net/avatar/Console/100"
+    }
+
     fun registerCommands() {
         register(DiscordLinkCommand())
     }

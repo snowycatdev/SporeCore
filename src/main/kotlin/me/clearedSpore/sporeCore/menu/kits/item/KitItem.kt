@@ -7,6 +7,7 @@ import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.kit.`object`.Kit
 import me.clearedSpore.sporeCore.menu.kits.preview.KitPreviewMenu
+import me.clearedSpore.sporeCore.menu.kits.preview.NewKitPreviewMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -56,6 +57,13 @@ class KitItem(
             }
 
             clickType.isRightClick -> {
+//                NewKitPreviewMenu(
+//                    clicker,
+//                    kit.inventory.toTypedArray(),
+//                    kit.armor.toTypedArray(),
+//                    kit.offHand,
+//                    "Previewing kit: ${kit.name.blue()}"
+//                ).open()
                 KitPreviewMenu(kit, player).open(player)
             }
         }

@@ -187,7 +187,7 @@ data class User(
                     .toMutableSet(),
                 tpsBar = doc.boolean("tpsBar"),
                 pastReports = doc.documents("pastReports").mapNotNull { Report.fromDocument(it) }
-                    .toMutableList(),
+                    .toMutableList()
             )
         }
 

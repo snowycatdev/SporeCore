@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.util.doc
 
 import org.bukkit.Location
 import org.dizitart.no2.collection.Document
+import java.util.UUID
 
 class DocWriter {
     private val doc: Document = Document.createDocument()
@@ -17,6 +18,12 @@ class DocWriter {
     fun putLong(key: String, value: Long): DocWriter = put(key, value)
     fun putDouble(key: String, value: Double): DocWriter = put(key, value)
 
+    fun putId(key: String, uuid: UUID?): DocWriter {
+        if (uuid != null) {
+            doc.put(key, uuid.toString())
+        }
+        return this
+    }
 
     fun putLocation(key: String, location: Location?): DocWriter {
         location?.let {
