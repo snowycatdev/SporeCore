@@ -34,6 +34,10 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
                 user.balance.toString()
             }
 
+            params.equals("player_name", ignoreCase = true) -> {
+                player.name
+            }
+
             params.equals("balance_formatted", ignoreCase = true) -> {
                 if (!config.economy.enabled) return null
                 EconomyService.format(user.balance, BalanceFormat.COMPACT).toString()
