@@ -21,8 +21,8 @@ class ViewIGLogsItem(
     override fun createItem(): ItemStack {
         val investigation = IGService.findInvestigation(investigationID)!!
         return ItemBuilder(Material.HOPPER)
-            .setName("View Logs".blue())
-            .addLoreLine("Logs: ${investigation.logs.size}".blue())
+            .setName("Logs: &f${investigation.logs.size}".blue())
+            .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage logs")
             .build()
     }

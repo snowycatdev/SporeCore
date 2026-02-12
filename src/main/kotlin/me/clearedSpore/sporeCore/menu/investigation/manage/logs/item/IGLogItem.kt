@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.logs.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeCore.features.investigation.`object`.Investigation
 import me.clearedSpore.sporeCore.features.investigation.`object`.log.IGLog
 import me.clearedSpore.sporeCore.util.ItemBuilder
@@ -28,10 +29,10 @@ class IGLogItem(
         return ItemBuilder(Material.PAPER)
             .setName("$date".blue())
             .addLoreLine("")
-            .addLoreLine("Log Type: &f${log.type.displayName}".blue())
-            .addLoreLine("User: &f${investigation.getName(log.user)}".blue())
-            .addLoreLine("Description: &f${log.action}".blue())
-            .addLoreLine("ID: &f${log.id}".blue())
+            .addLoreLine("|".gray() + " Log Type: &f${log.type.displayName}".blue())
+            .addLoreLine("|".gray() + " User: &f${investigation.getName(log.user)}".blue())
+            .addLoreLine("|".gray() + " Description: &f${log.action}".blue())
+            .addLoreLine("|".gray() + " ID: &f${log.id}".blue())
             .build()
     }
 

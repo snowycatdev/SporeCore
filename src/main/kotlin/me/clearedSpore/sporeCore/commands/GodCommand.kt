@@ -41,7 +41,7 @@ class GodCommand : BaseCommand() {
 
         sender.sendMessage(
             if (players.size == 1)
-                "GodMode toggled for ${players.first().name}.".blue()
+                "GodMode ${if (players.first().isInvulnerable) "enabled" else "disabled"} for ${players.first().name}.".blue()
             else
                 "GodMode toggled for ${players.size} players.".blue()
         )

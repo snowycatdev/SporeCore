@@ -12,8 +12,9 @@ class TryLogSetting : ToggleSetting(
     displayName = "Try Logs",
     item = Material.BELL,
     lore = listOf(
-        "| Controls whether you are able to see players",
-        "| attempting to join while banned from the server."
+        "",
+        "| &fControls whether you are able to see players",
+        "| &fattempting to join while banned from the server."
     ),
     permission = Perm.PUNISH_LOG
 ) {

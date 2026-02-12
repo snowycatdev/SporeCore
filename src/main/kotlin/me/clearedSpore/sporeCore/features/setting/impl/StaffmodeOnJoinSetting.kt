@@ -12,8 +12,9 @@ class StaffmodeOnJoinSetting : ToggleSetting(
     displayName = "Staff Mode On Join",
     item = Material.COMPASS,
     lore = listOf(
-        "| Controls whether your staff mode is enabled",
-        "| automatically when you join the server."
+        "",
+        "| &fControls whether your staff mode is enabled",
+        "| &fautomatically when you join the server."
     ),
     permission = Perm.MODE_ALLOW
 ) {

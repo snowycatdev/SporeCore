@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.role.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.StringUtil.capitalizeFirstLetter
 import me.clearedSpore.sporeCore.extension.PlayerExtension.safeUuidStr
@@ -34,8 +35,9 @@ class RoleItem(
         val name = investigation.getName(staff)
         val item = ItemBuilder(Material.BOOK)
             .setName(name.blue())
-            .addLoreLine("UUID: &f$staff".blue())
-            .addLoreLine("Role: &f$role".blue())
+            .addLoreLine("|".gray() + " UUID: &f$staff".blue())
+            .addLoreLine("|".gray() + " Role: &f$role".blue())
+            .addLoreLine("")
 
         if (viewer.hasPermission(Perm.INVESTIGATION_ADMIN) || investigation.creator == viewer.uuidStr()) {
             if (type == RoleManageMenu.RoleType.ADMIN) {

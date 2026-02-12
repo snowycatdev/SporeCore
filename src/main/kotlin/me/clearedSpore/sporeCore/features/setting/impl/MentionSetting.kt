@@ -28,8 +28,9 @@ class MentionTitleSetting : OptionSetting<MentionOption>(
     displayName = "Mentions",
     item = Material.LECTERN,
     lore = listOf(
-        "| Controls what you want to see or",
-        "| hear when you are mentioned in chat."
+        "",
+        "| &fControls what you want to see or",
+        "| &fhear when you are mentioned in chat."
     ),
 ) {
     override fun values(): List<MentionOption> = listOf(

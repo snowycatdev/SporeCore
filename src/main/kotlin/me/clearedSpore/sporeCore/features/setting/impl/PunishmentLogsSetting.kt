@@ -12,8 +12,9 @@ class PunishmentLogsSetting : ToggleSetting(
     displayName = "Punishment Logs",
     item = Material.DISPENSER,
     lore = listOf(
-        "| Controls whether punishment logs are",
-        "| shown to you in chat."
+        "",
+        "| &fControls whether punishment logs are",
+        "| &fshown to you in chat."
     ),
     permission = Perm.PUNISH_LOG
 ) {

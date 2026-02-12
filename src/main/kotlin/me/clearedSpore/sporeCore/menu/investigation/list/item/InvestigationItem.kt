@@ -2,6 +2,7 @@ package me.clearedSpore.sporeCore.menu.investigation.list.item
 
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.features.investigation.IGService
@@ -33,19 +34,19 @@ class InvestigationItem(
         return ItemBuilder(Material.BOOK)
             .setName("Investigation: &f$index".blue())
             .addLoreLine("")
-            .addLoreLine("Name: &f${investigation.name}".blue())
-            .addLoreLine("Creator: &f${investigation.getCreatorName() ?: "None".red()}".blue())
-            .addLoreLine("Description: &f${investigation.description}".blue())
-            .addLoreLine("Timestamp: &f$date ($timeAgo)".blue())
-            .addLoreLine("Notes: &f${investigation.notes.size}".blue())
-            .addLoreLine("Linked Reports: &f${investigation.linkedReports.size}".blue())
-            .addLoreLine("Linked Punishments: &f${investigation.linkedPunishments.size}".blue())
-            .addLoreLine("Suspects/Players: &f${investigation.suspects.size}".blue())
-            .addLoreLine("Staff: &f${investigation.staff.size}".blue())
-            .addLoreLine("Admins: &f${investigation.admin.size}".blue())
-            .addLoreLine("Logs: &f${investigation.logs.size}".blue())
-            .addLoreLine("Priority: &f${investigation.getPriorityText()}".blue())
-            .addLoreLine("Status: &f${investigation.status.displayName}".blue())
+            .addLoreLine("|".gray() + " Name: &f${investigation.name}".blue())
+            .addLoreLine("|".gray() + " Creator: &f${investigation.getCreatorName() ?: "None".red()}".blue())
+            .addLoreLine("|".gray() + " Description: &f${investigation.description}".blue())
+            .addLoreLine("|".gray() + " Timestamp: &f$date ($timeAgo)".blue())
+            .addLoreLine("|".gray() + " Notes: &f${investigation.notes.size}".blue())
+            .addLoreLine("|".gray() + " Linked Reports: &f${investigation.linkedReports.size}".blue())
+            .addLoreLine("|".gray() + " Linked Punishments: &f${investigation.linkedPunishments.size}".blue())
+            .addLoreLine("|".gray() + " Suspects/Players: &f${investigation.suspects.size}".blue())
+            .addLoreLine("|".gray() + " Staff: &f${investigation.staff.size}".blue())
+            .addLoreLine("|".gray() + " Admins: &f${investigation.admin.size}".blue())
+            .addLoreLine("|".gray() + " Logs: &f${investigation.logs.size}".blue())
+            .addLoreLine("|".gray() + " Priority: &f${investigation.getPriorityText()}".blue())
+            .addLoreLine("|".gray() + " Status: &f${investigation.status.displayName}".blue())
             .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage this investigation")
             .build()

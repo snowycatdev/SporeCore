@@ -27,8 +27,8 @@ class ManageLinkedPunishmentsItem(
         }
 
         return ItemBuilder(Material.RED_WOOL)
-            .setName("Manage linked punishments".blue())
-            .addLoreLine("Linked punishments: ${investigation.linkedPunishments.size}".blue())
+            .setName("Linked Punishments: &f${investigation.linkedPunishments.size}".blue())
+            .addLoreLine("")
             .addUsageLine(ClickType.LEFT, "manage linked punishments")
             .build()
     }

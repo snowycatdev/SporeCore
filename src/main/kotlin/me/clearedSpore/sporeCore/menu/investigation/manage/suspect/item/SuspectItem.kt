@@ -3,6 +3,7 @@ package me.clearedSpore.sporeCore.menu.investigation.manage.suspect.item
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes.player
 import me.clearedSpore.sporeAPI.menu.Item
 import me.clearedSpore.sporeAPI.util.CC.blue
+import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.red
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.TimeUtil
@@ -43,9 +44,9 @@ class SuspectItem(
         val item = ItemBuilder(Material.PLAYER_HEAD)
             .setName((suspect.getSuspectName() ?: "None".red()).blue())
             .addLoreLine("")
-            .addLoreLine("Description: &f${suspect.description}".blue())
-            .addLoreLine("Added by: &f${investigation.getName(suspect.addedBy)}".blue())
-            .addLoreLine("Timestamp: &f$date ($timeAgo)".blue())
+            .addLoreLine("|".gray() + " Description: &f${suspect.description}".blue())
+            .addLoreLine("|".gray() + " Added by: &f${investigation.getName(suspect.addedBy)}".blue())
+            .addLoreLine("|".gray() + " Timestamp: &f$date ($timeAgo)".blue())
             .addLoreLine("")
 
         if (viewer.hasPermission(Perm.HISTORY_OTHERS)) {

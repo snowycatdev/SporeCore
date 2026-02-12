@@ -12,8 +12,9 @@ class CurrencyLogsSetting : ToggleSetting(
     displayName = "Currency Logs",
     item = Material.GOLD_INGOT,
     lore = listOf(
-        "| Controls whether changes in a player's currency",
-        "| are sent to you."
+        "",
+        "| &fControls whether changes in a player's currency",
+        "| &fare sent to you."
     ),
     permission = Perm.CURRENCY_NOTIFY
 ) {

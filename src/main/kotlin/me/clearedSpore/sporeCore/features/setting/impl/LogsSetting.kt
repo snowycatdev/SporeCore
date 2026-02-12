@@ -11,7 +11,10 @@ class LogsSetting : ToggleSetting(
     key = "logs",
     displayName = "Logs",
     item = Material.HOPPER,
-    lore = listOf("| Controls whether you see activity logs."),
+    lore = listOf(
+        "",
+        "| &fControls whether you see activity logs."
+    ),
     permission = Perm.LOG
 ) {
     override fun defaultValue(): Boolean = true
