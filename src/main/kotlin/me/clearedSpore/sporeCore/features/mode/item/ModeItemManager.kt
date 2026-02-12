@@ -1,7 +1,7 @@
 package me.clearedSpore.sporeCore.features.mode.item
 
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.features.mode.item.impl.BookItem
+import me.clearedSpore.sporeCore.features.mode.item.impl.InvseeItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.CompassItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.FreezeItem
 import me.clearedSpore.sporeCore.features.mode.item.impl.HistoryItem
@@ -19,7 +19,7 @@ object ModeItemManager {
         register(PunishSwordItem())
         register(SpeedItem())
         register(HistoryItem())
-        register(BookItem())
+        register(InvseeItem())
         register(CompassItem())
     }
 
