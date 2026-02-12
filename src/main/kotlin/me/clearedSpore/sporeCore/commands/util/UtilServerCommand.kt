@@ -7,23 +7,21 @@ import co.aikar.commands.annotation.Subcommand
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.white
-import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
+import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.annotations.SporeCoreCommand
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
-import java.lang.reflect.Field
 import java.text.DecimalFormat
+import kotlin.math.min
 
 @CommandAlias("util")
 @CommandPermission(Perm.UTIL_COMMAND)
 @SporeCoreCommand
 class UtilServerCommand : BaseCommand() {
-
-    private val df = DecimalFormat("0.00")
 
     @Subcommand("server players")
     @CommandPermission(Perm.UTIL_SERVER)
@@ -52,22 +50,20 @@ class UtilServerCommand : BaseCommand() {
     @Subcommand("server tps")
     @CommandPermission(Perm.UTIL_SERVER)
     fun tps(sender: CommandSender) {
-        try {
-            val server = Bukkit.getServer()
-            val minecraftServerClass = server.javaClass.getMethod("getServer").declaringClass
-            val tpsField: Field = minecraftServerClass.getDeclaredField("recentTps")
-            tpsField.isAccessible = true
-            val tps = tpsField.get(server) as DoubleArray
 
-            sender.sendSuccessMessage(
-                "Server TPS: " +
-                        df.format(tps[0]).blue() +
-                        " &7| " + "5min: ".white() + df.format(tps[1]).blue() +
-                        " &7| " + "15min: ".white() + df.format(tps[2]).blue()
-            )
+        val tps = try {
+            round1(min(20.0, SporeCore.instance.server.tps[0]))
         } catch (ex: Exception) {
-            sender.sendErrorMessage("Failed to retrieve TPS")
+            20.0
         }
+
+        sender.sendSuccessMessage(
+            "Server TPS: $tps"
+        )
+    }
+
+    private fun round1(value: Double): Double {
+        return kotlin.math.round(value * 10.0) / 10.0
     }
 
     @Subcommand("server version")
