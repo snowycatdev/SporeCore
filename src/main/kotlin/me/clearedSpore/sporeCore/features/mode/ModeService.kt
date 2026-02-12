@@ -154,7 +154,8 @@ object ModeService {
             data?.let {
                 player.gameMode = it.previousGamemode
                 player.allowFlight = it.previousFlight
-                player.isInvulnerable = it.previousInvulnerable
+                // Always set this to false!!
+                player.isInvulnerable = false
                 if (mode.tpBack) {
                     it.previousLocation?.let { loc -> player.teleport(loc) }
                 }
