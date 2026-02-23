@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "me.clearedSpore"
-version = "2.8.1"
+version = "2.8.2"
 
 repositories {
     mavenCentral()
@@ -36,10 +36,11 @@ dependencies {
         exclude(group = "org.yaml", module = "snakeyaml")
     }
     implementation("com.github.Exlll.ConfigLib:configlib-yaml:v4.6.1")
-    implementation("com.github.Clearedspore:SporeAPI:4.3")
+    implementation("com.github.Clearedspore:SporeAPI:4.5")
     compileOnly("org.dizitart:nitrite:4.3.2")
     compileOnly(platform("org.dizitart:nitrite-bom:4.3.2"))
     compileOnly("org.dizitart:nitrite-mvstore-adapter:4.3.2")
+
 
     compileOnly("org.reflections:reflections:0.10.2")
 
