@@ -5,14 +5,21 @@ import co.aikar.commands.annotation.*
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.green
 import me.clearedSpore.sporeAPI.util.CC.red
+import me.clearedSpore.sporeAPI.util.Cooldown
 import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
+import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.extension.PlayerExtension.userJoinFail
+import me.clearedSpore.sporeCore.extension.PlayerExtension.uuid
 import me.clearedSpore.sporeCore.features.eco.EconomyService
+import me.clearedSpore.sporeCore.features.eco.PaymentCooldownService
+import me.clearedSpore.sporeCore.features.message.Message
+import me.clearedSpore.sporeCore.features.message.MessageType
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import java.util.UUID
 
 @CommandAlias("pay")
 @CommandPermission(Perm.ECO)
@@ -50,17 +57,28 @@ class PayCommand : BaseCommand() {
             return
         }
 
+        if (!PaymentCooldownService.canPay(sender.uniqueId)) {
+            val timeLeft = TimeUtil.formatDuration(Cooldown.getTimeLeft("report", sender.uuid()))
+            sender.sendErrorMessage("You must wait $timeLeft seconds before paying again.")
+            return
+        }
+
+        PaymentCooldownService.onPayment(sender.uniqueId)
         EconomyService.remove(senderUser, amount, "Paid to ${targetUser.playerName}")
         EconomyService.add(targetUser, amount, "Received from ${sender.name}", false)
 
         val formattedAmount = EconomyService.format(amount)
         sender.sendMessage("You paid ${targetUser.playerName} ".blue() + formattedAmount.green())
 
-        val onlinePlayer = Bukkit.getPlayer(targetUser.uuid)
-        if (onlinePlayer != null && onlinePlayer.isOnline) {
-            onlinePlayer.sendMessage("You received ".blue() + formattedAmount.green() + " from ${sender.name}.".blue())
-        } else {
-            targetUser.queuePayment(sender.name, amount)
-        }
+        val message = Message(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            MessageType.PAYMENT,
+            "You received ".blue() + formattedAmount.green() + " from ${sender.name}.".blue(),
+            sender.uuid(),
+            false
+        )
+
+        targetUser.queueMessage(message)
     }
 }
