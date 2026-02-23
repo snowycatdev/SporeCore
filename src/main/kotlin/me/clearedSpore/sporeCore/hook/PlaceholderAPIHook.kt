@@ -48,13 +48,8 @@ class PlaceholderAPIHook() : PlaceholderExpansion() {
                 EconomyService.format(user.balance, BalanceFormat.DECIMAL).toString()
             }
 
-            params.equals("pending_messages", ignoreCase = true) -> {
-                user.pendingMessages.size.toString()
-            }
-
-            params.equals("pending_payments", ignoreCase = true) -> {
-                if(!config.economy.enabled) return "0"
-                user.pendingPayments.size.toString()
+            params.equals("messages", ignoreCase = true) -> {
+                user.messages.size.toString()
             }
 
             params.equals("punishments_active_mute", ignoreCase = true) -> {

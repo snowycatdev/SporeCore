@@ -353,6 +353,7 @@ data class JoinConfig(
     var message: List<String> = listOf(
         "&cbWelcome back %sporecore_player_name%!!",
         "&cbTime: &f%localtime_time%",
+        "&cbYou have &f%sporecore_messages% &cbmessage(s)",
         "&cbRun /help for a guide!"
     ),
 

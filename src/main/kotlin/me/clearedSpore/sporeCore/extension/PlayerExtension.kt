@@ -66,4 +66,17 @@ object PlayerExtension {
         }
     }
 
+    fun UUID.toPlayer(): Player? {
+        val offline = Bukkit.getOfflinePlayer(this)
+        if (!offline.hasJoinedBefore()) return null
+        return offline.player
+    }
+
+    fun UUID.toPlayerName(): String? {
+        val offline = Bukkit.getOfflinePlayer(this)
+        if (!offline.hasJoinedBefore()) return null
+        return offline.name
+    }
+
+
 }

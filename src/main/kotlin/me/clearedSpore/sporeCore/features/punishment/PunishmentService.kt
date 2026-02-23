@@ -11,6 +11,8 @@ import me.clearedSpore.sporeAPI.util.TimeUtil
 import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.features.discord.DiscordService
+import me.clearedSpore.sporeCore.features.message.Message
+import me.clearedSpore.sporeCore.features.message.MessageType
 import me.clearedSpore.sporeCore.features.punishment.config.PunishmentConfig
 import me.clearedSpore.sporeCore.features.punishment.config.ReasonDefinition
 import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
@@ -56,26 +58,6 @@ object PunishmentService {
             loaded = false
             config
         }
-    }
-
-    fun getReasonByName(category: String, reasonName: String): ReasonDefinition? {
-        if (!loaded) return null
-        return config.reasons.categories[category.lowercase()]?.get(reasonName.lowercase())
-    }
-
-    fun getAllReasons(): Map<String, Map<String, ReasonDefinition>> {
-        if (!loaded) return emptyMap()
-        return config.reasons.categories
-    }
-
-    fun getCategories(): Set<String> {
-        if (!loaded) return emptySet()
-        return config.reasons.categories.keys
-    }
-
-    fun getReasonsInCategory(category: String): Map<String, ReasonDefinition> {
-        if (!loaded) return emptyMap()
-        return config.reasons.categories[category.lowercase()] ?: emptyMap()
     }
 
     fun logToDiscord(punishment: Punishment) {
@@ -355,7 +337,17 @@ object PunishmentService {
 
     private fun handleChatPunishment(target: User, punisher: User, punishment: Punishment) {
         val msg = getMessage(punishment.type)
-        target.player?.sendMessage(buildMessage(msg, punishment))
+
+        val message = Message(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            MessageType.PUNISHMENT,
+            buildMessage(msg, punishment),
+            punisher.uuid,
+            false
+        )
+
+        target.queueMessage(message)
         Logger.info("&f${target.playerName} &cwas ${punishment.type.displayName.lowercase()} by &f${punisher.playerName} &cfor &e${punishment.reason}".translate())
     }
 

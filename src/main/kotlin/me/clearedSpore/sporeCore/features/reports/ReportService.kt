@@ -1,7 +1,6 @@
 package me.clearedSpore.sporeCore.features.reports
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Cooldown
 import me.clearedSpore.sporeAPI.util.Logger
@@ -10,7 +9,6 @@ import me.clearedSpore.sporeAPI.util.Message.sendErrorMessage
 import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.Task
 import me.clearedSpore.sporeAPI.util.TimeUtil
-import me.clearedSpore.sporeCore.ChatColorConfig
 import me.clearedSpore.sporeCore.SporeCore
 import me.clearedSpore.sporeCore.DatabaseManager
 import me.clearedSpore.sporeCore.extension.PlayerExtension.uuidStr
@@ -21,7 +19,6 @@ import me.clearedSpore.sporeCore.features.reports.`object`.ReportType
 import me.clearedSpore.sporeCore.menu.punishment.punish.PunishMenu
 import me.clearedSpore.sporeCore.user.UserManager
 import me.clearedSpore.sporeCore.util.Perm
-import me.clearedSpore.sporeCore.util.button.TextButton
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.chat.ClickEvent
@@ -193,7 +190,7 @@ object ReportService {
                     ?.sendMessage(SporeCore.instance.coreConfig.reports.notifyReporter.translate())
             } else {
                 UserManager.get(UUID.fromString(report.reporterUuid))?.run {
-                    queueMessage(SporeCore.instance.coreConfig.reports.notifyReporter)
+                    sendMessage(SporeCore.instance.coreConfig.reports.notifyReporter)
                     save()
                 } ?: player.sendErrorMessage("Failed to notify reporter! Please contact an administrator")
             }
@@ -230,7 +227,7 @@ object ReportService {
             Bukkit.getPlayer(reporter.uniqueId)?.sendMessage(msg.translate())
         } else {
             UserManager.get(UUID.fromString(report.reporterUuid))?.run {
-                queueMessage(msg)
+                sendMessage(msg)
                 save()
             } ?: player.sendErrorMessage("Failed to notify reporter! Please contact an administrator")
         }

@@ -3,10 +3,9 @@ package me.clearedSpore.sporeCore.user
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeAPI.util.Message.sendSuccessMessage
 import me.clearedSpore.sporeAPI.util.Task
 import me.clearedSpore.sporeCore.SporeCore
-import me.clearedSpore.sporeCore.util.doc.DocReader
-import me.clearedSpore.sporeCore.util.doc.DocWriter
 import me.clearedSpore.sporeCore.features.chat.color.`object`.ChatColor
 import me.clearedSpore.sporeCore.features.chat.`object`.ChatFormat
 import me.clearedSpore.sporeCore.features.currency.`object`.CreditAction
@@ -14,12 +13,16 @@ import me.clearedSpore.sporeCore.features.currency.`object`.CreditLog
 import me.clearedSpore.sporeCore.features.eco.`object`.EcoAction
 import me.clearedSpore.sporeCore.features.eco.`object`.EconomyLog
 import me.clearedSpore.sporeCore.features.homes.`object`.Home
+import me.clearedSpore.sporeCore.features.message.Message
+import me.clearedSpore.sporeCore.features.message.MessageType
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.Punishment
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
 import me.clearedSpore.sporeCore.features.punishment.`object`.StaffPunishmentStats
 import me.clearedSpore.sporeCore.features.reports.`object`.Report
 import me.clearedSpore.sporeCore.features.setting.model.AbstractSetting
+import me.clearedSpore.sporeCore.util.doc.DocReader
+import me.clearedSpore.sporeCore.util.doc.DocWriter
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -39,8 +42,7 @@ data class User(
     var firstJoin: String? = null,
     var firstServerIP: String? = null,
     var balance: Double = 0.0,
-    var pendingMessages: MutableList<String> = mutableListOf(),
-    var pendingPayments: MutableMap<String, Double> = mutableMapOf(),
+    var messages: MutableList<Message> = mutableListOf(),
     var playerSettings: MutableMap<String, Any> = mutableMapOf(),
     var homes: MutableList<Home> = mutableListOf(),
     var economyLogs: MutableList<EconomyLog> = mutableListOf(),
@@ -80,8 +82,7 @@ data class User(
         .put("hasJoinedBefore", hasJoinedBefore)
         .put("firstJoin", firstJoin)
         .put("firstServerIP", firstServerIP)
-        .putList("pendingMessages", pendingMessages)
-        .putMap("pendingPayments", pendingPayments)
+        .putDocuments("messages", messages.map { it.toDocument() })
         .putMap("playerSettings", playerSettings)
         .putDocuments("homes", homes.map { it.toDocument() })
         .putDocuments("economyLogs", economyLogs.map { it.toDocument() })
@@ -135,8 +136,8 @@ data class User(
                 hasJoinedBefore = doc.boolean("hasJoinedBefore"),
                 firstJoin = doc.string("firstJoin"),
                 firstServerIP = doc.string("firstServerIP"),
-                pendingMessages = doc.list("pendingMessages").filterIsInstance<String>().toMutableList(),
-                pendingPayments = doc.map<Double>("pendingPayments").toMutableMap(),
+                messages = doc.documents("messages").mapNotNull { Message.fromDocument(it) }
+                    .toMutableList(),
                 playerSettings = run {
                     val loadedSettings = mutableMapOf<String, Any>()
                     (doc.doc["playerSettings"] as? Map<*, *>)?.forEach { (k, v) ->
@@ -267,7 +268,15 @@ data class User(
             }
 
             else -> {
-                pendingMessages.add(message)
+                val msg = Message(
+                    UUID.randomUUID().toString(),
+                    System.currentTimeMillis(),
+                    MessageType.PUNISHMENT,
+                    message,
+                    this.uuid,
+                    true
+                )
+                queueMessage(msg)
                 UserManager.save(this, silent = true)
             }
         }
@@ -285,8 +294,21 @@ data class User(
         }
     }
 
-    fun save(silent: Boolean = false){
+    fun save(silent: Boolean = false) {
         UserManager.save(this, silent)
+    }
+
+    fun queueMessage(message: Message) {
+        if (isOnline()) {
+            if(message.raw) {
+                player?.sendSuccessMessage(message.message)
+            } else {
+                player?.sendMessage(message.message)
+            }
+        } else {
+            messages.add(message)
+            save()
+        }
     }
 
     fun <T> getSetting(setting: AbstractSetting<T>): T {
@@ -334,7 +356,6 @@ data class User(
             false
         }
     }
-
 
 
     fun logCredit(action: CreditAction, amount: Double, reason: String = "") {
@@ -420,12 +441,6 @@ data class User(
         return PunishmentService.removePunishment(this, sender, punishmentId, reason)
     }
 
-    fun queueMessage(msg: String) {
-        pendingMessages.add(msg)
-        UserManager.save(this)
-    }
-
-
     fun hasKitCooldown(kitID: String): Boolean {
         val expiry = kitCooldowns[kitID] ?: return false
         return System.currentTimeMillis() < expiry
@@ -441,8 +456,4 @@ data class User(
         UserManager.save(this)
     }
 
-    fun queuePayment(senderName: String, amount: Double) {
-        pendingPayments[senderName] = pendingPayments.getOrDefault(senderName, 0.0) + amount
-        UserManager.save(this)
-    }
 }

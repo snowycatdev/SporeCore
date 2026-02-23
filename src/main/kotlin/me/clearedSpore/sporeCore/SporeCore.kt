@@ -14,6 +14,8 @@ import me.clearedSpore.sporeCore.acf.ItemCompletions.registerItemCompletions
 import me.clearedSpore.sporeCore.acf.TargetSelectorResolver
 import me.clearedSpore.sporeCore.acf.TargetType
 import me.clearedSpore.sporeCore.acf.error.PlayerOnlyResolver
+import me.clearedSpore.sporeCore.acf.extension.ACFExtension.registerEnum
+import me.clearedSpore.sporeCore.acf.extension.ACFExtension.registerRegistryType
 import me.clearedSpore.sporeCore.acf.targets.`object`.TargetEntities
 import me.clearedSpore.sporeCore.acf.targets.`object`.TargetPlayers
 import me.clearedSpore.sporeCore.acf.targets.`object`.TargetSinglePlayer
@@ -50,12 +52,14 @@ import me.clearedSpore.sporeCore.features.chat.channel.ChatChannelService
 import me.clearedSpore.sporeCore.features.currency.CurrencySystemService
 import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.eco.EconomyService
+import me.clearedSpore.sporeCore.features.eco.PaymentCooldownService
 import me.clearedSpore.sporeCore.features.eco.VaultEco
 import me.clearedSpore.sporeCore.features.homes.HomeService
 import me.clearedSpore.sporeCore.features.investigation.`object`.enum.InvestigationPriority
 import me.clearedSpore.sporeCore.features.kit.KitService
 import me.clearedSpore.sporeCore.features.logs.LogsService
 import me.clearedSpore.sporeCore.features.logs.`object`.LogType
+import me.clearedSpore.sporeCore.features.message.MessageType
 import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.features.mode.listener.ModeListener
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
@@ -84,12 +88,14 @@ import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.plugin.ServicePriority
 import org.bukkit.plugin.java.JavaPlugin
+import org.w3c.dom.Attr
 import java.io.File
 import java.net.URLClassLoader
 import java.util.jar.JarFile
@@ -224,6 +230,7 @@ class SporeCore : JavaPlugin() {
         PlaytimeTracker.start()
         Cooldown.createCooldown("msg_cooldown", 2)
         Cooldown.createCooldown("report", coreConfig.reports.reportCooldown)
+        PaymentCooldownService.init()
 
         ListenerRegistry.registerAll()
         registerListeners()
@@ -625,12 +632,12 @@ class SporeCore : JavaPlugin() {
         locales.addMessage(
             Locales.ENGLISH,
             MessageKeys.PERMISSION_DENIED,
-            "$prefix" + "You don't have permission to use this command!".red()
+            prefix + "You don't have permission to use this command!".red()
         )
         locales.addMessage(
             Locales.ENGLISH,
             MessageKeys.UNKNOWN_COMMAND,
-            "$prefix" + "That command does not exist!".red()
+            prefix + "That command does not exist!".red()
         )
 
         ConfirmCondition.register(commandManager)
@@ -638,26 +645,14 @@ class SporeCore : JavaPlugin() {
 
         registerTargetSelectors()
 
-        commandManager.getCommandContexts().registerContext(Enchantment::class.java, { context ->
-            val enchantment = Enchantment.getByName(context.popFirstArg())
-            if (enchantment == null) throw InvalidCommandArgument("Enchantment not found", false)
-            enchantment
-        })
+        commandManager.registerEnum<MessageType>()
+        commandManager.registerEnum<InvestigationPriority>()
+        commandManager.registerRegistryType(Enchantment::class.java) {
+            Enchantment.getByKey(NamespacedKey.minecraft(it.lowercase()))
+        }
 
-
-        commandManager.getCommandContexts().registerContext(InvestigationPriority::class.java, { context ->
-            val priority = InvestigationPriority.valueOf(context.popFirstArg())
-            if (priority == null) throw InvalidCommandArgument("Priority not found", false)
-            priority
-        })
-
-        commandManager.commandContexts.registerContext(Attribute::class.java) { context ->
-            val arg = context.popFirstArg()
-            try {
-                Attribute.valueOf(arg.uppercase())
-            } catch (ex: IllegalArgumentException) {
-                throw IllegalArgumentException("Attribute '$arg' does not exist!")
-            }
+        commandManager.registerRegistryType(Attribute::class.java) {
+            Attribute.valueOf(it.uppercase())
         }
 
         commandManager.enableUnstableAPI("help")
@@ -823,6 +818,8 @@ class SporeCore : JavaPlugin() {
         }
 
 
+
+
         commandManager.registerItemCompletions()
     }
 
@@ -855,32 +852,6 @@ class SporeCore : JavaPlugin() {
             val input = context.input ?: ""
             resolver.getTabCompletions(input)
         }
-    }
-
-    private fun getClassesInPackage(packageName: String): List<Class<*>> {
-        val path = packageName.replace('.', '/')
-        val classLoader = javaClass.classLoader as URLClassLoader
-        val classes = mutableListOf<Class<*>>()
-
-        classLoader.urLs.forEach { url ->
-            if (url.path.endsWith(".jar")) {
-                val jarFile = JarFile(url.path)
-                jarFile.entries().asSequence().forEach { entry ->
-                    if (entry.name.endsWith(".class") && entry.name.startsWith(path)) {
-                        val className = entry.name.removeSuffix(".class").replace('/', '.')
-                        try {
-                            val clazz = Class.forName(className)
-                            if (clazz.getAnnotation(Setting::class.java) != null) {
-                                classes.add(clazz)
-                            }
-                        } catch (_: Exception) {
-                        }
-                    }
-                }
-            }
-        }
-
-        return classes
     }
 
 }

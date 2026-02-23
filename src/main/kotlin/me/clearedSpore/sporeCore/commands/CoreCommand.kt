@@ -652,12 +652,17 @@ class CoreCommand : BaseCommand() {
 
         val config = SporeCore.instance.coreConfig
 
+        val msgButton = TextButton("[Click to view]".blue())
+            .hoverEvent("Click to view messages")
+            .runCommand("messages admin view ${target.name}")
+            .build(sender)
+
         sender.sendMessage("=== User Info for ${target.name} ===".blue())
         sender.sendMessage("UUID: ".white() + target.uniqueId.toString().green() + " (uuidStr)".gray())
         sender.sendMessage("First Join: ".white() + (user.firstJoin ?: "Unknown").green() + " (firstJoin)".gray())
         sender.sendMessage("Homes: ".white() + user.homes.size.toString().green() + " (homes)".gray())
         sender.sendMessage(
-            "Pending Messages: ".white() + user.pendingMessages.size.toString().green() + " (pendingMessages)".gray()
+            "Messages: ".white() + user.messages.size.toString().green() + " (messages)".gray() + msgButton
         )
         sender.sendMessage("Balance: ".white() + EconomyService.format(user.balance).green() + " (balance)".gray())
         sender.sendMessage("Last join: ".white() + user.lastJoin?.green() + " (lastJoin)".gray())
@@ -680,15 +685,6 @@ class CoreCommand : BaseCommand() {
                             .format(loc.x, loc.y, loc.z)
                     } ?: "None").green() + " (lastLocation)".gray()
         )
-
-        sender.sendMessage("Pending Payments: ".white() + "(pendingPayments)".gray())
-        if (user.pendingPayments.isNotEmpty()) {
-            user.pendingPayments.forEach { (senderName, total) ->
-                sender.sendMessage("   ${EconomyService.format(total).green()} from ${senderName.white()}".blue())
-            }
-        } else {
-            sender.sendMessage("   User has no pending payments".red())
-        }
 
         sender.sendMessage(
             "Channel: ".white() +

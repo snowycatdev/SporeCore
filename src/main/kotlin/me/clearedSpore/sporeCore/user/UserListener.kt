@@ -4,7 +4,6 @@ import me.clearedSpore.sporeAPI.exception.LoggedException
 import me.clearedSpore.sporeAPI.util.CC.blue
 import me.clearedSpore.sporeAPI.util.CC.translate
 import me.clearedSpore.sporeAPI.util.Logger
-import me.clearedSpore.sporeAPI.util.Message
 import me.clearedSpore.sporeAPI.util.StringUtil.firstPart
 import me.clearedSpore.sporeAPI.util.StringUtil.hasFlag
 import me.clearedSpore.sporeAPI.util.Task
@@ -16,6 +15,7 @@ import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.eco.EconomyService
 import me.clearedSpore.sporeCore.features.logs.LogsService
 import me.clearedSpore.sporeCore.features.logs.`object`.LogType
+import me.clearedSpore.sporeCore.features.message.Message
 import me.clearedSpore.sporeCore.features.mode.ModeService
 import me.clearedSpore.sporeCore.features.punishment.PunishmentService
 import me.clearedSpore.sporeCore.features.punishment.`object`.PunishmentType
@@ -36,10 +36,11 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.dizitart.no2.filters.FluentFilter
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
+import java.time.temporal.ChronoUnit
 
 class UserListener : Listener {
 
@@ -109,7 +110,7 @@ class UserListener : Listener {
 
                 if (PunishmentService.config.alts.notifyStaff) {
                     val tryMessage = PunishmentService.buildAltTryMessage(user, altPunishment)
-                    Message.broadcastMessageWithPermission(tryMessage, Perm.PUNISH_LOG)
+                    me.clearedSpore.sporeAPI.util.Message.broadcastMessageWithPermission(tryMessage, Perm.PUNISH_LOG)
                     Logger.info(tryMessage)
                 }
 
@@ -290,6 +291,19 @@ class UserListener : Listener {
             event.joinMessage = config.joinLeaveMessages.join
                 .translate()
                 .parsePlaceholders(player)
+        }
+
+        if(user.messages.isNotEmpty()) {
+            val cutoff = Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()
+            val oldMessages: List<Message> = user.messages.filter { it.timestamp <= cutoff }
+
+            if(oldMessages.isNotEmpty()) {
+                user.sendMessage("${oldMessages.size} messages were removed as they were longer than 30 days!".blue())
+                oldMessages.forEach { message ->
+                    user.messages.remove(message)
+                }
+                user.save()
+            }
         }
 
 
