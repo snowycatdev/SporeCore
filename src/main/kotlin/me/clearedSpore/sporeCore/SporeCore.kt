@@ -136,7 +136,7 @@ class SporeCore : JavaPlugin() {
         totalCommands = 0
         instance = this
 
-        version = Version.PUBLIC
+        version = Version.DEV
 
         coreConfig = loadConfig()
         Logger.initialize(

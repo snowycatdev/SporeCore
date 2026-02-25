@@ -1,13 +1,18 @@
 package me.clearedSpore.sporeCore.features.eco
 
+import me.clearedSpore.sporeAPI.exception.LoggedException
 import me.clearedSpore.sporeAPI.util.CC.gray
 import me.clearedSpore.sporeAPI.util.CC.white
 import me.clearedSpore.sporeAPI.util.Logger
+import me.clearedSpore.sporeAPI.util.Message
+import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.eco.`object`.BalanceFormat
 import me.clearedSpore.sporeCore.features.eco.`object`.EcoAction
 import me.clearedSpore.sporeCore.user.User
 import me.clearedSpore.sporeCore.user.UserManager
+import me.clearedSpore.sporeCore.util.Perm
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
@@ -77,11 +82,48 @@ object EconomyService {
         Bukkit.getConsoleSender().sendMessage(message)
     }
 
+    fun logSuspicious(message: String) {
+        val message = "§7[§cSuspicious Economy Action§7] §f$message"
+        Bukkit.getConsoleSender().sendMessage(message)
+        Message.broadcastMessageWithPermission(message, Perm.ECO_ADMIN)
+    }
+
     fun add(user: User, amount: Double, reason: String = "", shouldSave: Boolean = true) {
         user.balance += amount
         user.logEconomy(EcoAction.ADDED, amount, reason)
         if (shouldSave) {
             UserManager.save(user)
+        }
+
+        val config = SporeCore.instance.coreConfig.economy
+        val threshold = parseAmount(config.suspiciousThreshold)
+        val formattedAmount = format(amount)
+        if(config.suspiciousThreshold != "0" && threshold != null && amount >= threshold) {
+            val message = "${user.playerName} received $formattedAmount §7| §f$reason"
+            logSuspicious(message)
+        }
+
+        val highThreshold = parseAmount(config.suspiciousThreshold)
+        if(config.highThreshold != "0"
+            && highThreshold != null
+            && amount >= highThreshold
+            && config.thresholdWebhook.isNotBlank()
+        ) {
+
+            try {
+                Logger.info("Logging high threshold to discord...")
+                Webhook(config.thresholdWebhook)
+                    .setUsername("SporeCore")
+                    .setProfileURL(DiscordService.getConsoleAvatar())
+                    .setMessage("SUSPICIOUS ECONOMY TRANSACTION! ${user.playerName} received $formattedAmount | $reason")
+                    .send()
+            } catch (e: Exception) {
+                throw LoggedException(
+                    userMessage = "Failed to log message to discord.",
+                    internalMessage = "Error while logging to discord",
+                    cause = e,
+                ).also { it.log() }
+            }
         }
 
         logConsole(user.playerName, EcoAction.ADDED, amount, reason)
@@ -92,6 +134,39 @@ object EconomyService {
         user.balance -= amount
         user.logEconomy(EcoAction.REMOVED, amount, reason)
         UserManager.save(user)
+
+
+        val config = SporeCore.instance.coreConfig.economy
+        val threshold = parseAmount(config.suspiciousThreshold)
+        val formattedAmount = format(amount)
+        if(config.suspiciousThreshold != "0" && threshold != null && amount >= threshold) {
+            val message = "${user.playerName} lost $formattedAmount §7| §f$reason"
+            logSuspicious(message)
+        }
+
+        val highThreshold = parseAmount(config.suspiciousThreshold)
+        if(config.highThreshold != "0"
+            && highThreshold != null
+            && amount >= highThreshold
+            && config.thresholdWebhook.isNotBlank()
+        ) {
+
+            try {
+                Logger.info("Logging high threshold to discord...")
+                Webhook(config.thresholdWebhook)
+                    .setUsername("SporeCore")
+                    .setProfileURL(DiscordService.getConsoleAvatar())
+                    .setMessage("SUSPICIOUS ECONOMY TRANSACTION! ${user.playerName} lost $formattedAmount | $reason")
+                    .send()
+            } catch (e: Exception) {
+                throw LoggedException(
+                    userMessage = "Failed to log message to discord.",
+                    internalMessage = "Error while logging to discord",
+                    cause = e,
+                ).also { it.log() }
+            }
+        }
+
         logConsole(user.playerName, EcoAction.REMOVED, amount, reason)
     }
 

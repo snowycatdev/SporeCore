@@ -750,6 +750,25 @@ data class EconomyConfig(
         "COMPACT → 5k, 5m, etc."
     )
     var balanceFormat: BalanceFormat = BalanceFormat.COMPACT,
+
+    @Comment(
+        "Threshold for when a player pays/receives a set amount of money",
+        "This will send an alert to online staff.",
+        "set to 0 for no alert"
+    )
+    var suspiciousThreshold: String = "5m",
+
+    @Comment(
+        "Threshold for when it sends a message to discord",
+        "set to 0 for no alert"
+    )
+    var highThreshold: String = "50m",
+
+    @Comment(
+        "Webhook for the high threshold alert.",
+        "Leave empty for no discord message"
+    )
+    var thresholdWebhook: String = ""
 )
 
 @Configuration

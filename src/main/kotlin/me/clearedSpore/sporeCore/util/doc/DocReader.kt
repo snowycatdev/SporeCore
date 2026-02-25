@@ -8,21 +8,12 @@ import java.util.UUID
 class DocReader(val doc: Document) {
 
     fun string(key: String): String? = doc.get(key)?.toString()
-
     fun boolean(key: String): Boolean =
-        (doc.get(key) as? Boolean)
-            ?: (string(key)?.toBooleanStrictOrNull() == true)
-
+        (doc.get(key) as? Boolean) ?: (string(key)?.toBooleanStrictOrNull() == true)
     fun int(key: String): Int =
-        (doc.get(key) as? Number)?.toInt()
-            ?: string(key)?.toIntOrNull()
-            ?: 0
-
-    fun id(key: String): UUID? {
-        val raw = string(key) ?: return null
-        return runCatching { UUID.fromString(raw) }.getOrNull()
-    }
-
+        (doc.get(key) as? Number)?.toInt() ?: string(key)?.toIntOrNull() ?: 0
+    fun intOrNull(key: String): Int? =
+        (doc.get(key) as? Number)?.toInt() ?: string(key)?.toIntOrNull()
     fun long(key: String): Long =
         when (val value = doc.get(key)) {
             is Long -> value
@@ -31,12 +22,9 @@ class DocReader(val doc: Document) {
             is String -> value.toLongOrNull() ?: 0L
             else -> 0L
         }
-
     fun double(key: String): Double =
-        (doc.get(key) as? Number)?.toDouble()
-            ?: string(key)?.toDoubleOrNull()
-            ?: 0.0
-
+        (doc.get(key) as? Number)?.toDouble() ?: string(key)?.toDoubleOrNull() ?: 0.0
+    fun id(key: String): UUID? = string(key)?.let { runCatching { UUID.fromString(it) }.getOrNull() }
 
     fun location(key: String): Location? {
         val str = string(key) ?: return null
@@ -51,9 +39,7 @@ class DocReader(val doc: Document) {
         return Location(world, x, y, z, yaw, pitch)
     }
 
-    fun list(key: String): List<Any> =
-        (doc.get(key) as? List<*>)?.filterNotNull() ?: emptyList()
-
+    fun list(key: String): List<Any> = (doc.get(key) as? List<*>)?.filterNotNull() ?: emptyList()
 
     inline fun <reified T> map(key: String): Map<String, T> =
         (doc.get(key) as? Map<*, *>)?.mapNotNull {
@@ -61,9 +47,7 @@ class DocReader(val doc: Document) {
             val v: Any? = when (T::class) {
                 Boolean::class -> (it.value as? Boolean ?: it.value.toString().toBooleanStrictOrNull())
                 Double::class -> (it.value as? Number)?.toDouble() ?: it.value.toString().toDoubleOrNull()
-                Number::class -> (it.value as? Number)
-                    ?: it.value.toString().toDoubleOrNull()
-
+                Number::class -> (it.value as? Number) ?: it.value.toString().toDoubleOrNull()
                 String::class -> it.value?.toString()
                 else -> null
             }
@@ -71,16 +55,9 @@ class DocReader(val doc: Document) {
             k to (v as T)
         }?.toMap() ?: emptyMap()
 
+    inline fun <reified T : Enum<T>> enum(key: String): T? =
+        string(key)?.let { runCatching { enumValueOf<T>(it) }.getOrNull() }
 
-    inline fun <reified T : Enum<T>> enum(key: String): T? {
-        val value = string(key) ?: return null
-        return runCatching { enumValueOf<T>(value) }.getOrNull()
-    }
-
-
-    fun document(key: String): Document? =
-        (doc.get(key) as? Document)
-
-    fun documents(key: String): List<Document> =
-        (doc.get(key) as? List<*>)?.filterIsInstance<Document>() ?: emptyList()
+    fun document(key: String): Document? = doc.get(key) as? Document
+    fun documents(key: String): List<Document> = (doc.get(key) as? List<*>)?.filterIsInstance<Document>() ?: emptyList()
 }

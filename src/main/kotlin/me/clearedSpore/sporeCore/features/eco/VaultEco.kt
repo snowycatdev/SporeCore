@@ -1,8 +1,11 @@
 package me.clearedSpore.sporeCore.features.eco
 
+import me.clearedSpore.sporeAPI.exception.LoggedException
 import me.clearedSpore.sporeAPI.util.Logger
 import me.clearedSpore.sporeAPI.util.Task
+import me.clearedSpore.sporeAPI.util.Webhook
 import me.clearedSpore.sporeCore.SporeCore
+import me.clearedSpore.sporeCore.features.discord.DiscordService
 import me.clearedSpore.sporeCore.features.eco.`object`.EcoAction
 import me.clearedSpore.sporeCore.user.UserManager
 import net.milkbowl.vault.economy.Economy
@@ -20,7 +23,7 @@ class VaultEco : Economy {
         return config.enabled
     }
 
-    override fun getName(): String? {
+    override fun getName(): String {
         return config.name
     }
 
@@ -127,6 +130,37 @@ class VaultEco : Economy {
             return EconomyResponse(0.0, user.balance, ResponseType.FAILURE, "Insufficient balance!")
         }
 
+        val threshold = EconomyService.parseAmount(config.suspiciousThreshold)
+        val formattedAmount = EconomyService.format(amount)
+        if(config.suspiciousThreshold != "0" && threshold != null && amount >= threshold) {
+            val message = "${user.playerName} lost $formattedAmount §7| §fVault withdrawal by a different plugin"
+            EconomyService.logSuspicious(message)
+
+            val highThreshold = EconomyService.parseAmount(config.suspiciousThreshold)
+            if(config.highThreshold != "0"
+                && highThreshold != null
+                && amount >= highThreshold
+                && config.thresholdWebhook.isNotBlank()
+                ) {
+
+                try {
+                    Logger.info("Logging high threshold to discord...")
+                    val webhook = Webhook(config.thresholdWebhook)
+                        .setUsername("SporeCore")
+                        .setProfileURL(DiscordService.getConsoleAvatar())
+                        .setMessage("SUSPICIOUS ECONOMY TRANSACTION! ${user.playerName} lost $formattedAmount | Vault withdrawal by a different plugin")
+                        .send()
+                } catch (e: Exception) {
+                    throw LoggedException(
+                        userMessage = "Failed to log message to discord.",
+                        internalMessage = "Error while logging to discord",
+                        cause = e,
+                    ).also { it.log() }
+                }
+            }
+
+        }
+
         user.balance -= amount
         Task.runAsync {
             user.logEconomy(EcoAction.REMOVED, amount, "Vault withdrawal by a different plugin")
@@ -163,6 +197,36 @@ class VaultEco : Economy {
         val user = UserManager.get(offlinePlayer.uniqueId)
         if (user == null) {
             return EconomyResponse(0.0, 0.0, ResponseType.FAILURE, "Failed to load user!")
+        }
+
+        val threshold = EconomyService.parseAmount(config.suspiciousThreshold)
+        val formattedAmount = EconomyService.format(amount)
+        if(config.suspiciousThreshold != "0" && threshold != null && amount >= threshold) {
+            val message = "${user.playerName} received $formattedAmount §7| §fVault deposit by a different plugin"
+            EconomyService.logSuspicious(message)
+        }
+
+        val highThreshold = EconomyService.parseAmount(config.suspiciousThreshold)
+        if(config.highThreshold != "0"
+            && highThreshold != null
+            && amount >= highThreshold
+            && config.thresholdWebhook.isNotBlank()
+        ) {
+
+            try {
+                Logger.info("Logging high threshold to discord...")
+                val webhook = Webhook(config.thresholdWebhook)
+                    .setUsername("SporeCore")
+                    .setProfileURL(DiscordService.getConsoleAvatar())
+                    .setMessage("SUSPICIOUS ECONOMY TRANSACTION! ${user.playerName} received $formattedAmount | Vault deposit by a different plugin")
+                    .send()
+            } catch (e: Exception) {
+                throw LoggedException(
+                    userMessage = "Failed to log message to discord.",
+                    internalMessage = "Error while logging to discord",
+                    cause = e,
+                ).also { it.log() }
+            }
         }
 
         user.balance += amount

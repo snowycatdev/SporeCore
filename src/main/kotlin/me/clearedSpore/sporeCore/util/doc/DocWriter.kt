@@ -12,42 +12,33 @@ class DocWriter {
         return this
     }
 
-    fun putString(key: String, value: String?): DocWriter = put(key, value)
-    fun putBoolean(key: String, value: Boolean): DocWriter = put(key, value)
-    fun putInt(key: String, value: Int): DocWriter = put(key, value)
-    fun putLong(key: String, value: Long): DocWriter = put(key, value)
-    fun putDouble(key: String, value: Double): DocWriter = put(key, value)
+    fun putString(key: String, value: String?) = put(key, value)
+    fun putBoolean(key: String, value: Boolean) = put(key, value)
+    fun putInt(key: String, value: Int) = put(key, value)
+    fun putLong(key: String, value: Long) = put(key, value)
+    fun putDouble(key: String, value: Double) = put(key, value)
 
-    fun putId(key: String, uuid: UUID?): DocWriter {
-        if (uuid != null) {
-            doc.put(key, uuid.toString())
-        }
-        return this
+    fun putId(key: String, uuid: UUID?) = apply {
+        if (uuid != null) doc.put(key, uuid.toString())
     }
 
-    fun putLocation(key: String, location: Location?): DocWriter {
+    fun putLocation(key: String, location: Location?) = apply {
         location?.let {
             val str = "${it.world.name},${it.x},${it.y},${it.z},${it.yaw},${it.pitch}"
             doc.put(key, str)
         }
-        return this
     }
 
-
-    fun putList(key: String, list: Collection<*>?): DocWriter {
+    fun putList(key: String, list: Collection<*>?) = apply {
         doc.put(key, list ?: emptyList<Any>())
-        return this
     }
 
-
-    fun putMap(key: String, map: Map<*, *>?): DocWriter {
+    fun putMap(key: String, map: Map<*, *>?) = apply {
         if (!map.isNullOrEmpty()) doc.put(key, map)
-        return this
     }
 
-    fun putDocuments(key: String, docs: Collection<Document>?): DocWriter {
+    fun putDocuments(key: String, docs: Collection<Document>?) = apply {
         if (!docs.isNullOrEmpty()) doc.put(key, docs)
-        return this
     }
 
     fun build(): Document = doc
