@@ -112,6 +112,14 @@ class ModeListener(private val modeProvider: (Player) -> Mode?) : Listener {
     }
 
     @EventHandler
+    fun onBowPrepare(event: EntityShootBowEvent) {
+        val player = event.entity as? Player ?: return
+        val mode = modeProvider(player) ?: return
+        if (!mode.pvp) event.isCancelled = true
+        
+        }
+
+    @EventHandler
     fun onSilentChest(event: PlayerInteractEvent) {
         val player = event.player
         val mode = modeProvider(player) ?: return
