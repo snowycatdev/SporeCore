@@ -158,5 +158,6 @@ class ModeListener(private val modeProvider: (Player) -> Mode?) : Listener {
                 }
             }, 0L, 20L)
         }
+        event.isCancelled = true
     }
 }
