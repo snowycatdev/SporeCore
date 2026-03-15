@@ -307,7 +307,7 @@ class UserListener : Listener {
         }
 
 
-        if (config.discord.chat.isNotEmpty() && !autoStaff && !VanishService.isVanished(player.uniqueId)) {
+        if (config.discord.chat.isNotEmpty() && !ModeService.isInMode(player) && !VanishService.isVanished(player.uniqueId)) {
             val embed = Webhook.Embed()
                 .setColor(0x00FF00)
                 .setDescription("**${player.name} joined the server**")
@@ -352,6 +352,8 @@ class UserListener : Listener {
             event.quitMessage(null)
             wasVanished = true
             ModeService.toggleMode(player)
+            VanishService.vanishedPlayers.remove(player.uniqueId)
+            player.isSleepingIgnored = false
         }
 
 
